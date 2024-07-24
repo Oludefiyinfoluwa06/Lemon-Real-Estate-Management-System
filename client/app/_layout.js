@@ -34,6 +34,10 @@ const RootLayout = () => {
                 name='index'
                 options={{ headerShown: false }}
             />
+            <Stack.Screen
+                name='user'
+                options={{ headerShown: false }}
+            />
         </Stack>
     );
 }
