@@ -11,6 +11,7 @@
   "dependencies": {
     "@expo/vector-icons": "^14.0.2",
     "@react-native-async-storage/async-storage": "^1.21.0",
+    "@react-native-community/blur": "^4.4.0",
     "@react-navigation/drawer": "^6.6.15",
     "@react-navigation/native": "^6.1.17",
     "@rneui/base": "^4.0.0-rc.7",
@@ -32,6 +33,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-native": "^0.73.6",
+    "react-native-color-matrix-image-filters": "^6.0.9",
     "react-native-gesture-handler": "~2.14.0",
     "react-native-image-crop-picker": "^0.41.2",
     "react-native-reanimated": "~3.6.2",

@@ -3,12 +3,16 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        "logo": "#96AD00",
-        "darkSlateGray": "#2F4F4F",
-        "charcoal": "#36454F",
-        "gunmetal": "#2A3439",
-        "darkGreen": "#013220",
-        "ebony": "#555D50"
+        "chartreuse": "#BBCC13",
+        "frenchGray": {
+          "light": "#57606D",
+          "dark": "#3D454B",
+        },
+        "darkBrown": "#616A60",
+        "darkUmber": {
+          "light": "#2B3B3C",
+          "dark": "#212A2B"
+        }
       },
       fontFamily: {
         rthin: ["Raleway-Thin", "sans-serif"],

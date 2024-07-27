@@ -15,7 +15,11 @@ app.use(methodOverride('_method'));
 mongoose.connect(process.env.dbURI)
     .then(() => {
         console.log('DB connected successfully');
-
-        app.listen(port, () => console.log(`Server running on port: http://localhost:${port}!`));
     })
     .catch(err => console.log(err, 'Connection unsuccessful'));
+
+module.exports = app;
+
+if (require.main === module) {
+    app.listen(port, () => console.log(`Server running on port: http://localhost:${port}!`));
+}

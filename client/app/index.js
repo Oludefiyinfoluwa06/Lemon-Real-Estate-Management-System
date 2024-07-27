@@ -14,7 +14,7 @@ const SplashScreen = () => {
             setTimeout(() => {
                 if (token && isAgent) return router.replace('/agent/dashboard');
 
-                return router.replace('/user/home');
+                return router.replace('/login');
             }, 3000);
         }
 
@@ -22,14 +22,14 @@ const SplashScreen = () => {
     }, []);
     
     return (
-        <SafeAreaView className='flex items-center justify-center bg-charcoal h-screen'>
+        <SafeAreaView className='flex items-center justify-center h-full bg-darkUmber-dark'>
             <Image 
                 source={images.logo}
                 resizeMode='contain'
                 className='w-[100px]'
             />
 
-            <StatusBar backgroundColor={'#36454F'} />
+            <StatusBar backgroundColor={'#212A2B'} />
         </SafeAreaView>
     );
 }
