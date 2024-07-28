@@ -30,6 +30,7 @@ const Categories = () => {
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
+                className='mt-[20px]'
             >
                 
             </ScrollView>
