@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, ImageBackground } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { images } from '../../assets/constants';
 
 const Categories = () => {
     const categories = ['Lands', 'Duplex', 'Bungalows', 'Shop Spaces', 'Mansions'];
@@ -32,7 +34,81 @@ const Categories = () => {
                 showsHorizontalScrollIndicator={false}
                 className='mt-[20px]'
             >
-                
+                <View className='ml-[20px]'>
+                    <ImageBackground
+                        source={images.house1}
+                        style={{ width: 150, height: 150, borderRadius: 18, overflow: 'hidden' }}
+                    >
+                        <View className='bg-transparentBlack absolute top-0 left-0 w-full h-full' />
+                        <View className='absolute bottom-0 left-0 p-2 flex-row items-center justify-between w-full'>
+                            <TouchableOpacity>
+                                <Text className='text-md font-rbold text-white'>Hello Avenue</Text>
+                                <Text className='text-sm font-rbold text-gray-400'>Abuja</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity>
+                                <Ionicons name='heart-outline' size={20} color='#FFFFFF' />
+                            </TouchableOpacity>
+                        </View>
+                    </ImageBackground>
+                </View>
+
+                <View className='ml-[20px]'>
+                    <ImageBackground
+                        source={images.house2}
+                        style={{ width: 150, height: 150, borderRadius: 18, overflow: 'hidden' }}
+                    >
+                        <View className='bg-transparentBlack absolute top-0 left-0 w-full h-full' />
+                        <View className='absolute bottom-0 left-0 p-2 flex-row items-center justify-between w-full'>
+                            <TouchableOpacity>
+                                <Text className='text-md font-rbold text-white'>Hello Avenue</Text>
+                                <Text className='text-sm font-rbold text-gray-400'>Abuja</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity>
+                                <Ionicons name='heart-outline' size={20} color='#FFFFFF' />
+                            </TouchableOpacity>
+                        </View>
+                    </ImageBackground>
+                </View>
+
+                <View className='ml-[20px]'>
+                    <ImageBackground
+                        source={images.house1}
+                        style={{ width: 150, height: 150, borderRadius: 18, overflow: 'hidden' }}
+                    >
+                        <View className='bg-transparentBlack absolute top-0 left-0 w-full h-full' />
+                        <View className='absolute bottom-0 left-0 p-2 flex-row items-center justify-between w-full'>
+                            <TouchableOpacity>
+                                <Text className='text-md font-rbold text-white'>Hello Avenue</Text>
+                                <Text className='text-sm font-rbold text-gray-400'>Abuja</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity>
+                                <Ionicons name='heart-outline' size={20} color='#FFFFFF' />
+                            </TouchableOpacity>
+                        </View>
+                    </ImageBackground>
+                </View>
+
+                <View className='mx-[20px]'>
+                    <ImageBackground
+                        source={images.house2}
+                        style={{ width: 150, height: 150, borderRadius: 18, overflow: 'hidden' }}
+                    >
+                        <View className='bg-transparentBlack absolute top-0 left-0 w-full h-full' />
+                        <View className='absolute bottom-0 left-0 p-2 flex-row items-center justify-between w-full'>
+                            <TouchableOpacity>
+                                <Text className='text-md font-rbold text-white'>Hello Avenue</Text>
+                                <Text className='text-sm font-rbold text-gray-400'>Abuja</Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity>
+                                <Ionicons name='heart-outline' size={20} color='#FFFFFF' />
+                            </TouchableOpacity>
+                        </View>
+                    </ImageBackground>
+                </View>
             </ScrollView>
         </View>
     );
