@@ -18,7 +18,7 @@ const TabLayout = () => {
                 tabBarHideOnKeyboard: true,
                 tabBarStyle: {
                     position: 'absolute',
-                    bottom: 0,
+                    bottom: -0.3,
                     left: 0,
                     height: 60,
                     paddingVertical: 5,

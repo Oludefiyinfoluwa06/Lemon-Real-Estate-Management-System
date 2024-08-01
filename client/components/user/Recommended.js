@@ -1,18 +1,8 @@
-import { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, ImageBackground } from 'react-native';
-import Ionicons from '@expo/vector-icons/Ionicons';
+import { View, Text, ScrollView, TouchableOpacity, ImageBackground } from 'react-native';
 import { images } from '../../assets/constants';
 
-const Categories = () => {
-    const categories = ['Lands', 'Duplex', 'Bungalows', 'Shop Spaces', 'Mansions'];
-
-    const [selectedCategory, setSelectedCategory] = useState(categories[0]);
-    
-    const toggleCategorySelection = (property) => {
-        setSelectedCategory(property);
-    };
-
-    const categoryProperties = [
+const Recommended = () => {
+    const recommendedProperties = [
         {
             id: 1,
             image: images.house1,
@@ -40,21 +30,8 @@ const Categories = () => {
     ];
     
     return (
-        <View>
-            <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-            >
-                {categories.map((category, index) => (
-                    <TouchableOpacity
-                        key={category}
-                        className={`p-2 m-1 rounded-md ${index === 0 ? 'ml-4' : ''} ${index === categories.length - 1 ? 'mr-4' : ''} ${selectedCategory === category ? 'bg-chartreuse' : 'bg-frenchGray-light'}`}
-                        onPress={() => toggleCategorySelection(category)}
-                    >
-                        <Text className={`text-center font-rbold text-lg ${selectedCategory === category ? 'text-frenchGray-light' : 'text-white'}`}>{category}</Text>
-                    </TouchableOpacity>
-                ))}
-            </ScrollView>
+        <View className='mt-[20px]'>
+            <Text className='text-xl font-rbold text-white ml-[20px]'>Recommended Properties</Text>
 
             <ScrollView
                 horizontal
@@ -62,7 +39,7 @@ const Categories = () => {
                 contentContainerStyle={{ paddingRight: 20 }}
                 className='mt-[20px]'
             >
-                {categoryProperties.map(property => (
+                {recommendedProperties.map(property => (
                     <View
                         className='ml-[20px]'
                         key={property.id}
@@ -78,9 +55,6 @@ const Categories = () => {
                                     <Text className='text-xl font-rbold text-white'>{property.name}</Text>
                                     <Text className='text-lg font-rbold text-gray-400'>{property.price}</Text>
                                 </TouchableOpacity>
-                                <TouchableOpacity>
-                                    <Ionicons name='heart-outline' size={22} color={'#FFFFFF'} />
-                                </TouchableOpacity>
                             </View>
                         </ImageBackground>
                     </View>
@@ -90,4 +64,4 @@ const Categories = () => {
     );
 }
 
-export default Categories;
+export default Recommended;
