@@ -1,11 +1,14 @@
+import { useEffect } from 'react';
 import { Image, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { images } from '../assets/constants';
-import { useEffect } from 'react';
 import { router } from 'expo-router';
+import * as NavigationBar from 'expo-navigation-bar';
+import { images } from '../assets/constants';
 
 const SplashScreen = () => {
+    NavigationBar.setBackgroundColorAsync("#212A2B");
+
     useEffect(() => {
         const checkIsLoggedIn = async () => {
             const token = await AsyncStorage.getItem('token');

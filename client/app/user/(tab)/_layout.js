@@ -1,6 +1,7 @@
 import { View } from 'react-native';
 import { Tabs } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import * as NavigationBar from 'expo-navigation-bar';
 
 const TabIcon = ({ icon, focused }) => (
     <View className={`${focused ? 'bg-[#212A2B]' : ''} items-center justify-center w-[50px] h-[50px] rounded-full`}>
@@ -9,6 +10,8 @@ const TabIcon = ({ icon, focused }) => (
 );
 
 const TabLayout = () => {    
+    NavigationBar.setBackgroundColorAsync("#2B3B3C");
+
     return (
         <Tabs
             screenOptions={{
