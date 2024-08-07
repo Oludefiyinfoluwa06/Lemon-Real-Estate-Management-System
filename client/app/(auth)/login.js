@@ -35,7 +35,7 @@ const Login = () => {
             <View className="flex-row items-center justify-center my-4 w-full">
                 <Button
                     type='agent'
-                    text='Agent Login'
+                    text='Proprietor Login'
                     bg={true}
                     onPress={() => { }}
                 />

@@ -17,16 +17,12 @@ const Signup = () => {
         middleName: '',
         currentAddress: '',
         country: '',
-        state: '',
-        idNumber: '',
-        bvn: '',
-        dateOfBirth: '',
-        gender: '',
+        countryCode: '',
         mobileNumber: '',
         email: '',
         password: ''
     });
-
+    
     const [userDetails, setUserDetails] = useState({
         propertiesOfInterest: [],
         lastName: '',
@@ -34,11 +30,7 @@ const Signup = () => {
         middleName: '',
         currentAddress: '',
         country: '',
-        state: '',
-        idNumber: '',
-        bvn: '',
-        dateOfBirth: '',
-        gender: '',
+        countryCode: '',
         mobileNumber: '',
         email: '',
         password: ''
@@ -62,7 +54,7 @@ const Signup = () => {
                 <View className="flex-row items-center justify-center mb-6 w-full">
                     <Button
                         type='agent'
-                        text='Sign Up as Agent'
+                        text='Sign Up as Proprietor'
                         bg={selected.agent}
                         onPress={() => toggleSelection('agent')}
                     />

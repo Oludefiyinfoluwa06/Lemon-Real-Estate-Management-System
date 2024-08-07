@@ -1,8 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import { fetchCountries } from '../../services/countryApi';
+import { Picker } from '@react-native-picker/picker';
 
 const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
     const [currentStep, setCurrentStep] = useState(1);
+    const [countries, setCountries] = useState([]);
+    const [selectedCountry, setSelectedCountry] = useState({});
+
+    useEffect(() => {
+        const getCountries = async () => {
+            try {
+                const countriesData = await fetchCountries();
+                setCountries(countriesData);
+            } catch (error) {
+                console.error('Error fetching countries:', error);
+            }
+        };
+
+        getCountries();
+    }, []);
 
     const nextStep = () => {
         setCurrentStep((prevStep) => Math.min(prevStep + 1, 4));
@@ -12,6 +29,13 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
         setCurrentStep((prevStep) => Math.max(prevStep - 1, 1));
     };
 
+    const handleCountryChange = (country) => {
+        setSelectedCountry(country);
+        const countryDetails = countries.find(c => c.name.common === country);
+        const countryCode = countryDetails.idd.root + (countryDetails.idd.suffixes ? countryDetails.idd.suffixes[0] : '');
+        setAgentDetails({ ...agentDetails, country: countryDetails.name.common, countryCode });
+    };
+
     const handleSignup = async () => {
 
     }
@@ -19,7 +43,7 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
     return (
         <View className="mb-6">
             {currentStep === 1 && (
-                <>
+                <View>
                     <TextInput
                         placeholder="Last Name"
                         className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
@@ -47,7 +71,7 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
                     <TouchableOpacity onPress={nextStep} className="bg-chartreuse p-3 rounded-lg mt-4">
                         <Text className="text-center text-frenchGray-dark font-rbold">Next</Text>
                     </TouchableOpacity>
-                </>
+                </View>
             )}
 
             {currentStep === 2 && (
@@ -60,21 +84,33 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
                         onChangeText={(text) => setAgentDetails({ ...agentDetails, currentAddress: text })}
                     />
 
-                    <TextInput
-                        placeholder="Country"
-                        className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
-                        placeholderTextColor="#AFAFAF"
-                        value={agentDetails.country}
-                        onChangeText={(text) => setAgentDetails({ ...agentDetails, country: text })}
-                    />
+                    <View className="bg-frenchGray-light mb-4 rounded-lg w-full font-regular">
+                        <Picker
+                            selectedValue={selectedCountry}
+                            onValueChange={(itemValue) => handleCountryChange(itemValue)}
+                            style={{ color: '#FFFFFF' }}
+                            dropdownIconColor={'#AFAFAF'}
+                            selectionColor={'#FFFFFF'}
+                        >
+                            <Picker.Item key='select' label='Select country' value='' />
+                            {countries.map((country) => (
+                                <Picker.Item key={country.cca2} label={country.name.common} value={country.name.common} />
+                            ))}
+                        </Picker>
+                    </View>
 
-                    <TextInput
-                        placeholder="State"
-                        className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
-                        placeholderTextColor="#AFAFAF"
-                        value={agentDetails.state}
-                        onChangeText={(text) => setAgentDetails({ ...agentDetails, state: text })}
-                    />
+                    <View className="flex-row items-center mb-4">
+                        <View className="bg-frenchGray-light text-white p-2 py-[14px] rounded-lg">
+                            <Text className="text-white">{`${agentDetails.countryCode}`}</Text>
+                        </View>
+                        <TextInput
+                            placeholder="Mobile Number"
+                            className="bg-frenchGray-light text-white p-2 ml-2 rounded-lg flex-1 font-regular"
+                            placeholderTextColor="#AFAFAF"
+                            value={agentDetails.mobileNumber}
+                            onChangeText={(text) => setAgentDetails({ ...agentDetails, mobileNumber: text })}
+                        />
+                    </View>
                     
                     <TouchableOpacity onPress={prevStep} className="bg-frenchGray-dark p-3 rounded-lg mt-4">
                         <Text className="text-center text-white font-rbold">Back</Text>
@@ -88,58 +124,6 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
 
             {currentStep === 3 && (
                 <>
-                    <TextInput
-                        placeholder="Identification Number"
-                        className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
-                        placeholderTextColor="#AFAFAF"
-                        value={agentDetails.idNumber}
-                        onChangeText={(text) => setAgentDetails({ ...agentDetails, idNumber: text })}
-                    />
-
-                    <TextInput
-                        placeholder="Bank Verification Number (BVN)"
-                        className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
-                        placeholderTextColor="#AFAFAF"
-                        value={agentDetails.bvn}
-                        onChangeText={(text) => setAgentDetails({ ...agentDetails, bvn: text })}
-                    />
-
-                    <TextInput
-                        placeholder="Date of Birth (YYYY-MM-DD)"
-                        className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
-                        placeholderTextColor="#AFAFAF"
-                        value={agentDetails.dateOfBirth}
-                        onChangeText={(text) => setAgentDetails({ ...agentDetails, dateOfBirth: text })}
-                    />
-
-                    <TouchableOpacity onPress={prevStep} className="bg-frenchGray-dark p-3 rounded-lg mt-4">
-                        <Text className="text-center text-white font-rbold">Back</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity onPress={nextStep} className="bg-chartreuse p-3 rounded-lg mt-4">
-                        <Text className="text-center text-frenchGray-dark font-rbold">Next</Text>
-                    </TouchableOpacity>
-                </>
-            )}
-
-            {currentStep === 4 && (
-                <>
-                    <TextInput
-                        placeholder="Gender"
-                        className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
-                        placeholderTextColor="#AFAFAF"
-                        value={agentDetails.gender}
-                        onChangeText={(text) => setAgentDetails({ ...agentDetails, gender: text })}
-                    />
-
-                    <TextInput
-                        placeholder="Mobile Number (e.g. +234 801 234 5678)"
-                        className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
-                        placeholderTextColor="#AFAFAF"
-                        value={agentDetails.mobileNumber}
-                        onChangeText={(text) => setAgentDetails({ ...agentDetails, mobileNumber: text })}
-                    />
-
                     <TextInput
                         placeholder="Email"
                         className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
