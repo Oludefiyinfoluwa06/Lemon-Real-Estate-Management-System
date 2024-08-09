@@ -4,6 +4,8 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const methodOverride = require('method-override');
 
+const usersRoute = require('./routes/user.route');
+
 const port = process.env.PORT || 5000;
 const app = express();
 
@@ -17,6 +19,8 @@ mongoose.connect(process.env.dbURI)
         console.log('DB connected successfully');
     })
     .catch(err => console.log(err, 'Connection unsuccessful'));
+
+app.use('/api/user', usersRoute);
 
 module.exports = app;
 
