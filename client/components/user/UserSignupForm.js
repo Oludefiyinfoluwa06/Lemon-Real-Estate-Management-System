@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Picker } from '@react-native-picker/picker';
-import { router } from 'expo-router';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { fetchCountries } from '../../services/countryApi';
+import { useAuth } from '../../contexts/AuthContext';
 
 const UserSignupForm = ({ userDetails, setUserDetails }) => {
     const [currentStep, setCurrentStep] = useState(1);
     const [countries, setCountries] = useState([]);
     const [selectedCountry, setSelectedCountry] = useState({});
+
+    const { authLoading, setAuthError, register } = useAuth();
 
     useEffect(() => {
         const getCountries = async () => {
@@ -15,7 +17,7 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
                 const countriesData = await fetchCountries();
                 setCountries(countriesData);
             } catch (error) {
-                console.error('Error fetching countries:', error);
+                console.log('Error fetching countries:', error);
             }
         };
 
@@ -26,18 +28,55 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
 
     const [selectedProperties, setSelectedProperties] = useState([]);
 
-    const togglePropertySelection = (property) => {
-        setSelectedProperties((prevSelected) =>
-            prevSelected.includes(property)
-                ? prevSelected.filter((item) => item !== property)
-                : [...prevSelected, property]
-        );
+    const togglePropertySelection = async (property) => {
+        setSelectedProperties((prevSelected) => {
+            if (prevSelected) {
+                const updatedProperties = prevSelected.includes(property)
+                    ? prevSelected.filter((item) => item !== property)
+                    : [...prevSelected, property];
+    
+                setUserDetails({ ...userDetails, propertiesOfInterest: updatedProperties });
 
-        setUserDetails({ ...userDetails, propertiesOfInterest: selectedProperties });
+                return updatedProperties;
+            }
+        });
     };
 
+    const validateEmail = (email) => {
+        const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
+
+        if (email.match(emailRegex)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     const nextStep = () => {
-        setCurrentStep((prevStep) => Math.min(prevStep + 1, 4));
+        if (currentStep === 1) {
+            if (selectedProperties.length < 1) {
+                return setAuthError('Choose at least, one property category');
+            }
+
+            if (
+                userDetails.lastName === '' ||
+                userDetails.firstName === ''
+            ) {
+                return setAuthError('Input fields must not be empty');
+            }
+
+            setCurrentStep((prevStep) => Math.min(prevStep + 1, 4));
+        } else {
+            if (
+                userDetails.currentAddress === '' ||
+                userDetails.country === '' ||
+                userDetails.mobileNumber === ''
+            ) {
+                return setAuthError('Input fields must not be empty');
+            }
+
+            setCurrentStep((prevStep) => Math.min(prevStep + 1, 4));
+        }
     };
 
     const prevStep = () => {
@@ -52,11 +91,26 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
     };
     
     const handleSignup = async () => {
+        if (
+            userDetails.email === '' ||
+            userDetails.password === '' 
+        ) {
+            return setAuthError('Input fields must not be empty');
+        }
         
+        if (!validateEmail(userDetails.email)) {
+            return setAuthError('Enter a valid email');
+        }
+
+        if (userDetails.password.length < 8) {
+            return setAuthError('Password length must be equal to or greater than 8 characters');
+        }
+
+        await register(userDetails);
     }
 
     return (
-        <View className="mb-6">
+        <View className="mb-6">            
             {currentStep === 1 && (
                 <>
                     <Text className="text-white text-lg mb-2 font-rbold">Properties of Interest:</Text>
@@ -172,7 +226,7 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
                         <Text className="text-center text-white font-rbold">Back</Text>
                     </TouchableOpacity>
                     <TouchableOpacity className="bg-chartreuse p-3 rounded-lg mt-4" onPress={handleSignup}>
-                        <Text className="text-center text-frenchGray-dark font-rbold">Signup</Text>
+                        <Text className="text-center text-frenchGray-dark font-rbold">{authLoading ? 'Loading...' : 'Signup'}</Text>
                     </TouchableOpacity>
                 </>
             )}

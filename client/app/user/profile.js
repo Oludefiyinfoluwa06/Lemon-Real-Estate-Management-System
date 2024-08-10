@@ -2,10 +2,13 @@ import { View, Text, Image, ScrollView, StatusBar, TouchableOpacity } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as NavigationBar from 'expo-navigation-bar';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import Button from '../../components/common/Button';
 import { router } from 'expo-router';
+import Button from '../../components/common/Button';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Profile = () => {
+    const { logout } = useAuth();
+
     NavigationBar.setBackgroundColorAsync("#212A2B");
 
     const user = {
@@ -41,7 +44,7 @@ const Profile = () => {
 
                     <TouchableOpacity
                         className='absolute top-[10px] right-[20px] bg-transparentWhite items-center justify-center w-[50px] h-[50px] rounded-full'
-                        onPress={() => {}}
+                        onPress={async () => await logout()}
                     >
                         <Ionicons name='log-out-outline' size={23} color={'#FFFFFF'} />
                     </TouchableOpacity>

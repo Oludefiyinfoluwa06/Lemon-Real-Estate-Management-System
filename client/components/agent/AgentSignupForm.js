@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
-import { fetchCountries } from '../../services/countryApi';
 import { Picker } from '@react-native-picker/picker';
+import { fetchCountries } from '../../services/countryApi';
+import { useAuth } from '../../contexts/AuthContext';
 
 const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
     const [currentStep, setCurrentStep] = useState(1);
     const [countries, setCountries] = useState([]);
     const [selectedCountry, setSelectedCountry] = useState({});
+
+    const { authLoading, setAuthError, register } = useAuth();
 
     useEffect(() => {
         const getCountries = async () => {
@@ -21,8 +24,37 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
         getCountries();
     }, []);
 
+    const validateEmail = (email) => {
+        const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
+
+        if (email.match(emailRegex)) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     const nextStep = () => {
-        setCurrentStep((prevStep) => Math.min(prevStep + 1, 4));
+        if (currentStep === 1) {
+            if (
+                agentDetails.lastName === '' ||
+                agentDetails.firstName === ''
+            ) {
+                return setAuthError('Input fields must not be empty');
+            }
+
+            setCurrentStep((prevStep) => Math.min(prevStep + 1, 4));
+        } else {
+            if (
+                agentDetails.currentAddress === '' ||
+                agentDetails.country === '' ||
+                agentDetails.mobileNumber === ''
+            ) {
+                return setAuthError('Input fields must not be empty');
+            }
+
+            setCurrentStep((prevStep) => Math.min(prevStep + 1, 4));
+        }
     };
 
     const prevStep = () => {
@@ -37,7 +69,22 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
     };
 
     const handleSignup = async () => {
+        if (
+            agentDetails.email === '' ||
+            agentDetails.password === '' 
+        ) {
+            return setAuthError('Input fields must not be empty');
+        }
+        
+        if (!validateEmail(agentDetails.email)) {
+            return setAuthError('Enter a valid email');
+        }
 
+        if (agentDetails.password.length < 8) {
+            return setAuthError('Password length must be equal to or greater than 8 characters');
+        }
+
+        await register(agentDetails);
     }
 
     return (

@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
     profilePicture: { type: String },
     lastName: { type: String, required: true, },
     firstName: { type: String, required: true, },
-    middleName: { type: String, required: true, },
+    middleName: { type: String, },
     currentAddress: { type: String, required: true, },
     country: { type: String, required: true, },
     mobileNumber: { type: String, required: true, },

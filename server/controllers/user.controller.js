@@ -11,7 +11,7 @@ const register = async (req, res) => {
         const existingUser = await User.findOne({ email });
 
         if (existingUser) {
-            return res.status(409).json({ error: 'This email exists already' });
+            return res.status(409).json({ message: 'This email exists already' });
         }
 
         const salt = await bcrypt.genSalt();
@@ -32,7 +32,7 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, role } = req.body;
 
         const user = await User.findOne({ email });
 
@@ -49,7 +49,7 @@ const login = async (req, res) => {
         const userId = user._id;
         const accessToken = createAccessToken(userId);
 
-        return res.status(200).json({ message: 'Login successful', accessToken });
+        return res.status(200).json({ message: 'Login successful', accessToken, role: user.role });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'An error occurred' });

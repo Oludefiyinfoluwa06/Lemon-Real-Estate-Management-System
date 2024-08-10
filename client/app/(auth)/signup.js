@@ -1,16 +1,19 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Button from '../../components/common/Button';
 import AgentSignupForm from '../../components/agent/AgentSignupForm';
 import UserSignupForm from '../../components/user/UserSignupForm';
+import { useAuth } from '../../contexts/AuthContext';
+import ErrorOrMessageModal from '../../components/common/ErrorOrMessageModal';
 
 const Signup = () => {
     const [selected, setSelected] = useState({
         agent: false,
         user: true,
-    })
+    });
+
     const [agentDetails, setAgentDetails] = useState({
         lastName: '',
         firstName: '',
@@ -20,7 +23,8 @@ const Signup = () => {
         countryCode: '',
         mobileNumber: '',
         email: '',
-        password: ''
+        password: '',
+        role: 'agent'
     });
     
     const [userDetails, setUserDetails] = useState({
@@ -33,8 +37,11 @@ const Signup = () => {
         countryCode: '',
         mobileNumber: '',
         email: '',
-        password: ''
+        password: '',
+        role: 'buyer'
     });
+
+    const { setAuthError, authError, authMessage, setAuthMessage } = useAuth();
 
     const toggleSelection = (type) => {
         setSelected({
@@ -45,6 +52,24 @@ const Signup = () => {
 
     return (
         <SafeAreaView className='h-full flex-1 items-center justify-center bg-darkUmber-dark'>
+            {authError && (
+                <ErrorOrMessageModal
+                    visible={authError !== ''}
+                    modalType='error'
+                    onClose={() => setAuthError('')}
+                    text={authError}
+                />
+            )}
+
+            {authMessage && (
+                <ErrorOrMessageModal
+                    visible={authMessage !== ''}
+                    modalType='success'
+                    onClose={() => setAuthMessage('')}
+                    text={authMessage}
+                />
+            )}
+
             <ScrollView className='w-full p-[20px]'>
                 <View className='mx-auto w-full'>
                     <Text className="text-chartreuse text-2xl font-rbold mb-2 text-center">Create Account</Text>
@@ -69,8 +94,6 @@ const Signup = () => {
                 {selected.agent && <AgentSignupForm agentDetails={agentDetails} setAgentDetails={setAgentDetails} />}
 
                 {selected.user && <UserSignupForm userDetails={userDetails} setUserDetails={setUserDetails} />}
-
-                
 
                 <TouchableOpacity className="mt-3" onPress={() => router.push('/login')}>
                     <Text className="text-frenchGray-light text-center font-rregular">Already have an account? Log In</Text>

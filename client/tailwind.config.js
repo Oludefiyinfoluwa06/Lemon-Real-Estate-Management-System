@@ -13,8 +13,12 @@ module.exports = {
           "light": "#2B3B3C",
           "dark": "#212A2B"
         },
-        transparentBlack: 'rgba(0,0,0,0.65)',
+        transparentBlack: 'rgba(0,0,0,0.45)',
         transparentWhite: 'rgba(255,255,255,0.1)',
+        textError: '#721c24',
+        bgError: '#f8d7da',
+        textSuccess: '#173a28',
+        bgSuccess: '#cdeeaa',
       },
       fontFamily: {
         rthin: ["Raleway-Thin", "sans-serif"],
