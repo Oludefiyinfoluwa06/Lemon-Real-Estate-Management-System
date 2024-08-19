@@ -44,6 +44,10 @@ const RootLayout = () => {
                     name='user'
                     options={{ headerShown: false }}
                 />
+                <Stack.Screen
+                    name='agent'
+                    options={{ headerShown: false }}
+                />
             </Stack>
         </AuthProvider>
     );

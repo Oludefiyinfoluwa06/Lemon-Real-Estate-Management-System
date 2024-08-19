@@ -5,12 +5,14 @@ import { router } from 'expo-router';
 import Button from '../../components/common/Button';
 import { useAuth } from '../../contexts/AuthContext';
 import ErrorOrMessageModal from '../../components/common/ErrorOrMessageModal';
+import { Ionicons } from '@expo/vector-icons';
 
 const Login = () => {
     const [credentials, setCredentials] = useState({
         email: '',
         password: '',
     });
+    const [showPassword, setShowPassword] = useState(false);
 
     const { authLoading, authError, setAuthError, authMessage, setAuthMessage, login } = useAuth();
 
@@ -63,14 +65,22 @@ const Login = () => {
                 onChangeText={(text) => setCredentials({ ...credentials, email: text })}
             />
         
-            <TextInput
-                placeholder="Password"
-                secureTextEntry
-                className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
-                placeholderTextColor="#AFAFAF"
-                value={credentials.password}
-                onChangeText={(text) => setCredentials({ ...credentials, password: text })}
-            />
+            <View className='relative w-full'>
+                <TextInput
+                    placeholder="Password"
+                    secureTextEntry={!showPassword}
+                    className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
+                    placeholderTextColor="#AFAFAF"
+                    value={credentials.password}
+                    onChangeText={(text) => setCredentials({ ...credentials, password: text })}
+                />
+                <TouchableOpacity
+                    className='absolute top-[10px] right-[8px]'
+                    onPress={() => setShowPassword(prev => !prev)}
+                >
+                    <Ionicons name={showPassword ? 'eye-outline' : 'eye-off-outline'} size={20} color={'#AFAFAF'} />
+                </TouchableOpacity>
+            </View>
 
             <View className="flex-row items-center justify-center my-4 w-full">
                 <Button

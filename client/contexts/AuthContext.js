@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
             setTimeout(() => {
                 setAuthMessage('');
     
-                response.data.role === 'agent' ? router.replace('/agent/dashboard') : router.replace('/user/home');
+                response.data.role === 'individual-agent' || response.data.role === 'company-agent' ? router.replace('/agent/dashboard') : router.replace('/user/home');
             }, 3000);
 
         } catch (err) {

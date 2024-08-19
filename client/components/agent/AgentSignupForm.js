@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { Ionicons } from '@expo/vector-icons';
 import { fetchCountries } from '../../services/countryApi';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -8,6 +9,7 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
     const [currentStep, setCurrentStep] = useState(1);
     const [countries, setCountries] = useState([]);
     const [selectedCountry, setSelectedCountry] = useState({});
+    const [showPassword, setShowPassword] = useState(false);
 
     const { authLoading, setAuthError, register } = useAuth();
 
@@ -38,7 +40,8 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
         if (currentStep === 1) {
             if (
                 agentDetails.lastName === '' ||
-                agentDetails.firstName === ''
+                agentDetails.firstName === '' ||
+                agentDetails.brandName === ''
             ) {
                 return setAuthError('Input fields must not be empty');
             }
@@ -84,6 +87,9 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
             return setAuthError('Password length must be equal to or greater than 8 characters');
         }
 
+
+        setAgentDetails({ ...agentDetails, role: 'individual-agent' });
+
         await register(agentDetails);
     }
 
@@ -108,11 +114,11 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
                     />
 
                     <TextInput
-                        placeholder="Middle Name"
+                        placeholder="Brand Name"
                         className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
                         placeholderTextColor="#AFAFAF"
-                        value={agentDetails.middleName}
-                        onChangeText={(text) => setAgentDetails({ ...agentDetails, middleName: text })}
+                        value={agentDetails.companyName}
+                        onChangeText={(text) => setAgentDetails({ ...agentDetails, companyName: text })}
                     />
 
                     <TouchableOpacity onPress={nextStep} className="bg-chartreuse p-3 rounded-lg mt-4">
@@ -179,21 +185,29 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
                         onChangeText={(text) => setAgentDetails({ ...agentDetails, email: text })}
                     />
 
-                    <TextInput
-                        placeholder="Password"
-                        secureTextEntry
-                        className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
-                        placeholderTextColor="#AFAFAF"
-                        value={agentDetails.password}
-                        onChangeText={(text) => setAgentDetails({ ...agentDetails, password: text })}
-                    />
+                    <View className='relative w-full'>
+                        <TextInput
+                            placeholder="Password"
+                            secureTextEntry={!showPassword}
+                            className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
+                            placeholderTextColor="#AFAFAF"
+                            value={agentDetails.password}
+                            onChangeText={(text) => setAgentDetails({ ...agentDetails, password: text })}
+                        />
+                        <TouchableOpacity
+                            className='absolute top-[10px] right-[8px]'
+                            onPress={() => setShowPassword(prev => !prev)}
+                        >
+                            <Ionicons name={showPassword ? 'eye-outline' : 'eye-off-outline'} size={20} color={'#AFAFAF'} />
+                        </TouchableOpacity>
+                    </View>
 
                     <TouchableOpacity onPress={prevStep} className="bg-frenchGray-dark p-3 rounded-lg mt-4">
                         <Text className="text-center text-white font-rbold">Back</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity className="bg-chartreuse p-3 rounded-lg mt-4" onPress={handleSignup}>
-                        <Text className="text-center text-white">Signup</Text>
+                        <Text className="text-center text-white">{authLoading ? 'Loading...' : 'Signup'}</Text>
                     </TouchableOpacity>
                 </>
             )}

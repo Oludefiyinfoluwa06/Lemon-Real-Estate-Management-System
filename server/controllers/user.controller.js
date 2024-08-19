@@ -6,7 +6,7 @@ const createAccessToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { exp
 
 const register = async (req, res) => {
     try {
-        const { propertiesOfInterest, lastName, firstName, middleName, currentAddress, country, mobileNumber, email, password, role } = req.body;
+        const { propertiesOfInterest, lastName, firstName, middleName, companyName, currentAddress, country, mobileNumber, email, password, role } = req.body;
 
         const existingUser = await User.findOne({ email });
 
@@ -17,7 +17,7 @@ const register = async (req, res) => {
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const user = await User.create({ propertiesOfInterest, profilePicture: '', lastName, firstName, middleName, currentAddress, country, mobileNumber, email, password: hashedPassword, role });
+        const user = await User.create({ propertiesOfInterest, profilePicture: '', lastName, firstName, middleName, companyName, currentAddress, country, mobileNumber, email, password: hashedPassword, role });
 
         if (!user) {
             return res.status(400).json({ message: 'Could not save user\'s details' });

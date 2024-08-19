@@ -4,12 +4,18 @@ const userSchema = new mongoose.Schema({
     propertiesOfInterest: {
         type: [String],
         required: () => this.role === 'buyer',
-        default: [],
     },
     profilePicture: { type: String },
-    lastName: { type: String, required: true, },
-    firstName: { type: String, required: true, },
+    lastName: { 
+        type: String, 
+        required: () => this.role === 'buyer', 
+    },
+    firstName: { 
+        type: String, 
+        required: () => this.role === 'buyer', 
+    },
     middleName: { type: String, },
+    companyName: { type: String, },
     currentAddress: { type: String, required: true, },
     country: { type: String, required: true, },
     mobileNumber: { type: String, required: true, },
@@ -17,7 +23,7 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true, },
     role: {
         type: String,
-        enum: ['buyer', 'agent'],
+        enum: ['buyer', 'individual-agent', 'company-agent'],
         required: true
     }
 });

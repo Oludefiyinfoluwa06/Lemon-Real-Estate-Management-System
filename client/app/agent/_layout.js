@@ -4,7 +4,7 @@ const AgentLayout = () => {
     return (
         <Stack>
             <Stack.Screen
-                name='(drawer)'
+                name='(tab)'
                 options={{ headerShown: false }}
             />
         </Stack>

@@ -3,28 +3,15 @@ import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Button from '../../components/common/Button';
-import AgentSignupForm from '../../components/agent/AgentSignupForm';
 import UserSignupForm from '../../components/user/UserSignupForm';
 import { useAuth } from '../../contexts/AuthContext';
 import ErrorOrMessageModal from '../../components/common/ErrorOrMessageModal';
+import ChooseAgentType from '../../components/agent/ChooseAgentType';
 
 const Signup = () => {
     const [selected, setSelected] = useState({
         agent: false,
         user: true,
-    });
-
-    const [agentDetails, setAgentDetails] = useState({
-        lastName: '',
-        firstName: '',
-        middleName: '',
-        currentAddress: '',
-        country: '',
-        countryCode: '',
-        mobileNumber: '',
-        email: '',
-        password: '',
-        role: 'agent'
     });
     
     const [userDetails, setUserDetails] = useState({
@@ -91,7 +78,7 @@ const Signup = () => {
                         onPress={() => toggleSelection('user')} />
                 </View>
 
-                {selected.agent && <AgentSignupForm agentDetails={agentDetails} setAgentDetails={setAgentDetails} />}
+                {selected.agent && <ChooseAgentType />}
 
                 {selected.user && <UserSignupForm userDetails={userDetails} setUserDetails={setUserDetails} />}
 

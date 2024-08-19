@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { fetchCountries } from '../../services/countryApi';
 import { useAuth } from '../../contexts/AuthContext';
 
-const UserSignupForm = ({ userDetails, setUserDetails }) => {
+const CompanyAgentSignupForm = ({ agentDetails, setAgentDetails }) => {
     const [currentStep, setCurrentStep] = useState(1);
     const [countries, setCountries] = useState([]);
     const [selectedCountry, setSelectedCountry] = useState({});
@@ -19,30 +19,12 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
                 const countriesData = await fetchCountries();
                 setCountries(countriesData);
             } catch (error) {
-                console.log('Error fetching countries:', error);
+                console.error('Error fetching countries:', error);
             }
         };
 
         getCountries();
     }, []);
-
-    const propertyOptions = [ 'Lands', 'Duplex', 'Bungalows', 'Shop Spaces', 'Mansions' ];
-
-    const [selectedProperties, setSelectedProperties] = useState([]);
-
-    const togglePropertySelection = async (property) => {
-        setSelectedProperties((prevSelected) => {
-            if (prevSelected) {
-                const updatedProperties = prevSelected.includes(property)
-                    ? prevSelected.filter((item) => item !== property)
-                    : [...prevSelected, property];
-    
-                setUserDetails({ ...userDetails, propertiesOfInterest: updatedProperties });
-
-                return updatedProperties;
-            }
-        });
-    };
 
     const validateEmail = (email) => {
         const emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g;
@@ -56,23 +38,16 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
 
     const nextStep = () => {
         if (currentStep === 1) {
-            if (selectedProperties.length < 1) {
-                return setAuthError('Choose at least, one property category');
-            }
-
-            if (
-                userDetails.lastName === '' ||
-                userDetails.firstName === ''
-            ) {
+            if (agentDetails.companyName === '') {
                 return setAuthError('Input fields must not be empty');
             }
 
             setCurrentStep((prevStep) => Math.min(prevStep + 1, 4));
         } else {
             if (
-                userDetails.currentAddress === '' ||
-                userDetails.country === '' ||
-                userDetails.mobileNumber === ''
+                agentDetails.currentAddress === '' ||
+                agentDetails.country === '' ||
+                agentDetails.mobileNumber === ''
             ) {
                 return setAuthError('Input fields must not be empty');
             }
@@ -89,73 +64,46 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
         setSelectedCountry(country);
         const countryDetails = countries.find(c => c.name.common === country);
         const countryCode = countryDetails.idd.root + (countryDetails.idd.suffixes ? countryDetails.idd.suffixes[0] : '');
-        setUserDetails({ ...userDetails, country: countryDetails.name.common, countryCode });
+        setAgentDetails({ ...agentDetails, country: countryDetails.name.common, countryCode });
     };
-    
+
     const handleSignup = async () => {
         if (
-            userDetails.email === '' ||
-            userDetails.password === '' 
+            agentDetails.email === '' ||
+            agentDetails.password === '' 
         ) {
             return setAuthError('Input fields must not be empty');
         }
         
-        if (!validateEmail(userDetails.email)) {
+        if (!validateEmail(agentDetails.email)) {
             return setAuthError('Enter a valid email');
         }
 
-        if (userDetails.password.length < 8) {
+        if (agentDetails.password.length < 8) {
             return setAuthError('Password length must be equal to or greater than 8 characters');
         }
 
-        await register(userDetails);
+        setAgentDetails({ ...agentDetails, role: 'company-agent' });
+
+        await register(agentDetails);
     }
 
     return (
-        <View className="mb-6">            
+        <View className="mb-6">
             {currentStep === 1 && (
-                <>
-                    <Text className="text-white text-lg mb-2 font-rbold">Properties of Interest:</Text>
-                    <View className="flex-row flex-wrap mb-4">
-                        {propertyOptions.map((property) => (
-                            <TouchableOpacity
-                                key={property}
-                                className={`p-2 m-1 rounded-lg ${selectedProperties.includes(property) ? 'bg-chartreuse' : 'bg-frenchGray-light'}`}
-                                onPress={() => togglePropertySelection(property)}
-                            >
-                                <Text className="text-center text-white font-rregular">{property}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-
+                <View>
                     <TextInput
-                        placeholder="Last Name"
+                        placeholder="Company Name"
                         className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
                         placeholderTextColor="#AFAFAF"
-                        value={userDetails.lastName}
-                        onChangeText={(text) => setUserDetails({ ...userDetails, lastName: text })}
-                    />
-
-                    <TextInput
-                        placeholder="First Name"
-                        className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
-                        placeholderTextColor="#AFAFAF"
-                        value={userDetails.firstName}
-                        onChangeText={(text) => setUserDetails({ ...userDetails, firstName: text })}
-                    />
-
-                    <TextInput
-                        placeholder="Middle Name"
-                        className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
-                        placeholderTextColor="#AFAFAF"
-                        value={userDetails.middleName}
-                        onChangeText={(text) => setUserDetails({ ...userDetails, middleName: text })}
+                        value={agentDetails.companyName}
+                        onChangeText={(text) => setAgentDetails({ ...agentDetails, companyName: text })}
                     />
 
                     <TouchableOpacity onPress={nextStep} className="bg-chartreuse p-3 rounded-lg mt-4">
                         <Text className="text-center text-frenchGray-dark font-rbold">Next</Text>
                     </TouchableOpacity>
-                </>
+                </View>
             )}
 
             {currentStep === 2 && (
@@ -164,8 +112,8 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
                         placeholder="Current Address"
                         className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
                         placeholderTextColor="#AFAFAF"
-                        value={userDetails.currentAddress}
-                        onChangeText={(text) => setUserDetails({ ...userDetails, currentAddress: text })}
+                        value={agentDetails.currentAddress}
+                        onChangeText={(text) => setAgentDetails({ ...agentDetails, currentAddress: text })}
                     />
 
                     <View className="bg-frenchGray-light mb-4 rounded-lg w-full font-regular">
@@ -185,20 +133,21 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
 
                     <View className="flex-row items-center mb-4">
                         <View className="bg-frenchGray-light text-white p-2 py-[14px] rounded-lg">
-                            <Text className="text-white">{`${userDetails.countryCode}`}</Text>
+                            <Text className="text-white">{`${agentDetails.countryCode}`}</Text>
                         </View>
                         <TextInput
                             placeholder="Mobile Number"
                             className="bg-frenchGray-light text-white p-2 ml-2 rounded-lg flex-1 font-regular"
                             placeholderTextColor="#AFAFAF"
-                            value={userDetails.mobileNumber}
-                            onChangeText={(text) => setUserDetails({ ...userDetails, mobileNumber: text })}
+                            value={agentDetails.mobileNumber}
+                            onChangeText={(text) => setAgentDetails({ ...agentDetails, mobileNumber: text })}
                         />
                     </View>
-
+                    
                     <TouchableOpacity onPress={prevStep} className="bg-frenchGray-dark p-3 rounded-lg mt-4">
                         <Text className="text-center text-white font-rbold">Back</Text>
                     </TouchableOpacity>
+
                     <TouchableOpacity onPress={nextStep} className="bg-chartreuse p-3 rounded-lg mt-4">
                         <Text className="text-center text-frenchGray-dark font-rbold">Next</Text>
                     </TouchableOpacity>
@@ -211,8 +160,8 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
                         placeholder="Email"
                         className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
                         placeholderTextColor="#AFAFAF"
-                        value={userDetails.email}
-                        onChangeText={(text) => setUserDetails({ ...userDetails, email: text })}
+                        value={agentDetails.email}
+                        onChangeText={(text) => setAgentDetails({ ...agentDetails, email: text })}
                     />
 
                     <View className='relative w-full'>
@@ -221,8 +170,8 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
                             secureTextEntry={!showPassword}
                             className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
                             placeholderTextColor="#AFAFAF"
-                            value={userDetails.password}
-                            onChangeText={(text) => setUserDetails({ ...userDetails, password: text })}
+                            value={agentDetails.password}
+                            onChangeText={(text) => setAgentDetails({ ...agentDetails, password: text })}
                         />
                         <TouchableOpacity
                             className='absolute top-[10px] right-[8px]'
@@ -235,8 +184,9 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
                     <TouchableOpacity onPress={prevStep} className="bg-frenchGray-dark p-3 rounded-lg mt-4">
                         <Text className="text-center text-white font-rbold">Back</Text>
                     </TouchableOpacity>
+
                     <TouchableOpacity className="bg-chartreuse p-3 rounded-lg mt-4" onPress={handleSignup}>
-                        <Text className="text-center text-frenchGray-dark font-rbold">{authLoading ? 'Loading...' : 'Signup'}</Text>
+                        <Text className="text-center text-white">{authLoading ? 'Loading...' : 'Signup'}</Text>
                     </TouchableOpacity>
                 </>
             )}
@@ -244,4 +194,4 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
     );
 }
 
-export default UserSignupForm;
+export default CompanyAgentSignupForm;
