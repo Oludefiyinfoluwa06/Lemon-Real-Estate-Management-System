@@ -1,16 +1,19 @@
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from '../../../contexts/AuthContext';
+import Header from '../../../components/agent/dashboard/Header';
+import PropertiesOverview from '../../../components/agent/dashboard/PropertiesOverview';
+import SalesRevenueAnalytics from '../../../components/agent/dashboard/SalesRevenueAnalytics';
 
-const Dashboard = () => {
-    const { logout } = useAuth();
-    
+const Dashboard = () => {    
     return (
-        <SafeAreaView>
-            <Text>Welcome</Text>
-            <TouchableOpacity onPress={async () => await logout()}>
-                <Text>Logout</Text>
-            </TouchableOpacity>
+        <SafeAreaView className='h-full bg-darkUmber-dark p-4'>
+            <ScrollView showsVerticalScrollIndicator={false}>
+                <Header />
+                <PropertiesOverview />
+                <SalesRevenueAnalytics />
+
+                <View className='mt-[70px]' />
+            </ScrollView>
         </SafeAreaView>
     );
 }

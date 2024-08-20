@@ -57,6 +57,7 @@ const ChooseAgentType = () => {
                         onPress={() => {
                             setShowAgentForm(true);
                             setShowIndividualAgentForm(true);
+                            setIndividualAgentDetails({ ...individualAgentDetails, role: 'individual-agent' });
                         }}
                     />
 
@@ -66,10 +67,21 @@ const ChooseAgentType = () => {
                         onPress={() => {
                             setShowAgentForm(true);
                             setShowCompanyAgentForm(true);
+                            setCompanyAgentDetails({ ...companyAgentDetails, role: 'company-agent' });
                         }}
                     />
                 </View>
-            : showCompanyAgentForm ? <IndividualAgentSignupForm agentDetails={companyAgentDetails} setAgentDetails={setCompanyAgentDetails} /> : showIndividualAgentForm && <AgentSignupForm agentDetails={individualAgentDetails} setAgentDetails={setIndividualAgentDetails} />}
+            : showCompanyAgentForm ?
+                <IndividualAgentSignupForm
+                    agentDetails={companyAgentDetails}
+                    setAgentDetails={setCompanyAgentDetails}
+                />
+            : showIndividualAgentForm &&
+                <AgentSignupForm
+                    agentDetails={individualAgentDetails}
+                    setAgentDetails={setIndividualAgentDetails}
+                />
+            }
         </>
     );
 }

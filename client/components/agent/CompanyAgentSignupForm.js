@@ -83,8 +83,6 @@ const CompanyAgentSignupForm = ({ agentDetails, setAgentDetails }) => {
             return setAuthError('Password length must be equal to or greater than 8 characters');
         }
 
-        setAgentDetails({ ...agentDetails, role: 'company-agent' });
-
         await register(agentDetails);
     }
 

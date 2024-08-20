@@ -45,6 +45,48 @@ const TabLayout = () => {
                     ),
                 }}
             />
+            <Tabs.Screen
+                name='properties'
+                options={{ 
+                    headerShown: false,
+                    tabBarIcon: ({ color, focused }) => (
+                        <TabIcon
+                            icon={'key-outline'}
+                            color={color}
+                            focused={focused}
+                            name='Properties'
+                        />
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name='analytics'
+                options={{ 
+                    headerShown: false,
+                    tabBarIcon: ({ color, focused }) => (
+                        <TabIcon
+                            icon={'stats-chart-outline'}
+                            color={color}
+                            focused={focused}
+                            name='Analytics'
+                        />
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name='wallet'
+                options={{ 
+                    headerShown: false,
+                    tabBarIcon: ({ color, focused }) => (
+                        <TabIcon
+                            icon={'wallet-outline'}
+                            color={color}
+                            focused={focused}
+                            name='Wallet'
+                        />
+                    ),
+                }}
+            />
         </Tabs>
     );
 }
