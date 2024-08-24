@@ -1,6 +1,7 @@
 const User = require("../models/user.model");
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { isValidObjectId } = require("mongoose");
 
 const createAccessToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '360000s' });
 
@@ -32,7 +33,7 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { email, password, role } = req.body;
+        const { email, password } = req.body;
 
         const user = await User.findOne({ email });
 
@@ -56,7 +57,52 @@ const login = async (req, res) => {
     }
 }
 
+const uploadProfilePicture = async (req, res) => {
+    try {
+        const { profilePictureUrl } = req.body;
+        const { id } = req.params;
+
+        const user = await User.findByIdAndUpdate(id, { profilePicture: profilePictureUrl }, { new: true });
+
+        if (!user) {
+            return res.status(400).json({ message: 'Could not update profile picture' });
+        }
+
+        return res.status(200).json({ message: 'Profile picture upload was successful' });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'An error occurred' });
+    }
+}
+
+const getUser = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const isValidId = isValidObjectId(id);
+
+        if (!isValidId) {
+            return res.status(400).json({ message: 'Invalid user ID' });
+        }
+
+        const user = await User.findById(id);
+
+        if (!user) {
+            return res.status(404).json({ message: 'User cannot be found' });
+        }
+
+        const { password, ...userWithoutPassword } = user.toObject();
+
+        return res.status(200).json({ user: userWithoutPassword });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'An error occurred' });
+    }
+}
+
 module.exports = {
     register,
     login,
+    uploadProfilePicture,
+    getUser,
 }
