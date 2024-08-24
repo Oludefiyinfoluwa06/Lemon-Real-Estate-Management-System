@@ -17,8 +17,9 @@ const PropertiesOverview = () => {
     return (
         <View>
             <PropertiesOverviewCard icon='business-outline' title='Total properties' subTitle='0' />
-            <PropertiesOverviewCard icon='calendar-outline' title='Total Properties added this month' subTitle='0' />
-            <PropertiesOverviewCard icon='checkbox-outline' title='Total properties sold' subTitle='0' />
+            <PropertiesOverviewCard icon='home-outline' title='Properties for Rent' subTitle='0' />
+            <PropertiesOverviewCard icon='pricetag-outline' title='Properties for Sale' subTitle='0' />
+            {/* <PropertiesOverviewCard icon='cash-outline' title='Total Revenue' subTitle='0' /> */}
         </View>
     );
 }

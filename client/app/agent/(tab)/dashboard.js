@@ -4,17 +4,17 @@ import Header from '../../../components/agent/dashboard/Header';
 import PropertiesOverview from '../../../components/agent/dashboard/PropertiesOverview';
 import SalesRevenueAnalytics from '../../../components/agent/dashboard/SalesRevenueAnalytics';
 
-const Dashboard = () => {    
+const Dashboard = () => {
     return (
-        <SafeAreaView className='h-full bg-darkUmber-dark p-4'>
-            <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+            <SafeAreaView className='h-full bg-darkUmber-dark p-4'>
                 <Header />
                 <PropertiesOverview />
                 <SalesRevenueAnalytics />
 
                 <View className='mt-[70px]' />
-            </ScrollView>
-        </SafeAreaView>
+            </SafeAreaView>
+        </ScrollView>
     );
 }
 

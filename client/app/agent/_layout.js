@@ -7,6 +7,10 @@ const AgentLayout = () => {
                 name='(tab)'
                 options={{ headerShown: false }}
             />
+            <Stack.Screen
+                name='profile'
+                options={{ headerShown: false }}
+            />
         </Stack>
     );
 }

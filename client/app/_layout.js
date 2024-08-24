@@ -28,7 +28,7 @@ const RootLayout = () => {
     if (!loaded) {
         return null;
     }
-    
+
     return (
         <AuthProvider>
             <Stack>

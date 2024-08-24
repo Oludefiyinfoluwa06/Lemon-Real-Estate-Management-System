@@ -60,15 +60,15 @@ const TabLayout = () => {
                 }}
             />
             <Tabs.Screen
-                name='analytics'
+                name='chats'
                 options={{ 
                     headerShown: false,
                     tabBarIcon: ({ color, focused }) => (
                         <TabIcon
-                            icon={'stats-chart-outline'}
+                            icon={'chatbubbles-outline'}
                             color={color}
                             focused={focused}
-                            name='Analytics'
+                            name='Chats'
                         />
                     ),
                 }}
