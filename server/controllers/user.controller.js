@@ -3,11 +3,23 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { isValidObjectId } = require("mongoose");
 
-const createAccessToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '360000s' });
+const createAccessToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: 360000 });
 
 const register = async (req, res) => {
     try {
-        const { propertiesOfInterest, lastName, firstName, middleName, companyName, currentAddress, country, mobileNumber, email, password, role } = req.body;
+        const { 
+            propertiesOfInterest, 
+            lastName, 
+            firstName, 
+            middleName, 
+            companyName, 
+            currentAddress, 
+            country, 
+            mobileNumber, 
+            email, 
+            password, 
+            role 
+        } = req.body;
 
         const existingUser = await User.findOne({ email });
 
@@ -18,13 +30,29 @@ const register = async (req, res) => {
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const user = await User.create({ propertiesOfInterest, profilePicture: '', lastName, firstName, middleName, companyName, currentAddress, country, mobileNumber, email, password: hashedPassword, role });
+        const user = await User.create({ 
+            propertiesOfInterest, 
+            profilePicture: '', 
+            lastName, 
+            firstName, 
+            middleName, 
+            companyName, 
+            currentAddress, 
+            country, 
+            mobileNumber, 
+            email, 
+            password: hashedPassword, 
+            role 
+        });
 
         if (!user) {
             return res.status(400).json({ message: 'Could not save user\'s details' });
         }
 
-        return res.status(201).json({ message: 'Registration successful' });
+        const userId = user._id;
+        const accessToken = createAccessToken(userId);
+
+        return res.status(201).json({ message: 'Registration successful', accessToken, role: user.role });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'An error occurred' });
@@ -60,7 +88,7 @@ const login = async (req, res) => {
 const uploadProfilePicture = async (req, res) => {
     try {
         const { profilePictureUrl } = req.body;
-        const { id } = req.params;
+        const id = req.user._id;
 
         const user = await User.findByIdAndUpdate(id, { profilePicture: profilePictureUrl }, { new: true });
 

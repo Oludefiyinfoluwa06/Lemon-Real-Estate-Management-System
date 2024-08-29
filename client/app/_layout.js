@@ -48,6 +48,10 @@ const RootLayout = () => {
                     name='agent'
                     options={{ headerShown: false }}
                 />
+                <Stack.Screen
+                    name='profile-picture-upload'
+                    options={{ headerShown: false }}
+                />
             </Stack>
         </AuthProvider>
     );
