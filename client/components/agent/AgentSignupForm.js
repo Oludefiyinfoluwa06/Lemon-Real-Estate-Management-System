@@ -78,7 +78,7 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
         ) {
             return setAuthError('Input fields must not be empty');
         }
-        
+
         if (!validateEmail(agentDetails.email)) {
             return setAuthError('Enter a valid email');
         }
@@ -87,7 +87,11 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
             return setAuthError('Password length must be equal to or greater than 8 characters');
         }
 
-        await register(agentDetails);
+        const fullMobileNumber = `${agentDetails.countryCode}${agentDetails.mobileNumber}`;
+
+        const updatedAgentDetails = { ...agentDetails, mobileNumber: fullMobileNumber };
+
+        await register(updatedAgentDetails);
     }
 
     return (
@@ -161,7 +165,7 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
                             onChangeText={(text) => setAgentDetails({ ...agentDetails, mobileNumber: text })}
                         />
                     </View>
-                    
+
                     <TouchableOpacity onPress={prevStep} className="bg-frenchGray-dark p-3 rounded-lg mt-4">
                         <Text className="text-center text-white font-rbold">Back</Text>
                     </TouchableOpacity>

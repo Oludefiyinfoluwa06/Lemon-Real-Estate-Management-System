@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
         required: () => this.role === 'buyer', 
     },
     middleName: { type: String, },
-    companyName: { type: String, },
+    companyName: { type: String, required: true },
     currentAddress: { type: String, required: true, },
     country: { type: String, required: true, },
     mobileNumber: { type: String, required: true, },

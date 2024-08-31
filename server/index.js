@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const methodOverride = require('method-override');
 
 const usersRoute = require('./routes/user.route');
+const propertiesRoute = require('./routes/property.route');
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -21,6 +22,7 @@ mongoose.connect(process.env.dbURI)
     .catch(err => console.log(err, 'Connection unsuccessful'));
 
 app.use('/api/user', usersRoute);
+app.use('/api/property', propertiesRoute);
 
 module.exports = app;
 

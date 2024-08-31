@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
     const [authLoading, setAuthLoading] = useState(false);
     const [authError, setAuthError] = useState('');
     const [authMessage, setAuthMessage] = useState('');
-    const [profilePictureUrl, setProfilePictureUrl] = useState('');
+    const [user, setUser] = useState({});
 
     useEffect(() => {
         setAuthError('');
@@ -100,9 +100,7 @@ export const AuthProvider = ({ children }) => {
                 }
             );
 
-            setProfilePictureUrl(imgResponse.data.url);
-
-            const response = await axios.put(`${config.API_BASE_URL}/api/user/profile-picture/upload`, { profilePictureUrl }, {
+            const response = await axios.put(`${config.API_BASE_URL}/api/user/profile-picture/upload`, { profilePictureUrl: imgResponse.data.url }, {
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }
@@ -126,6 +124,30 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
+    const getUser = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+
+            if (!token) {
+                return router.replace('/login');
+            }
+
+            const response = await axios.get(`${config.API_BASE_URL}/api/user`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            setUser(response.data.user);
+        } catch (error) {
+            setAuthError(error.response.data.message);
+
+            setTimeout(() => {
+                setAuthError('');
+            }, 3000);
+        }
+    }
+
     const logout = async () => {
         await AsyncStorage.removeItem('token');
         router.replace('/login');
@@ -141,6 +163,8 @@ export const AuthProvider = ({ children }) => {
             register,
             login,
             uploadProfilePicture,
+            getUser,
+            user,
             logout
         }}>
             {children}

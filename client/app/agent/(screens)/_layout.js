@@ -1,22 +1,22 @@
 import { Stack } from 'expo-router';
 
-const AgentLayout = () => {
+const ScreenLayout = () => {
     return (
         <Stack>
             <Stack.Screen
-                name='(tab)'
+                name='properties/[id]'
                 options={{ headerShown: false }}
             />
             <Stack.Screen
-                name='(screens)'
+                name='properties/add'
                 options={{ headerShown: false }}
             />
             <Stack.Screen
-                name='profile'
+                name='properties/update/[id]'
                 options={{ headerShown: false }}
             />
         </Stack>
     );
 }
 
-export default AgentLayout;
+export default ScreenLayout;

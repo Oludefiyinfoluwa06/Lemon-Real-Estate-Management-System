@@ -6,6 +6,6 @@ const router = require('express').Router();
 router.post('/register', register);
 router.post('/login', login);
 router.put('/profile-picture/upload', authenticate, uploadProfilePicture);
-router.get('/:id', getUser);
+router.get('/', authenticate, getUser);
 
 module.exports = router;

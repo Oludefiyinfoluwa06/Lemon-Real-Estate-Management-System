@@ -105,7 +105,7 @@ const uploadProfilePicture = async (req, res) => {
 
 const getUser = async (req, res) => {
     try {
-        const { id } = req.params;
+        const id = req.user._id;
 
         const isValidId = isValidObjectId(id);
 
@@ -116,7 +116,7 @@ const getUser = async (req, res) => {
         const user = await User.findById(id);
 
         if (!user) {
-            return res.status(404).json({ message: 'User cannot be found' });
+            return res.status(404).json({ message: 'User not found' });
         }
 
         const { password, ...userWithoutPassword } = user.toObject();

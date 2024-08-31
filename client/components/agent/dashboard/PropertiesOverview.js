@@ -13,13 +13,18 @@ const PropertiesOverviewCard = ({ icon, title, subTitle }) => {
     )
 }
 
-const PropertiesOverview = () => {
+const PropertiesOverview = ({
+    numberOfProperties,
+    propertiesForRent,
+    propertiesForLease,
+    propertiesForSale
+}) => {
     return (
         <View>
-            <PropertiesOverviewCard icon='business-outline' title='Total properties' subTitle='0' />
-            <PropertiesOverviewCard icon='home-outline' title='Properties for Rent' subTitle='0' />
-            <PropertiesOverviewCard icon='pricetag-outline' title='Properties for Sale' subTitle='0' />
-            {/* <PropertiesOverviewCard icon='cash-outline' title='Total Revenue' subTitle='0' /> */}
+            <PropertiesOverviewCard icon='business-outline' title='Total properties' subTitle={numberOfProperties} />
+            <PropertiesOverviewCard icon='pricetag-outline' title='Properties for Sale' subTitle={propertiesForSale} />
+            <PropertiesOverviewCard icon='home-outline' title='Properties for Rent' subTitle={propertiesForRent} />
+            <PropertiesOverviewCard icon='cash-outline' title='Properties for Lease' subTitle={propertiesForLease} />
         </View>
     );
 }

@@ -12,7 +12,7 @@ const SplashScreen = () => {
     useEffect(() => {
         const checkIsLoggedIn = async () => {
             const token = await AsyncStorage.getItem('token');
-            
+
             setTimeout(() => {
                 if (token) return router.replace('/agent/dashboard');
 
@@ -22,10 +22,10 @@ const SplashScreen = () => {
 
         checkIsLoggedIn();
     }, []);
-    
+
     return (
         <SafeAreaView className='flex items-center justify-center h-full bg-darkUmber-dark'>
-            <Image 
+            <Image
                 source={images.logo}
                 resizeMode='contain'
                 className='w-[100px]'

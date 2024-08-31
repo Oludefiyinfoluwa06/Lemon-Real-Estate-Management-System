@@ -83,7 +83,11 @@ const CompanyAgentSignupForm = ({ agentDetails, setAgentDetails }) => {
             return setAuthError('Password length must be equal to or greater than 8 characters');
         }
 
-        await register(agentDetails);
+        const fullMobileNumber = `${agentDetails.countryCode}${agentDetails.mobileNumber}`;
+
+        const updatedAgentDetails = { ...agentDetails, mobileNumber: fullMobileNumber };
+
+        await register(updatedAgentDetails);
     }
 
     return (
@@ -138,10 +142,10 @@ const CompanyAgentSignupForm = ({ agentDetails, setAgentDetails }) => {
                             className="bg-frenchGray-light text-white p-2 ml-2 rounded-lg flex-1 font-regular"
                             placeholderTextColor="#AFAFAF"
                             value={agentDetails.mobileNumber}
-                            onChangeText={(text) => setAgentDetails({ ...agentDetails, mobileNumber: text })}
+                            onChangeText={(text) => setAgentDetails({ ...agentDetails, mobileNumber: `${agentDetails.countryCode}${text}` })}
                         />
                     </View>
-                    
+
                     <TouchableOpacity onPress={prevStep} className="bg-frenchGray-dark p-3 rounded-lg mt-4">
                         <Text className="text-center text-white font-rbold">Back</Text>
                     </TouchableOpacity>

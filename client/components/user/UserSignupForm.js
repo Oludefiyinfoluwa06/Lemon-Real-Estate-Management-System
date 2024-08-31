@@ -36,7 +36,7 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
                 const updatedProperties = prevSelected.includes(property)
                     ? prevSelected.filter((item) => item !== property)
                     : [...prevSelected, property];
-    
+
                 setUserDetails({ ...userDetails, propertiesOfInterest: updatedProperties });
 
                 return updatedProperties;
@@ -91,7 +91,7 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
         const countryCode = countryDetails.idd.root + (countryDetails.idd.suffixes ? countryDetails.idd.suffixes[0] : '');
         setUserDetails({ ...userDetails, country: countryDetails.name.common, countryCode });
     };
-    
+
     const handleSignup = async () => {
         if (
             userDetails.email === '' ||
@@ -99,7 +99,7 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
         ) {
             return setAuthError('Input fields must not be empty');
         }
-        
+
         if (!validateEmail(userDetails.email)) {
             return setAuthError('Enter a valid email');
         }
@@ -108,11 +108,15 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
             return setAuthError('Password length must be equal to or greater than 8 characters');
         }
 
-        await register(userDetails);
+        const fullMobileNumber = `${userDetails.countryCode}${userDetails.mobileNumber}`;
+
+        const updatedUserDetails = { ...userDetails, mobileNumber: fullMobileNumber };
+
+        await register(updatedUserDetails);
     }
 
     return (
-        <View className="mb-6">            
+        <View className="mb-6">
             {currentStep === 1 && (
                 <>
                     <Text className="text-white text-lg mb-2 font-rbold">Properties of Interest:</Text>
@@ -192,7 +196,7 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
                             className="bg-frenchGray-light text-white p-2 ml-2 rounded-lg flex-1 font-regular"
                             placeholderTextColor="#AFAFAF"
                             value={userDetails.mobileNumber}
-                            onChangeText={(text) => setUserDetails({ ...userDetails, mobileNumber: text })}
+                            onChangeText={(text) => setUserDetails({ ...userDetails, mobileNumber: `${userDetails.countryCode}${text}` })}
                         />
                     </View>
 

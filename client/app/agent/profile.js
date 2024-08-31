@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { View, Text, Image, ScrollView, StatusBar, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as NavigationBar from 'expo-navigation-bar';
@@ -7,21 +8,17 @@ import { useAuth } from '../../contexts/AuthContext';
 import Button from '../../components/common/Button';
 
 const Profile = () => {
-    const { logout } = useAuth();
+    const { getUser, user, logout } = useAuth();
 
     NavigationBar.setBackgroundColorAsync("#212A2B");
 
-    const user = {
-        username: 'John Doe',
-        email: 'john@doe.com',
-        // profilePicture: 'https://via.placeholder.com/150',
-        accountInfo: {
-            name: 'John Doe',
-            mobile: '+234 815 231 4660',
-            email: 'john@doe.com',
-            address: 'Avenue 2nd Street NW SY.',
+    useEffect(() => {
+        const getUserDetails = async () => {
+            await getUser();
         }
-    };
+
+        getUserDetails();
+    }, []);
 
     return (
         <SafeAreaView className='flex-1 bg-darkUmber-dark'>
@@ -39,7 +36,8 @@ const Profile = () => {
                         </View>
                     )}
 
-                    <Text className='text-white text-2xl font-rbold'>{user.username}</Text>
+                    {/* <Text className='text-white text-2xl font-rbold'>{user.lastName} {user.firstName}</Text> */}
+                    <Text className='text-white text-2xl font-rbold'>{user.companyName}</Text>
                     <Text className='text-white text-base font-rregular'>{user.email}</Text>
 
                     <TouchableOpacity
@@ -64,7 +62,7 @@ const Profile = () => {
                         <Ionicons name='person-outline' size={23} color={'#FFFFFF'} className='w-6 h-6 mr-3' />
                         <View>
                             <Text className='text-xl text-white font-rbold'>Name</Text>
-                            <Text className='text-lg text-white font-rregular'>{user.accountInfo.name}</Text>
+                            <Text className='text-lg text-white font-rregular'>{user.firstName} {user.lastName}</Text>
                         </View>
                     </View>
 
@@ -72,7 +70,7 @@ const Profile = () => {
                         <Ionicons name='call-outline' size={23} color={'#FFFFFF'} className='w-6 h-6 mr-3' />
                         <View>
                             <Text className='text-xl text-white font-rbold'>Phone</Text>
-                            <Text className='text-lg text-white font-rregular'>{user.accountInfo.mobile}</Text>
+                            <Text className='text-lg text-white font-rregular'>{user.mobileNumber}</Text>
                         </View>
                     </View>
 
@@ -80,7 +78,7 @@ const Profile = () => {
                         <Ionicons name='mail-outline' size={23} color={'#FFFFFF'} className='w-6 h-6 mr-3' />
                         <View>
                             <Text className='text-xl text-white font-rbold'>Email</Text>
-                            <Text className='text-lg text-white font-rregular'>{user.accountInfo.email}</Text>
+                            <Text className='text-lg text-white font-rregular'>{user.email}</Text>
                         </View>
                     </View>
 
@@ -88,13 +86,13 @@ const Profile = () => {
                         <Ionicons name='location-outline' size={23} color={'#FFFFFF'} className='w-6 h-6 mr-3' />
                         <View>
                             <Text className='text-xl text-white font-rbold'>Address</Text>
-                            <Text className='text-lg text-white font-rregular'>{user.accountInfo.address}</Text>
+                            <Text className='text-lg text-white font-rregular'>{user.currentAddress}</Text>
                         </View>
                     </View>
                 </View>
 
                 <View className='px-[20px]'>
-                    <Button text='Edit Profile' bg={true} onPress={() => router.push('/user/edit-profile')}  />
+                    <Button text='Edit Profile' bg={true} onPress={() => router.push('/agent/edit-profile')}  />
                 </View>
             </ScrollView>
 

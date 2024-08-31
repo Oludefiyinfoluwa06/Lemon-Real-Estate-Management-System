@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import { Image, Text, TouchableOpacity, View } from 'react-native';
-import { router } from 'expo-router';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useAuth } from '../../../contexts/AuthContext';
+import { router } from 'expo-router';
 
 const Header = () => {
     const { getUser, user } = useAuth();
@@ -16,10 +16,16 @@ const Header = () => {
     }, []);
 
     return (
-        <View className='flex-row items-center justify-between mb-4'>
-            <View className='flex-row items-center justify-start'>
+        <View className='flex-row items-center justify-between w-full'>
+            <Text className='font-bold text-white text-2xl'>All Properties</Text>
+
+            <View className='flex-row items-center justify-end gap-3'>
+                <TouchableOpacity onPress={() => router.push('/agent/properties/add')}>
+                    <Ionicons name='add-outline' size={30} color={'#FFFFFF'} />
+                </TouchableOpacity>
+
                 <TouchableOpacity
-                    className='bg-frenchGray-dark items-center justify-center w-[50px] h-[50px] rounded-full mr-3'
+                    className='bg-frenchGray-dark items-center justify-center w-[35px] h-[35px] rounded-full mr-3'
                     onPress={() => router.push('/agent/profile')}
                 >
                     {!user.profilePicture ?
@@ -34,16 +40,7 @@ const Header = () => {
                             className='rounded-full w-full h-full'
                         />}
                 </TouchableOpacity>
-
-                <Text className='text-white font-rbold text-xl'>Welcome, {user.firstName}</Text>
             </View>
-
-            <TouchableOpacity
-                className='bg-frenchGray-dark items-center justify-center w-[50px] h-[50px] rounded-full'
-                onPress={() => router.push('/agent/notifications')}
-            >
-                <Ionicons name='notifications-outline' size={23} color={'#FFFFFF'} />
-            </TouchableOpacity>
         </View>
     );
 }

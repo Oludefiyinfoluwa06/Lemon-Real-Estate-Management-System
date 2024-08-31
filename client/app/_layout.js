@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { AuthProvider } from '../contexts/AuthContext';
+import { PropertyProvider } from '../contexts/PropertyContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -31,28 +32,30 @@ const RootLayout = () => {
 
     return (
         <AuthProvider>
-            <Stack>
-                <Stack.Screen
-                    name='index'
-                    options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name='(auth)'
-                    options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name='user'
-                    options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name='agent'
-                    options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                    name='profile-picture-upload'
-                    options={{ headerShown: false }}
-                />
-            </Stack>
+            <PropertyProvider>
+                <Stack>
+                    <Stack.Screen
+                        name='index'
+                        options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                        name='(auth)'
+                        options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                        name='user'
+                        options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                        name='agent'
+                        options={{ headerShown: false }}
+                    />
+                    <Stack.Screen
+                        name='profile-picture-upload'
+                        options={{ headerShown: false }}
+                    />
+                </Stack>
+            </PropertyProvider>
         </AuthProvider>
     );
 }
