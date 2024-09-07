@@ -7,13 +7,12 @@ const propertySchema = new mongoose.Schema({
     category: { type: String, required: true },
     status: {
         type: String,
-        enum: ["rent", "lease", "sale"],
+        enum: ["Rent", "Lease", "Sale"],
         required: true
     },
     price: { type: Number, required: true },
     currency: { type: String, required: true },
-    longitude: { type: Number, required: true },
-    latitude: { type: Number, required: true },
+    location: { type: String, required: true },
     images: { type: [String], required: true },
     video: { type: String, required: true },
     agentId: {

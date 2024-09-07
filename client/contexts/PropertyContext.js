@@ -2,6 +2,7 @@ import { createContext, useContext, useState } from "react";
 import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { config } from "../config";
+import { useRouter } from "expo-router";
 
 const PropertyContext = createContext();
 
@@ -16,13 +17,30 @@ export const PropertyProvider = ({ children }) => {
     const [propertiesForLease, setPropertiesForLease] = useState(0);
     const [propertiesForSale, setPropertiesForSale] = useState(0);
 
-    const uploadProperty = async () => {
+    const router = useRouter();
+
+    const uploadProperty = async (title, description, category, status, price, currency, location, images, video, document) => {
         setPropertyLoading(true);
 
         try {
-            
+            const token = await AsyncStorage.getItem('token');
+
+            await axios.post(`${config.API_BASE_URL}/api/property/upload`, { title, description, category, status, price, currency, location, images, video, document }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
+
+            setPropertyMessage('Property uploaded successfully');
+
+            setTimeout(() => {
+                setPropertyMessage('');
+
+                router.replace('/agent/properties');
+            }, 3000);
         } catch (error) {
-            
+            console.log(error);
+            setPropertyError(error.response.data.message);
         } finally {
             setPropertyLoading(false);
         }
@@ -95,6 +113,8 @@ export const PropertyProvider = ({ children }) => {
                 propertyLoading,
                 propertyError,
                 propertyMessage,
+                setPropertyError,
+                setPropertyMessage,
                 uploadProperty,
                 getProperties,
                 agentProperties,

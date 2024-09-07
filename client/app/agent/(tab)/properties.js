@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useProperty } from '../../../contexts/PropertyContext';
 import Header from '../../../components/agent/properties/Header';
 import Listing from '../../../components/agent/properties/Listing';
+import NoProperties from '../../../components/agent/properties/NoProperties';
 
 const Properties = () => {
     const {
@@ -27,7 +28,11 @@ const Properties = () => {
             >
                 <Header />
 
-                <Listing properties={agentProperties} />
+                {agentProperties?.length === 0 ? (
+                    <NoProperties />
+                ) : (
+                    <Listing properties={agentProperties} />
+                )}
             </ScrollView>
         </SafeAreaView>
     );

@@ -4,7 +4,9 @@ const Property = require("../models/property.model");
 
 const uploadProperty = async (req, res) => {
     try {
-        const { title, description, category, status, price, currency, longitude, latitude, images, video, agentId, document } = req.body;
+        const { title, description, category, status, price, currency, location, images, video, document } = req.body;
+
+        const agentId = req.user._id;
 
         const isValidId = isValidObjectId(agentId);
 
@@ -25,8 +27,7 @@ const uploadProperty = async (req, res) => {
             status,
             price,
             currency,
-            longitude,
-            latitude,
+            location,
             images,
             video,
             agentId,

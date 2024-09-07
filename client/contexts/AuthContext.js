@@ -4,7 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { config } from '../config';
 
-import { CLOUDINARY_CLOUD_NAME } from '@env';
+import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from '@env';
 
 const AuthContext = createContext();
 
@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }) => {
                 type: 'image/jpeg',
                 name: 'upload.jpg',
             });
-            formData.append('upload_preset', 'lemon-app');
+            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
 
             const imgResponse = await axios.post(
                 `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,

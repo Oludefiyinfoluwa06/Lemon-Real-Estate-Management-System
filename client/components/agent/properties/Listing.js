@@ -1,9 +1,31 @@
-import { View, Text } from 'react-native';
+import React from 'react';
+import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
 
 const Listing = ({ properties }) => {
     return (
         <View>
-            <Text>Listing</Text>
+            {properties.map((property) => (
+                <TouchableOpacity
+                    key={property._id}
+                    // onPress={() => onSelectProperty(property)}
+                    className="my-4 bg-transparentWhite rounded-lg p-4"
+                >
+                    <Image
+                        source={{ uri: property.images[0] }}
+                        className="w-full h-[150px] rounded-lg mb-2"
+                        resizeMode="cover"
+                    />
+                    <Text className="text-chartreuse font-rsemibold text-lg">
+                        {property.title}
+                    </Text>
+                    <Text className="text-white font-rregular mb-2">
+                        {property.description.substring(0, 100)}...
+                    </Text>
+                    <Text className="text-white font-rbold text-xl">
+                        {property?.currency.split(' - ')[1]}{property.price}
+                    </Text>
+                </TouchableOpacity>
+            ))}
         </View>
     );
 }
