@@ -12,6 +12,7 @@ export const PropertyProvider = ({ children }) => {
     const [propertyMessage, setPropertyMessage] = useState('');
     const [agentProperties, setAgentProperties] = useState([]);
     const [properties, setProperties] = useState([]);
+    const [property, setProperty] = useState({});
     const [numberOfProperties, setNumberOfProperties] = useState(0);
     const [propertiesForRent, setPropertiesForRent] = useState(0);
     const [propertiesForLease, setPropertiesForLease] = useState(0);
@@ -75,9 +76,17 @@ export const PropertyProvider = ({ children }) => {
         setPropertyLoading(true);
 
         try {
-            
+            const token = await AsyncStorage.getItem('token');
+
+            const response = await axios.get(`${config.API_BASE_URL}/api/property/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            });
+
+            setProperty(response.data.property);
         } catch (error) {
-            
+            console.log(error);
         } finally {
             setPropertyLoading(false);
         }
@@ -124,6 +133,7 @@ export const PropertyProvider = ({ children }) => {
                 propertiesForLease,
                 propertiesForSale,
                 getProperty,
+                property,
                 updateProperty,
                 deleteProperty
             }}

@@ -1,10 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, Image, TextInput, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
-// import { useVideoPlayer, VideoView } from 'expo-video';
-import { Ionicons } from '@expo/vector-icons';
+import { Video } from 'expo-av';
+import * as WebBrowser from 'expo-web-browser';
 import axios from 'axios';
 import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from '@env';
 import Button from '../../../../components/common/Button';
@@ -13,6 +13,7 @@ import { fetchCountries } from '../../../../services/countryApi';
 import { useProperty } from '../../../../contexts/PropertyContext';
 import ErrorOrMessageModal from '../../../../components/common/ErrorOrMessageModal';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 const AddProperty = () => {
     const [currentStep, setCurrentStep] = useState(1);
@@ -23,18 +24,13 @@ const AddProperty = () => {
     const [price, setPrice] = useState('');
     const [currency, setCurrency] = useState('');
     const [location, setLocation] = useState('');
-    const [images, setImages] = useState([]);
+    const [propertyImages, setPropertyImages] = useState(Array(5).fill(null));
     const [video, setVideo] = useState('');
     const [document, setDocument] = useState('');
     const [uploading, setUploading] = useState(false);
     const [currencies, setCurrencies] = useState([]);
 
     const router = useRouter();
-
-    // const [localImages, setLocalImages] = useState(null);
-    // const [localVideo, setLocalVideo] = useState(null);
-    // const [isPlaying, setIsPlaying] = useState(true);
-    // const ref = useRef(null);
 
     const categories = [
         { name: 'Land' }, { name: 'Houses' }, { name: 'Shop Spaces' }, { name: 'Office Building' }, { name: 'Industrial Building' }
@@ -45,28 +41,11 @@ const AddProperty = () => {
 
     const { uploadProperty, propertyError, propertyMessage, setPropertyError, setPropertyMessage, propertyLoading } = useProperty();
 
-    // const player = useVideoPlayer(localVideo, player => {
-    //     player.loop = true;
-    //     player.play();
-    // });
-
-    // useEffect(() => {
-    //     const subscription = player.addListener('playingChange', isPlaying => {
-    //         setIsPlaying(isPlaying);
-    //     });
-
-    //     return () => {
-    //         subscription.remove();
-    //     };
-    // }, [player]);
-
     useEffect(() => {
         const getCurrency = async () => {
             try {
                 const countries = await fetchCountries();
-
                 const currencyMap = new Map();
-
                 countries.forEach(country => {
                     if (country.currencies) {
                         Object.values(country.currencies).forEach(currency => {
@@ -74,13 +53,11 @@ const AddProperty = () => {
                         });
                     }
                 });
-
                 setCurrencies(Array.from(currencyMap.entries()).map(([name, symbol]) => ({ name, symbol })));
             } catch (error) {
                 console.error('Error setting currencies:', error);
             }
-        }
-
+        };
         getCurrency();
     }, []);
 
@@ -89,13 +66,11 @@ const AddProperty = () => {
             if (title === '' || description === '' || category === '' || status === '') {
                 return setPropertyError('Input fields must not be empty');
             }
-
             setCurrentStep(currentStep + 1);
         } else {
             if (price === '' || currency === '' || location === '') {
                 return setPropertyError('Input fields must not be empty');
             }
-
             setCurrentStep(currentStep + 1);
         }
     };
@@ -105,14 +80,13 @@ const AddProperty = () => {
     };
 
     const handleAddProperty = async () => {
-        if (images.length === 0 || video === '' || document === '') {
+        if (propertyImages.filter(Boolean).length === 0 || video === '' || document === '') {
             return setPropertyError('Select the necessary files');
         }
-
-        await uploadProperty(title, description, category, status, price, currency, location, images, video, document);
+        await uploadProperty(title, description, category, status, price, currency, location, propertyImages, video, document);
     };
 
-    const uploadFileToCloudinary = async (file, type) => {
+    const uploadFileToCloudinary = async (file, type, slot) => {
         const data = new FormData();
         data.append('file', {
             uri: file.uri,
@@ -130,19 +104,26 @@ const AddProperty = () => {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
-                });
+                }
+            );
 
             if (type === 'image') {
-                setImages((prevImages) => [...prevImages, response.data.secure_url]);
-            } else {
+                setPropertyImages((prevImages) => {
+                    const updatedImages = [...prevImages];
+                    updatedImages[slot] = response.data.secure_url;
+                    return updatedImages;
+                });
+            } else if (type === 'video') {
                 setVideo(response.data.secure_url);
+            } else if (type === 'document') {
+                setDocument(response.data.secure_url);
             }
         } catch (error) {
             console.log('Error uploading to Cloudinary:', error.message);
         } finally {
             setUploading(false);
         }
-    }
+    };
 
     const uploadDocumentToCloudinary = async (file) => {
         const data = new FormData();
@@ -172,27 +153,24 @@ const AddProperty = () => {
         }
     }
 
-    const handleImageUpload = async () => {
+    const handleImageUpload = async (slot) => {
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.All,
-            allowsMultipleSelection: true,
-            aspect: [4, 3],
+            mediaTypes: ImagePicker.MediaTypeOptions.Images,
             quality: 1,
         });
 
         if (!result.canceled) {
-            // setLocalImages(result.assets);
-            result.assets.forEach((asset) => uploadFileToCloudinary(asset, 'image'));
+            uploadFileToCloudinary(result.assets[0], 'image', slot);
         }
     };
 
     const handleVideoUpload = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+            quality: 1,
         });
 
         if (!result.canceled) {
-            // setLocalVideo(result.assets[0]);
             uploadFileToCloudinary(result.assets[0], 'video');
         }
     };
@@ -249,7 +227,8 @@ const AddProperty = () => {
                             placeholderTextColor="#FFFFFF"
                             value={description}
                             onChangeText={(text) => setDescription(text)}
-                            className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
+                            className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full h-[100px] font-rregular"
+                            style={{ textAlignVertical: 'top' }}
                             multiline
                         />
                         <CustomSelect
@@ -304,64 +283,75 @@ const AddProperty = () => {
 
                 {currentStep === 3 && (
                     <View>
-                        <Button text={uploading ? "Uploading..." : "Upload Images"} bg={false} onPress={handleImageUpload} />
-                        {/* <ScrollView
-                            className={`${images.length > 0 ? 'mb-4' : ''}`}
+                        <Text className="font-rbold mb-2 text-xl text-white">Upload Images</Text>
+                        <ScrollView
+                            className="mb-4"
                             showsHorizontalScrollIndicator={false}
                             horizontal
                         >
-                            {images.length > 0 && images.map((image, index) => (
-                                <View className="w-full h-[100px]" key={index}>
-                                    <Image
-                                        source={{ uri: image }}
-                                        className="w-full h-[100px]"
-                                        resizeMode='cover'
-                                    />
-                                    <Text className="text-white text-center my-2">Image uploaded successfully</Text>
-                                </View>
+                            {propertyImages.map((img, index) => (
+                                <TouchableOpacity
+                                    key={index}
+                                    className="h-[150px] w-[150px] rounded mr-3 bg-frenchGray-dark items-center justify-center"
+                                    onPress={() => handleImageUpload(index)}
+                                >
+                                    {img ? (
+                                        <Image source={{ uri: img }} className="h-full w-full rounded" />
+                                    ) : (
+                                        <Ionicons name="image" size={40} color="#FFFFFF" />
+                                    )}
+                                </TouchableOpacity>
                             ))}
-                        </ScrollView> */}
+                        </ScrollView>
 
-                        <Button text={uploading ? "Uploading..." : "Upload Video"} bg={false} onPress={handleVideoUpload} />
+                        <Text className="font-rbold mb-2 text-xl text-white">Upload Video</Text>
                         {video ? (
-                            <View className="w-full">
-                                {/* <View className="w-full h-full relative">
-                                    <VideoView
-                                        ref={ref}
-                                        className="w-full h-ful"
-                                        player={player}
-                                        allowsFullscreen={false}
-                                        allowsPictureInPicture
-                                    />
-                                    <TouchableOpacity
-                                        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-                                        onPress={() => {
-                                            if (isPlaying) {
-                                                player.pause();
-                                            } else {
-                                                player.play();
-                                            }
-                                            setIsPlaying(prev => !prev);
-                                        }}
-                                    >
-                                        <Ionicons name={isPlaying ? "play" : "pause"} size={18} color={"#FFFFFF"} />
-                                    </TouchableOpacity>
-                                </View> */}
-                                <Text className="text-white text-center my-2">Video uploaded successfully</Text>
-                            </View>
-                        ) : null}
+                            <Video
+                                source={{ uri: video }}
+                                className="w-full h-[200px] rounded mt-3"
+                                useNativeControls
+                                resizeMode="contain"
+                            />
+                        ) : (
+                            <TouchableOpacity
+                                className="h-[150px] w-full rounded bg-frenchGray-dark items-center justify-center mb-4"
+                                onPress={handleVideoUpload}
+                            >
+                                <Ionicons name="videocam" size={40} color="#FFFFFF" />
+                            </TouchableOpacity>
+                        )}
 
-                        <Button text={uploading ? "Uploading..." : "Upload Document"} bg={false} onPress={handleDocumentUpload} />
+                        <Text className="font-rbold mb-2 text-xl text-white">Upload Document</Text>
                         {document ? (
-                            <Text className="text-white text-center">Document uploaded successfully</Text>
-                        ) : null}
+                            <TouchableOpacity
+                                className="h-[50px] w-full rounded bg-frenchGray-dark items-center justify-center mb-4"
+                                onPress={() => WebBrowser.openBrowserAsync(document)}
+                            >
+                                <Text className="text-white">Preview Document</Text>
+                            </TouchableOpacity>
+                        ) : (
+                            <TouchableOpacity
+                                className="h-[150px] w-full rounded bg-frenchGray-dark items-center justify-center mb-4"
+                                onPress={handleDocumentUpload}
+                            >
+                                <Ionicons name="document-text" size={40} color="#FFFFFF" />
+                            </TouchableOpacity>
+                        )}
 
                         <View className="flex flex-row justify-between mt-4">
                             <Button text="Back" bg={false} onPress={handlePreviousStep} />
-                            <Button type="user" text={propertyLoading ? "Loading..." : "Submit"} bg={true} onPress={handleAddProperty} disabled={uploading} />
+                            <Button
+                                type="user"
+                                text="Add Property"
+                                bg={true}
+                                onPress={handleAddProperty}
+                                loading={uploading || propertyLoading}
+                            />
                         </View>
                     </View>
                 )}
+
+                <View className="mt-[50px]" />
             </ScrollView>
         </SafeAreaView>
     );

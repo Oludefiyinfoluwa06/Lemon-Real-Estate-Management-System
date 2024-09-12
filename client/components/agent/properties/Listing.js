@@ -1,5 +1,6 @@
+import { router } from 'expo-router';
 import React from 'react';
-import { View, Text, ScrollView, Image, TouchableOpacity } from 'react-native';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
 
 const Listing = ({ properties }) => {
     return (
@@ -7,7 +8,7 @@ const Listing = ({ properties }) => {
             {properties.map((property) => (
                 <TouchableOpacity
                     key={property._id}
-                    // onPress={() => onSelectProperty(property)}
+                    onPress={() => router.push(`/agent/properties/${property._id}`)}
                     className="my-4 bg-transparentWhite rounded-lg p-4"
                 >
                     <Image

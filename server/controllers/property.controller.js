@@ -52,11 +52,11 @@ const getProperties = async (req, res) => {
 
         const properties = await Property.find();
 
-        const propertiesForRent = await Property.find({ agentId: id, status: 'rent' });
+        const propertiesForRent = await Property.find({ agentId: id, status: 'Rent' });
 
-        const propertiesForLease = await Property.find({ agentId: id, status: 'lease' });
+        const propertiesForLease = await Property.find({ agentId: id, status: 'Lease' });
 
-        const propertiesForSale = await Property.find({ agentId: id, status: 'sale' });
+        const propertiesForSale = await Property.find({ agentId: id, status: 'Sale' });
 
         return res.status(200).json({
             agentProperties,
