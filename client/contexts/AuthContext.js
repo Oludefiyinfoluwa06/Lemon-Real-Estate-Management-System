@@ -140,6 +140,7 @@ export const AuthProvider = ({ children }) => {
 
             setUser(response.data.user);
         } catch (error) {
+            console.log(error.response.data.message);
             setAuthError(error.response.data.message);
 
             setTimeout(() => {

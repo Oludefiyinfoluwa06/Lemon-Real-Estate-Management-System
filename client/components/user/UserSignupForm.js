@@ -26,7 +26,7 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
         getCountries();
     }, []);
 
-    const propertyOptions = [ 'Lands', 'Duplex', 'Bungalows', 'Shop Spaces', 'Mansions' ];
+    const propertyOptions = [ 'Land', 'Houses', 'Shop Spaces', 'Office Buildings', 'Industrial Buildings' ];
 
     const [selectedProperties, setSelectedProperties] = useState([]);
 

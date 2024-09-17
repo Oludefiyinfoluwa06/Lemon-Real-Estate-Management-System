@@ -1,15 +1,19 @@
+import React, { useEffect, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect } from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Video } from 'expo-av';
 import * as WebBrowser from 'expo-web-browser';
 import { useProperty } from '../../../../contexts/PropertyContext';
 import { Ionicons } from '@expo/vector-icons';
+import About from '../../../../components/agent/properties/tabs/About';
+import Gallery from '../../../../components/agent/properties/tabs/Gallery';
+import Review from '../../../../components/agent/properties/tabs/Review';
 
 const PropertyDetails = () => {
     const params = useLocalSearchParams();
     const { getProperty, property, propertyLoading } = useProperty();
+    const [activeTab, setActiveTab] = useState("about");
 
     useEffect(() => {
         const getPropertyDetails = async () => {
@@ -30,84 +34,78 @@ const PropertyDetails = () => {
     return (
         <SafeAreaView className="flex-1 bg-darkUmber-dark">
             <ScrollView className="flex-1">
-                <View className="p-4">
-                    <View className="flex-row items-center mb-4">
-                        <TouchableOpacity onPress={() => router.back()}>
-                            <Ionicons name='chevron-back-outline' size={28} color="#FFFFFF" />
-                        </TouchableOpacity>
-                        <Text className="text-white font-rbold text-2xl ml-2">Property details</Text>
-                    </View>
-
-                    <Text className="text-white text-3xl font-rbold mb-2">{property.title}</Text>
-                    <Text className="text-white text-xl font-rmedium mb-6">Status: For {property.status}</Text>
-                    <Text className="text-chartreuse text-xl font-rmedium mb-6">Price: {property.currency.split(' - ')[1]} {property.price} {property.status === 'Sale' ? '' : '/year'}</Text>
-
-                    {property.video && (
-                        <View className="mb-6">
-                            <Text className="text-white font-rbold text-xl mb-3">Property Preview</Text>
-                            <Video
-                                source={{ uri: property.video }}
-                                className="w-full h-[200px] rounded-lg"
-                                useNativeControls
-                                resizeMode="contain"
-                            />
-                        </View>
-                    )}
-
-                    <ScrollView
-                        horizontal
-                        showsHorizontalScrollIndicator={false}
-                        className="mb-6"
+                <View className="relative h-[350px]">
+                    {property?.images && <Image
+                        source={{ uri: property?.images[0] }}
+                        className="w-full h-full"
+                        resizeMode="cover"
+                    />}
+                    <TouchableOpacity
+                        className="absolute top-4 left-4 bg-black bg-opacity-50 rounded-full p-2"
+                        onPress={() => router.back()}
                     >
-                        {property.images.map((img, index) => (
-                            <Image
-                                key={index}
-                                source={{ uri: img }}
-                                className="h-[170px] w-[250px] mr-4 rounded-lg"
-                                resizeMode="cover"
-                            />
-                        ))}
-                    </ScrollView>
+                        <Ionicons name='chevron-back-outline' size={28} color="#FFFFFF" />
+                    </TouchableOpacity>
 
-                    {property.document && (
-                        <TouchableOpacity
-                            className="mb-6 p-4 bg-frenchGray-dark rounded-lg flex-row items-center justify-between"
-                            onPress={() => WebBrowser.openBrowserAsync(property.document)}
-                        >
+                    <View className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 p-4 flex-row justify-between items-center">
+                        <View className="flex-1 items-start">
+                            <Text className="text-white text-xl font-rbold">{property?.title}</Text>
                             <View className="flex-row items-center">
-                                <Ionicons name="document-text-outline" size={24} color="#BBCC13" />
-                                <Text className="text-white text-lg font-rmedium ml-3">View Property Document</Text>
+                                <Ionicons name="location-outline" size={20} color="#BBCC13" />
+                                <Text className="text-white text-base ml-2 font-rregular">{property?.location}</Text>
                             </View>
-                            <Ionicons name="arrow-forward-outline" size={24} color="#BBCC13" />
-                        </TouchableOpacity>
-                    )}
-
-                    <View className="flex-row items-center mb-6">
-                        <Ionicons name="location-outline" size={24} color="#BBCC13" />
-                        <Text className="text-white text-lg ml-2 mr-2 font-rregular">{property.location}</Text>
-                    </View>
-
-                    <View className="mb-6">
-                        <Text className="text-white font-rbold text-xl mb-2">Description</Text>
-                        <Text className="text-frenchGray-light text-base leading-6 font-rregular">{property.description}</Text>
-                    </View>
-
-                    <View className="mb-6 bg-frenchGray-dark p-4 rounded-lg">
-                        <Text className="text-white font-rbold text-xl mb-3">Proprietor Information</Text>
-                        <View className="flex-row items-center mb-4">
-                            <Ionicons name="person-outline" size={20} color="#BBCC13" />
-                            <Text className="text-white text-base ml-2 font-rregular">{property.agentName}</Text>
                         </View>
-                        <View className="flex-row items-center mb-4">
-                            <Ionicons name="call-outline" size={20} color="#BBCC13" />
-                            <Text className="text-white text-base ml-2 font-rregular">{property.agentContact}</Text>
-                        </View>
-                        <View className="flex-row items-center">
-                            <Ionicons name="business-outline" size={20} color="#BBCC13" />
-                            <Text className="text-white text-base ml-2 font-rregular">{property.companyName}</Text>
+
+                        <View className="items-end">
+                            <Text className="text-chartreuse text-xl font-rmedium">
+                                {property?.currency ? property?.currency.split(' - ')[1] : ''} {property?.price}
+                                {property?.status === 'Sale' ? '' : '/year'}
+                            </Text>
+                            <View className="bg-chartreuse px-3 py-1 rounded-full mt-2">
+                                <Text className="text-darkUmber-dark font-rbold">For {property?.status}</Text>
+                            </View>
                         </View>
                     </View>
                 </View>
+
+                <View className="flex-row items-center justify-between p-4">
+                    <TouchableOpacity
+                        className={`px-4 py-2 ${activeTab === 'about' ? 'border-b-2 border-b-chartreuse' : ''}`}
+                        onPress={() => setActiveTab("about")}
+                    >
+                        <Text className="text-xl text-white font-rregular">About</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        className={`px-4 py-2 ${activeTab === 'gallery' ? 'border-b-2 border-b-chartreuse' : ''}`}
+                        onPress={() => setActiveTab("gallery")}
+                    >
+                        <Text className="text-xl text-white font-rregular">Gallery</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        className={`px-4 py-2 ${activeTab === 'review' ? 'border-b-2 border-b-chartreuse' : ''}`}
+                        onPress={() => setActiveTab("review")}
+                    >
+                        <Text className="text-xl text-white font-rregular">Reviews</Text>
+                    </TouchableOpacity>
+                </View>
+
+                {activeTab === 'about' && (
+                    <About
+                        description={property?.description}
+                        document={property?.document}
+                    />
+                )}
+
+                {activeTab === 'gallery' && (
+                    <Gallery
+                        photos={property?.images}
+                        video={property?.video}
+                    />
+                )}
+
+                {activeTab === 'review' && (
+                    <Review />
+                )}
             </ScrollView>
         </SafeAreaView>
     );
