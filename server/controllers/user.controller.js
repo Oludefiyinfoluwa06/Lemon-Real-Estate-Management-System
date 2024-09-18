@@ -7,18 +7,18 @@ const createAccessToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { exp
 
 const register = async (req, res) => {
     try {
-        const { 
-            propertiesOfInterest, 
-            lastName, 
-            firstName, 
-            middleName, 
-            companyName, 
-            currentAddress, 
-            country, 
-            mobileNumber, 
-            email, 
-            password, 
-            role 
+        const {
+            propertiesOfInterest,
+            lastName,
+            firstName,
+            middleName,
+            companyName,
+            currentAddress,
+            country,
+            mobileNumber,
+            email,
+            password,
+            role
         } = req.body;
 
         const existingUser = await User.findOne({ email });
@@ -30,19 +30,19 @@ const register = async (req, res) => {
         const salt = await bcrypt.genSalt();
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const user = await User.create({ 
-            propertiesOfInterest, 
-            profilePicture: '', 
-            lastName, 
-            firstName, 
-            middleName, 
-            companyName, 
-            currentAddress, 
-            country, 
-            mobileNumber, 
-            email, 
-            password: hashedPassword, 
-            role 
+        const user = await User.create({
+            propertiesOfInterest,
+            profilePicture: '',
+            lastName,
+            firstName,
+            middleName,
+            companyName,
+            currentAddress,
+            country,
+            mobileNumber,
+            email,
+            password: hashedPassword,
+            role
         });
 
         if (!user) {
@@ -85,18 +85,17 @@ const login = async (req, res) => {
     }
 }
 
-const uploadProfilePicture = async (req, res) => {
+const updateUser = async (req, res) => {
     try {
-        const { profilePictureUrl } = req.body;
         const id = req.user._id;
 
-        const user = await User.findByIdAndUpdate(id, { profilePicture: profilePictureUrl }, { new: true });
+        const user = await User.findByIdAndUpdate(id, req.body, { new: true });
 
         if (!user) {
-            return res.status(400).json({ message: 'Could not update profile picture' });
+            return res.status(400).json({ message: 'Could not update your profile details' });
         }
 
-        return res.status(200).json({ message: 'Profile picture upload was successful' });
+        return res.status(200).json({ message: 'You\'ve updated your profile details successfully' });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'An error occurred' });
@@ -131,6 +130,6 @@ const getUser = async (req, res) => {
 module.exports = {
     register,
     login,
-    uploadProfilePicture,
+    updateUser,
     getUser,
 }

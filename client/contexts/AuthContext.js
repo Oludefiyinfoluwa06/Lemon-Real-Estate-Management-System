@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }) => {
                 }
             );
 
-            const response = await axios.put(`${config.API_BASE_URL}/api/user/profile-picture/upload`, { profilePictureUrl: imgResponse.data.url }, {
+            const response = await axios.put(`${config.API_BASE_URL}/api/user/update`, { profilePictureUrl: imgResponse.data.url }, {
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }
@@ -149,6 +149,40 @@ export const AuthProvider = ({ children }) => {
         }
     }
 
+    const updateProfile = async (user) => {
+        setAuthLoading(true);
+
+        try {
+            const token = await AsyncStorage.getItem('token');
+
+            if (!token) {
+                return router.replace('/login');
+            }
+
+            const response = await axios.put(`${config.API_BASE_URL}/api/user/update`, user, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            setAuthMessage(response.data.message);
+
+            setTimeout(() => {
+                setAuthMessage('');
+
+                user.role === 'individual-agent' || role === 'company-agent' ? router.replace('/agent/profile') : router.replace('/user/profile');
+            }, 3000);
+        } catch (error) {
+            setAuthError(error.response.data.message);
+
+            setTimeout(() => {
+                setAuthError('');
+            }, 3000);
+        } finally {
+            setAuthLoading(false);
+        }
+    }
+
     const logout = async () => {
         await AsyncStorage.removeItem('token');
         router.replace('/login');
@@ -166,6 +200,8 @@ export const AuthProvider = ({ children }) => {
             uploadProfilePicture,
             getUser,
             user,
+            setUser,
+            updateProfile,
             logout
         }}>
             {children}

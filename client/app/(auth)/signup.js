@@ -57,7 +57,7 @@ const Signup = () => {
                 />
             )}
 
-            <ScrollView className='w-full p-[20px]'>
+            <ScrollView showsVerticalScrollIndicator={false} className='w-full p-[20px]'>
                 <View className='mx-auto w-full'>
                     <Text className="text-chartreuse text-2xl font-rbold mb-2 text-center">Create Account</Text>
                     <Text className="text-frenchGray-light mb-5 text-center font-rregular">Choose your signup method</Text>

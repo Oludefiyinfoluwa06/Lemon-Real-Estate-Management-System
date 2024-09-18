@@ -188,7 +188,7 @@ const AddProperty = () => {
 
     return (
         <SafeAreaView className="bg-darkUmber-dark h-full">
-            <ScrollView className="p-4">
+            <ScrollView showsVerticalScrollIndicator={false} className="p-4">
                 {propertyError && (
                     <ErrorOrMessageModal
                         visible={propertyError !== ''}

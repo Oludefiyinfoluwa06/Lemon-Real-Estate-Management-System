@@ -64,7 +64,7 @@ const Login = () => {
                 value={credentials.email}
                 onChangeText={(text) => setCredentials({ ...credentials, email: text })}
             />
-        
+
             <View className='relative w-full'>
                 <TextInput
                     placeholder="Password"
@@ -90,7 +90,7 @@ const Login = () => {
                         if (credentials.email === '' || credentials.password === '') {
                             return setAuthError('Input fields must not be empty');
                         }
-                        
+
                         await login(credentials);
                     }}
                 />

@@ -22,7 +22,10 @@ const Profile = () => {
 
     return (
         <SafeAreaView className='flex-1 bg-darkUmber-dark'>
-            <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 20 }}
+            >
                 <View className='relative bg-darkUmber-light h-[300px] items-center justify-center rounded-b-3xl'>
                     {user?.profilePicture ? (
                         <Image

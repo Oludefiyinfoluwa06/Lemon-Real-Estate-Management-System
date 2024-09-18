@@ -70,11 +70,11 @@ const CompanyAgentSignupForm = ({ agentDetails, setAgentDetails }) => {
     const handleSignup = async () => {
         if (
             agentDetails.email === '' ||
-            agentDetails.password === '' 
+            agentDetails.password === ''
         ) {
             return setAuthError('Input fields must not be empty');
         }
-        
+
         if (!validateEmail(agentDetails.email)) {
             return setAuthError('Enter a valid email');
         }

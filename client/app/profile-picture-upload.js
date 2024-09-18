@@ -33,7 +33,7 @@ const ProfilePictureUpload = () => {
     }
 
     return (
-        <ScrollView className='h-full bg-darkUmber-light'>
+        <ScrollView showsVerticalScrollIndicator={false} className='h-full bg-darkUmber-light'>
             <SafeAreaView className="min-h-screen items-center justify-center p-[20px]">
                 {authError && (
                     <ErrorOrMessageModal

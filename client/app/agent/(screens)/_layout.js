@@ -4,6 +4,10 @@ const ScreenLayout = () => {
     return (
         <Stack>
             <Stack.Screen
+                name='profile/edit'
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
                 name='properties/[id]'
                 options={{ headerShown: false }}
             />

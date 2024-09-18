@@ -33,7 +33,7 @@ const PropertyDetails = () => {
 
     return (
         <SafeAreaView className="flex-1 bg-darkUmber-dark">
-            <ScrollView className="flex-1">
+            <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
                 <View className="relative h-[350px]">
                     {property?.images && <Image
                         source={{ uri: property?.images[0] }}
