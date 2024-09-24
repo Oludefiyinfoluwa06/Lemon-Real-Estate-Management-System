@@ -15,7 +15,10 @@ const userSchema = new mongoose.Schema({
         required: () => this.role === 'buyer', 
     },
     middleName: { type: String, },
-    companyName: { type: String, required: true },
+    companyName: {
+        type: String,
+        required: () => this.role === 'individual-agent' | 'company-agent', 
+    },
     currentAddress: { type: String, required: true, },
     country: { type: String, required: true, },
     mobileNumber: { type: String, required: true, },

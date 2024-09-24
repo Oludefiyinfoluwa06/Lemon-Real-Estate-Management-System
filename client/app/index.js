@@ -12,9 +12,12 @@ const SplashScreen = () => {
     useEffect(() => {
         const checkIsLoggedIn = async () => {
             const token = await AsyncStorage.getItem('token');
+            const role = await AsyncStorage.getItem('role');
 
             setTimeout(() => {
-                if (token) return router.replace('/agent/dashboard');
+                if (token && role) {
+                    return role === 'buyer' ? router.replace('/user/home') : router.replace('/agent/dashboard');
+                }
 
                 return router.replace('/login');
             }, 3000);

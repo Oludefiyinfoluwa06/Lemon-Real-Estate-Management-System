@@ -34,6 +34,7 @@ const uploadProperty = async (req, res) => {
             agentName: `${agent.lastName} ${agent.firstName}`,
             agentContact: agent.mobileNumber,
             companyName: agent.companyName,
+            agentProfilePicture: agent.profilePicture,
             document
         });
 
@@ -48,23 +49,56 @@ const getProperties = async (req, res) => {
     try {
         const id = req.user._id;
 
-        const agentProperties = await Property.find({ agentId: id });
+        const agentProperties = await Property.find({ agentId: id }).sort({ createdAt: -1 });
 
-        const properties = await Property.find();
+        let properties = await Property.find();
+        let savedProperties = await Property.find({
+            savedBy: { $in: [id] }
+        });
+        let rentProperties = await Property.find({ status: 'Rent' });
+        let leaseProperties = await Property.find({ status: 'Lease' });
+        let saleProperties = await Property.find({ status: 'Sale' });
 
-        const propertiesForRent = await Property.find({ agentId: id, status: 'Rent' });
+        let lands = await Property.find({ category: 'Land' });
+        let houses = await Property.find({ category: 'Houses' });
+        let shopSpaces = await Property.find({ category: 'Shop Spaces' });
+        let officeBuildings = await Property.find({ category: 'Office Building' });
+        let industrialBuildings = await Property.find({ category: 'Industrial Building' });
 
-        const propertiesForLease = await Property.find({ agentId: id, status: 'Lease' });
+        const shuffleArray = (array) => array.sort(() => Math.random() - 0.5);
 
-        const propertiesForSale = await Property.find({ agentId: id, status: 'Sale' });
+        properties = shuffleArray(properties);
+        savedProperties = shuffleArray(savedProperties);
+        rentProperties = shuffleArray(rentProperties);
+        leaseProperties = shuffleArray(leaseProperties);
+        saleProperties = shuffleArray(saleProperties);
+        lands = shuffleArray(lands);
+        houses = shuffleArray(houses);
+        shopSpaces = shuffleArray(shopSpaces);
+        officeBuildings = shuffleArray(officeBuildings);
+        industrialBuildings = shuffleArray(industrialBuildings);
+
+        const oneMonthAgo = new Date();
+        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+        const newListings = await Property.find({ createdAt: { $gte: oneMonthAgo } });
 
         return res.status(200).json({
             agentProperties,
+            numberOfProperties: agentProperties.length,
+            propertiesForRent: rentProperties.length,
+            propertiesForLease: leaseProperties.length,
+            propertiesForSale: saleProperties.length,
             properties,
-            numberOfProperties: properties.length,
-            propertiesForRent: propertiesForRent.length,
-            propertiesForLease: propertiesForLease.length,
-            propertiesForSale: propertiesForSale.length
+            savedProperties,
+            rentProperties,
+            leaseProperties,
+            saleProperties,
+            lands,
+            houses,
+            shopSpaces,
+            officeBuildings,
+            industrialBuildings,
+            newListings
         });
     } catch (error) {
         console.log(error);
@@ -98,7 +132,7 @@ const getProperty = async (req, res) => {
 const updateProperty = async (req, res) => {
     try {
         const propertyId = req.params.id;
-        const { title, description, category, status, price, currency, longitude, latitude, images, video, companyName, document } = req.body;
+        const { title, description, category, status, price, currency, location, images, video, document } = req.body;
 
         const isValidId = isValidObjectId(propertyId);
 
@@ -106,40 +140,105 @@ const updateProperty = async (req, res) => {
             return res.status(400).json({ message: 'Invalid ID' });
         }
 
+        if (!title || !description || !category || !status || !price || !currency || !location || images.length === 0 || !video || !document) {
+            const property = await Property.findByIdAndUpdate(propertyId, {
+                $push: { savedBy: req.user._id }
+            }, { new: true });
+
+            return res.status(200).json({ message: 'Property saved successfully', property });
+        }
+
         const property = await Property.findByIdAndUpdate(propertyId, {
-            title, 
-            description, 
-            category, 
-            status, 
-            price, 
-            currency, 
-            longitude, 
-            latitude, 
-            images, 
-            video, 
-            companyName, 
+            title,
+            description,
+            category,
+            status,
+            price,
+            currency,
+            location,
+            images,
+            video,
             document
         }, { new: true });
 
-        return res.status(200).json({ message: 'Property updated successful', property });
+        return res.status(200).json({ message: 'Property updated successfully', property });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'An error occurred' });
     }
 }
 
-const deleteProperty = async (req, res) => {
-    const propertyId = req.params.id;
+const searchProperty = async (req, res) => {
+    try {
+        const { title, country, category, status, minPrice, maxPrice } = req.query;
 
-    const isValidId = isValidObjectId(propertyId);
+        if (!country || !category || !status || !minPrice || !maxPrice) {
+            const properties = await Property.find({ title: { $regex: title, $options: 'i' } });
 
-    if (!isValidId) {
-        return res.status(400).json({ message: 'Invalid ID' });
+            return res.status(200).json({
+                count: properties.length,
+                properties,
+            });
+        }
+
+        let query = {};
+
+        if (title) {
+            query.title = { $regex: title, $options: 'i' };
+        }
+
+        if (country) {
+            query.country = { $regex: country, $options: 'i' };
+        }
+
+        if (category) {
+            query.category = category;
+        }
+
+        if (minPrice || maxPrice) {
+            query.price = {};
+            if (minPrice) {
+                query.price.$gte = minPrice;
+            }
+            if (maxPrice) {
+                query.price.$lte = maxPrice;
+            }
+        }
+
+        if (status) {
+            query.status = status;
+        }
+
+        const properties = await Property.find(query);
+
+        return res.status(200).json({
+            count: properties.length,
+            properties,
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'An error occurred' });
     }
+}
 
-    const property = await Property.findByIdAndDelete(propertyId);
+const deleteProperty = async (req, res) => {
+    try {
+        const propertyId = req.params.id;
 
-    return res.status(200).json({ message: 'Property deleted successfully', property });
+        const isValidId = isValidObjectId(propertyId);
+
+        if (!isValidId) {
+            return res.status(400).json({ message: 'Invalid ID' });
+        }
+
+        const property = await Property.findByIdAndDelete(propertyId);
+
+        return res.status(200).json({ message: 'Property deleted successfully', property });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: 'An error occurred' });
+    }
 }
 
 module.exports = {
@@ -147,5 +246,6 @@ module.exports = {
     getProperties,
     getProperty,
     updateProperty,
+    searchProperty,
     deleteProperty,
 }

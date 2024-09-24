@@ -28,6 +28,7 @@ export const AuthProvider = ({ children }) => {
             setAuthMessage(response.data.message);
 
             await AsyncStorage.setItem('token', response.data.accessToken);
+            await AsyncStorage.setItem('userId', response.data.id);
 
             setTimeout(() => {
                 setAuthMessage('');
@@ -54,6 +55,8 @@ export const AuthProvider = ({ children }) => {
             setAuthMessage(response.data.message);
 
             await AsyncStorage.setItem('token', response.data.accessToken);
+            await AsyncStorage.setItem('role', response.data.role);
+            await AsyncStorage.setItem('userId', response.data.id);
 
             setTimeout(() => {
                 setAuthMessage('');
@@ -100,13 +103,14 @@ export const AuthProvider = ({ children }) => {
                 }
             );
 
-            const response = await axios.put(`${config.API_BASE_URL}/api/user/update`, { profilePictureUrl: imgResponse.data.url }, {
+            const response = await axios.put(`${config.API_BASE_URL}/api/user/update`, { profilePicture: imgResponse.data.url }, {
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }
             });
 
             setAuthMessage(response.data.message);
+            await AsyncStorage.setItem('role', role);
 
             setTimeout(() => {
                 setAuthMessage('');
@@ -170,7 +174,7 @@ export const AuthProvider = ({ children }) => {
             setTimeout(() => {
                 setAuthMessage('');
 
-                user.role === 'individual-agent' || role === 'company-agent' ? router.replace('/agent/profile') : router.replace('/user/profile');
+                user.role === 'individual-agent' || user.role === 'company-agent' ? router.replace('/agent/profile') : router.replace('/user/profile');
             }, 3000);
         } catch (error) {
             setAuthError(error.response.data.message);

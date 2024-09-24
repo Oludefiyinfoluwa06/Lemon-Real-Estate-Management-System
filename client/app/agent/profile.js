@@ -72,7 +72,7 @@ const Profile = () => {
                     />
                     <Button
                         icon="document-text-outline"
-                        text="Terms and condition"
+                        text="Terms and conditions"
                         onClick={() => router.push('/agent/edit-profile')}
                     />
                     <Button

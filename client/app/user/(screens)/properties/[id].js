@@ -1,18 +1,34 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useProperty } from '../../../../contexts/PropertyContext';
 import { Ionicons } from '@expo/vector-icons';
-import About from '../../../../components/agent/properties/tabs/About';
-import Gallery from '../../../../components/agent/properties/tabs/Gallery';
-import Review from '../../../../components/agent/properties/tabs/Review';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useProperty } from '../../../../contexts/PropertyContext';
+import About from '../../../../components/user/properties/tabs/About';
+import Gallery from '../../../../components/user/properties/tabs/Gallery';
+import Review from '../../../../components/user/properties/tabs/Review';
 import { formatPrice } from '../../../../services/formatPrice';
 
 const PropertyDetails = () => {
     const params = useLocalSearchParams();
-    const { getProperty, property, propertyLoading } = useProperty();
+    const { getProperty, property, propertyLoading, updateProperty } = useProperty();
     const [activeTab, setActiveTab] = useState("about");
+
+    const [userId, setUserId] = useState("");
+
+    const getUserId = async () => {
+        return await AsyncStorage.getItem('userId');
+    }
+
+    useEffect(() => {
+        const fetchUserId = async () => {
+            const userId = await getUserId();
+            setUserId(userId);
+        }
+
+        fetchUserId();
+    }, []);
 
     useEffect(() => {
         const getPropertyDetails = async () => {
@@ -40,10 +56,17 @@ const PropertyDetails = () => {
                         resizeMode="cover"
                     />}
                     <TouchableOpacity
-                        className="absolute top-4 left-4 bg-frenchGray-light rounded-full p-2"
+                        className="absolute top-4 left-4 bg-transparentBlack rounded-full p-2"
                         onPress={() => router.back()}
                     >
                         <Ionicons name='chevron-back-outline' size={28} color="#FFFFFF" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        className="absolute top-4 right-4 bg-transparentBlack rounded-full p-3"
+                        onPress={async () => await updateProperty(property._id)}
+                    >
+                        <Ionicons name={property.savedBy && property.savedBy.includes(userId) ? "heart" : "heart-outline"} color={"#BBCC13"} size={25} />
                     </TouchableOpacity>
 
                     <View className="absolute bottom-0 left-0 right-0 bg-darkUmber-light p-4 flex-row justify-between items-center">
@@ -92,6 +115,10 @@ const PropertyDetails = () => {
                     <About
                         description={property?.description}
                         document={property?.document}
+                        proprietorName={property?.agentName}
+                        proprietorContact={property?.agentContact}
+                        companyName={property?.companyName}
+                        proprietorProfilePic={property?.agentProfilePicture}
                     />
                 )}
 

@@ -1,22 +1,22 @@
 import { Stack } from 'expo-router';
 
-const UserLayout = () => {
+const ScreenLayout = () => {
     return (
         <Stack>
             <Stack.Screen
-                name='(tab)'
+                name='profile/edit'
                 options={{ headerShown: false }}
             />
             <Stack.Screen
-                name='(screens)'
+                name='properties/[id]'
                 options={{ headerShown: false }}
             />
             <Stack.Screen
-                name='profile'
+                name='properties/saved'
                 options={{ headerShown: false }}
             />
         </Stack>
     );
 }
 
-export default UserLayout;
+export default ScreenLayout;

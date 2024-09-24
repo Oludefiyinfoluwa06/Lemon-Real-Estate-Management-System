@@ -5,16 +5,16 @@ import { useProperty } from '../../contexts/PropertyContext';
 import NoProperties from './NoProperties';
 import { formatPrice } from '../../services/formatPrice';
 
-const Categories = () => {
-    const categories = ['Lands', 'Houses', 'Shop spaces', 'Office buildings', 'Industrial buildings'];
+const Status = () => {
+    const status = ['Rent', 'Lease', 'Sale'];
 
-    const [selectedCategory, setSelectedCategory] = useState(categories[0]);
-    const [categoryProperties, setCategoryProperties] = useState([]);
+    const [selectedStatus, setSelectedStatus] = useState(status[0]);
+    const [statusProperties, setStatusProperties] = useState([]);
 
-    const { getProperties, lands, houses, shopSpaces, officeBuildings, industrialBuildings } = useProperty();
+    const { getProperties, rentProperties, leaseProperties, saleProperties } = useProperty();
 
-    const toggleCategorySelection = (category) => {
-        setSelectedCategory(category);
+    const toggleStatusSelection = (property) => {
+        setSelectedStatus(property);
     };
 
     useEffect(() => {
@@ -26,42 +26,39 @@ const Categories = () => {
     }, []);
 
     useEffect(() => {
-        const updateCategoryProperties = () => {
-            if (selectedCategory === 'Lands') {
-                setCategoryProperties(lands);
-            } else if (selectedCategory === 'Houses') {
-                setCategoryProperties(houses);
-            } else if (selectedCategory === 'Shop spaces') {
-                setCategoryProperties(shopSpaces);
-            } else if (selectedCategory === 'Office buildings') {
-                setCategoryProperties(officeBuildings);
-            } else if (selectedCategory === 'Industrial buildings') {
-                setCategoryProperties(industrialBuildings);
+        const updateStatusProperties = () => {
+            if (selectedStatus === 'Rent') {
+                setStatusProperties(rentProperties);
+            } else if (selectedStatus === 'Lease') {
+                setStatusProperties(leaseProperties);
+            } else if (selectedStatus === 'Sale') {
+                setStatusProperties(saleProperties);
             }
         };
 
-        updateCategoryProperties();
-    }, [selectedCategory, lands, houses, shopSpaces, officeBuildings, industrialBuildings]);
+        updateStatusProperties();
+    }, [selectedStatus, rentProperties, leaseProperties, saleProperties]);
 
     return (
         <View>
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
+                className="mt-4"
             >
-                {categories.map((category, index) => (
+                {status.map((item, index) => (
                     <TouchableOpacity
-                        key={category}
-                        className={`p-2 px-4 m-1 rounded-full ${index === 0 ? 'ml-4' : ''} ${index === categories.length - 1 ? 'mr-4' : ''} ${selectedCategory === category ? 'bg-chartreuse' : 'bg-frenchGray-light'}`}
-                        onPress={() => toggleCategorySelection(category)}
+                        key={item}
+                        className={`p-2 px-4 m-1 rounded-full ${index === 0 ? 'ml-4' : ''} ${index === status.length - 1 ? 'mr-4' : ''} ${selectedStatus === item ? 'bg-chartreuse' : 'bg-frenchGray-light'}`}
+                        onPress={() => toggleStatusSelection(item)}
                     >
-                        <Text className={`text-center font-rbold text-lg ${selectedCategory === category ? 'text-frenchGray-light' : 'text-white'}`}>{category}</Text>
+                        <Text className={`text-center font-rbold text-lg ${selectedStatus === item ? 'text-frenchGray-light' : 'text-white'}`}>{item}</Text>
                     </TouchableOpacity>
                 ))}
             </ScrollView>
 
-            {categoryProperties.length === 0 ? (
-                <NoProperties type='category' />
+            {statusProperties.length === 0 ? (
+                <NoProperties type='status' />
             ) : (
                 <ScrollView
                     horizontal
@@ -69,7 +66,7 @@ const Categories = () => {
                     contentContainerStyle={{ paddingRight: 20 }}
                     className='mt-[20px]'
                 >
-                    {categoryProperties.map(property => (
+                    {statusProperties.map(property => (
                         <View
                             className='ml-[20px]'
                             key={property._id}
@@ -95,4 +92,4 @@ const Categories = () => {
     );
 }
 
-export default Categories;
+export default Status;

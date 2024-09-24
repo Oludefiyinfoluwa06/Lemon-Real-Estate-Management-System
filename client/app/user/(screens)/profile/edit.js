@@ -128,9 +128,21 @@ const EditProfile = () => {
                                 </View>
                             </TouchableOpacity>
                         ) : (
-                            <View className='bg-white rounded-full p-[20px]'>
-                                <Ionicons name='person-outline' color={'#2B3B3C'} size={70} />
-                            </View>
+                            <TouchableOpacity
+                                className="relative"
+                                onPress={handleUploadProfileImage}
+                            >
+                                <View className='bg-white rounded-full p-[20px]'>
+                                    <Ionicons name='person-outline' color={'#2B3B3C'} size={70} />
+                                </View>
+                                <View className="absolute bottom-0 right-0">
+                                    <Ionicons
+                                        name="camera-outline"
+                                        size={20}
+                                        color={"#BBCC13"}
+                                    />
+                                </View>
+                            </TouchableOpacity>
                         )}
                     </View>
 
@@ -163,20 +175,6 @@ const EditProfile = () => {
                         </TouchableOpacity>
                     </View>
 
-                    <View className='relative w-full'>
-                        <TextInput
-                            placeholder={user?.firstName && user?.lastName ? "Brand Name" : "Company Name"}
-                            className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular pl-[35px]"
-                            placeholderTextColor="#AFAFAF"
-                            value={user?.companyName}
-                            onChangeText={(text) => setUser({ ...user, companyName: text })}
-                        />
-                        <TouchableOpacity
-                            className='absolute top-[10px] left-[8px]'
-                        >
-                            <Ionicons name="business-outline" size={20} color={'#AFAFAF'} />
-                        </TouchableOpacity>
-                    </View>
                     <View className='relative w-full'>
                         <TextInput
                             placeholder="Current Address"

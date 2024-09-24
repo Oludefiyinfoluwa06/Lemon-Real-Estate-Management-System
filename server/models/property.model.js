@@ -23,7 +23,9 @@ const propertySchema = new mongoose.Schema({
     agentName: { type: String, required: true },
     agentContact: { type: String, required: true },
     companyName: { type: String, required: true },
+    agentProfilePicture: { type: String, required: true },
     document: { type: String, required: true },
+    savedBy: { type: [String] }
 }, { timestamps: true });
 
 const Property = mongoose.model('properties', propertySchema);

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View, Text, ScrollView } from 'react-native';
+import { View, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useProperty } from '../../../contexts/PropertyContext';
 import Header from '../../../components/agent/properties/Header';
@@ -8,6 +8,7 @@ import NoProperties from '../../../components/agent/properties/NoProperties';
 
 const Properties = () => {
     const {
+        propertyLoading,
         getProperties,
         agentProperties,
     } = useProperty();
@@ -28,11 +29,15 @@ const Properties = () => {
             >
                 <Header />
 
-                {agentProperties?.length === 0 ? (
+                {propertyLoading ? (
+                    <ActivityIndicator size={"large"} color={"#BBCC13"} />
+                ) : agentProperties?.length === 0 ? (
                     <NoProperties />
                 ) : (
                     <Listing properties={agentProperties} />
                 )}
+
+                <View className="mt-[70px]" />
             </ScrollView>
         </SafeAreaView>
     );

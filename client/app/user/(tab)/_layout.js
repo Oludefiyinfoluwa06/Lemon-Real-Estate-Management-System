@@ -9,7 +9,7 @@ const TabIcon = ({ icon, focused }) => (
     </View>
 );
 
-const TabLayout = () => {    
+const TabLayout = () => {
     NavigationBar.setBackgroundColorAsync("#2B3B3C");
 
     return (
@@ -33,7 +33,7 @@ const TabLayout = () => {
         >
             <Tabs.Screen
                 name='home'
-                options={{ 
+                options={{
                     headerShown: false,
                     tabBarIcon: ({ color, focused }) => (
                         <TabIcon
@@ -47,7 +47,7 @@ const TabLayout = () => {
             />
             <Tabs.Screen
                 name='search'
-                options={{ 
+                options={{
                     headerShown: false,
                     tabBarIcon: ({ focused }) => (
                         <TabIcon
@@ -59,22 +59,8 @@ const TabLayout = () => {
                 }}
             />
             <Tabs.Screen
-                name='wallet'
-                options={{ 
-                    headerShown: false,
-                    tabBarIcon: ({ color, focused }) => (
-                        <TabIcon
-                            icon={'wallet-outline'}
-                            color={color}
-                            focused={focused}
-                            name='Wallet'
-                        />
-                    ),
-                }}
-            />
-            <Tabs.Screen
                 name='chats'
-                options={{ 
+                options={{
                     headerShown: false,
                     tabBarIcon: ({ color, focused }) => (
                         <TabIcon
@@ -82,6 +68,20 @@ const TabLayout = () => {
                             color={color}
                             focused={focused}
                             name='Chats'
+                        />
+                    ),
+                }}
+            />
+            <Tabs.Screen
+                name='wallet'
+                options={{
+                    headerShown: false,
+                    tabBarIcon: ({ color, focused }) => (
+                        <TabIcon
+                            icon={'wallet-outline'}
+                            color={color}
+                            focused={focused}
+                            name='Wallet'
                         />
                     ),
                 }}

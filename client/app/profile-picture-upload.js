@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Button from '../components/common/Button';
 import ErrorOrMessageModal from '../components/common/ErrorOrMessageModal';
 import { useAuth } from '../contexts/AuthContext';
@@ -53,7 +54,7 @@ const ProfilePictureUpload = () => {
                     />
                 )}
                 <Text className="font-rbold text-2xl text-white mb-4">Upload Profile Picture</Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                     className="w-full h-[250px] bg-frenchGray-dark rounded-lg flex items-center justify-center"
                     onPress={pickImage}
                 >
@@ -64,7 +65,8 @@ const ProfilePictureUpload = () => {
                     <Button
                         text="Skip"
                         bg={false}
-                        onPress={() => {
+                        onPress={async () => {
+                            await AsyncStorage.setItem('role', role);
                             router.replace(`${role === 'company-agent' || role === 'individual-agent' ? '/agent/dashboard' : '/user/home'}`)
                         }}
                     />
