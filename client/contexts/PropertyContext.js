@@ -27,6 +27,8 @@ export const PropertyProvider = ({ children }) => {
     const [officeBuildings, setOfficeBuildings] = useState([]);
     const [industrialBuildings, setIndustrialBuildings] = useState([]);
     const [newListings, setNewListings] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
     const router = useRouter();
 
@@ -57,21 +59,24 @@ export const PropertyProvider = ({ children }) => {
         }
     }
 
-    const getProperties = async () => {
+    const getProperties = async (page, limit) => {
         setPropertyLoading(true);
 
         try {
             const token = await AsyncStorage.getItem('token');
+            const userId = await AsyncStorage.getItem('userId');
 
-            const response = await axios.get(`${config.API_BASE_URL}/api/property/all`, {
+            const response = await axios.get(`${config.API_BASE_URL}/api/property/all?page=${page}`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 }
             });
 
+            const savedProperties = response.data.properties.filter(property => property.savedBy.includes(userId));
+
             setAgentProperties(response.data.agentProperties);
             setProperties(response.data.properties);
-            setSavedProperties(response.data.savedProperties);
+            setSavedProperties(savedProperties);
             setNumberOfProperties(response.data.numberOfProperties);
             setPropertiesForLease(response.data.propertiesForLease);
             setPropertiesForRent(response.data.propertiesForRent);
@@ -85,6 +90,8 @@ export const PropertyProvider = ({ children }) => {
             setOfficeBuildings(response.data.officeBuildings);
             setIndustrialBuildings(response.data.industrialBuildings);
             setNewListings(response.data.newListings);
+            setCurrentPage(response.data.currentPage);
+            setTotalPages(response.data.totalPages);
         } catch (error) {
             console.log(error.response.data);
         } finally {
@@ -206,6 +213,8 @@ export const PropertyProvider = ({ children }) => {
                 officeBuildings,
                 industrialBuildings,
                 newListings,
+                currentPage,
+                totalPages,
                 getProperty,
                 property,
                 updateProperty,

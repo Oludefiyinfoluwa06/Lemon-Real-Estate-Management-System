@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const User = require('./user.model');
 
 const propertySchema = new mongoose.Schema({
     title: { type: String, required: true },
@@ -13,19 +12,21 @@ const propertySchema = new mongoose.Schema({
     price: { type: Number, required: true },
     currency: { type: String, required: true },
     location: { type: String, required: true },
+    country: { type: String, required: true },
     images: { type: [String], required: true },
     video: { type: String, required: true },
     agentId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: User
+        ref: 'User'
     },
     agentName: { type: String, required: true },
     agentContact: { type: String, required: true },
     companyName: { type: String, required: true },
     agentProfilePicture: { type: String, required: true },
     document: { type: String, required: true },
-    savedBy: { type: [String] }
+    savedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }]
 }, { timestamps: true });
 
 const Property = mongoose.model('properties', propertySchema);

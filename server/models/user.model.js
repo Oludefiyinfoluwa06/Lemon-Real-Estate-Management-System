@@ -6,18 +6,18 @@ const userSchema = new mongoose.Schema({
         required: () => this.role === 'buyer',
     },
     profilePicture: { type: String },
-    lastName: { 
-        type: String, 
-        required: () => this.role === 'buyer', 
+    lastName: {
+        type: String,
+        required: true,
     },
-    firstName: { 
-        type: String, 
-        required: () => this.role === 'buyer', 
+    firstName: {
+        type: String,
+        required: true,
     },
     middleName: { type: String, },
     companyName: {
         type: String,
-        required: () => this.role === 'individual-agent' | 'company-agent', 
+        required: () => this.role === 'individual-agent' | 'company-agent',
     },
     currentAddress: { type: String, required: true, },
     country: { type: String, required: true, },

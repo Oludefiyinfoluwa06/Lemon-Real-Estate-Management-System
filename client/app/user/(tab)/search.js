@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, TextInput, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { router } from 'expo-router';
 import Properties from '../../../components/user/search/Properties';
 import { useProperty } from '../../../contexts/PropertyContext';
-import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import FilterBottomSheet from '../../../components/user/FilterBottomSheet';
 
 const Search = () => {
     const [searchQuery, setSearchQuery] = useState("");
@@ -16,8 +17,10 @@ const Search = () => {
     const [maxPrice, setMaxPrice] = useState("");
 
     const [userId, setUserId] = useState("");
+    const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+    const [page, setPage] = useState(1);
 
-    const { propertyLoading, properties, getProperties, searchProperty, updateProperty, propertyMessage, setPropertyMessage } = useProperty();
+    const { propertyLoading, properties, getProperties, searchProperty, updateProperty, propertyMessage, setPropertyMessage, currentPage, totalPages } = useProperty();
 
     const getUserId = async () => {
         return await AsyncStorage.getItem('userId');
@@ -33,7 +36,7 @@ const Search = () => {
     }, []);
 
     const fetchProperties = async () => {
-        await getProperties();
+        await getProperties(page);
     };
 
     const fetchSearchedProperties = async (
@@ -90,12 +93,12 @@ const Search = () => {
                         value={searchQuery}
                         onChangeText={(text) => setSearchQuery(text)}
                     />
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         className="bg-chartreuse items-center justify-center w-[40px] h-[40px] rounded-lg ml-2"
-                        onPress={() => {}}
+                        onPress={() => setIsBottomSheetOpen(true)}
                     >
                         <Ionicons name="filter" size={20} color="#212A2B" />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
 
                 {propertyLoading ? (
@@ -109,11 +112,30 @@ const Search = () => {
                         propertyMessage={propertyMessage}
                         setPropertyMessage={setPropertyMessage}
                         userId={userId}
+                        setPage={setPage}
+                        currentPage={currentPage}
+                        totalPages={totalPages}
                     />
                 )}
 
                 <View className="mt-[90px]" />
             </ScrollView>
+
+            {isBottomSheetOpen && <FilterBottomSheet
+                isBottomSheetOpen={isBottomSheetOpen}
+                setIsBottomSheetOpen={setIsBottomSheetOpen}
+                country={country}
+                setCountry={setCountry}
+                category={category}
+                setCategory={setCategory}
+                status={status}
+                setStatus={setStatus}
+                minPrice={minPrice}
+                setMinPrice={setMinPrice}
+                maxPrice={maxPrice}
+                setMaxPrice={setMaxPrice}
+                fetchSearchedProperties={fetchSearchedProperties}
+            />}
         </SafeAreaView>
     );
 };

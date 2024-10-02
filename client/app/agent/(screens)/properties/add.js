@@ -24,6 +24,7 @@ const AddProperty = () => {
     const [price, setPrice] = useState('');
     const [currency, setCurrency] = useState('');
     const [location, setLocation] = useState('');
+    const [country, setCountry] = useState('');
     const [propertyImages, setPropertyImages] = useState(Array(5).fill(null));
     const [video, setVideo] = useState('');
     const [document, setDocument] = useState('');
@@ -89,7 +90,7 @@ const AddProperty = () => {
         if (propertyImages.filter(Boolean).length === 0 || video === '' || document === '') {
             return setPropertyError('Select the necessary files');
         }
-        await uploadProperty(title, description, category, status, price, currency, location, propertyImages, video, document);
+        await uploadProperty(title, description, category, status, price, currency, location, country, propertyImages, video, document);
     };
 
     const uploadFileToCloudinary = async (file, type, slot) => {
@@ -283,6 +284,14 @@ const AddProperty = () => {
                             placeholderTextColor="#FFFFFF"
                             value={location}
                             onChangeText={(text) => setLocation(text)}
+                            className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
+                        />
+
+                        <TextInput
+                            placeholder="Country"
+                            placeholderTextColor="#FFFFFF"
+                            value={country}
+                            onChangeText={(text) => setCountry(text)}
                             className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
                         />
 

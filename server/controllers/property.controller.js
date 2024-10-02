@@ -1,10 +1,11 @@
 const { isValidObjectId } = require("mongoose");
+const mongoose = require("mongoose");
 const User = require("../models/user.model");
 const Property = require("../models/property.model");
 
 const uploadProperty = async (req, res) => {
     try {
-        const { title, description, category, status, price, currency, location, images, video, document } = req.body;
+        const { title, description, category, status, price, currency, location, country, images, video, document } = req.body;
 
         const agentId = req.user._id;
 
@@ -28,6 +29,7 @@ const uploadProperty = async (req, res) => {
             price,
             currency,
             location,
+            country,
             images,
             video,
             agentId,
@@ -49,12 +51,14 @@ const getProperties = async (req, res) => {
     try {
         const id = req.user._id;
 
+        const page = parseInt(req.query.page) || 1;
+        const skip = (page - 1) * 10;
+
         const agentProperties = await Property.find({ agentId: id }).sort({ createdAt: -1 });
 
-        let properties = await Property.find();
-        let savedProperties = await Property.find({
-            savedBy: { $in: [id] }
-        });
+        const totalPropertiesCount = await Property.countDocuments();
+
+        const properties = await Property.find().skip(skip).limit(10);
         let rentProperties = await Property.find({ status: 'Rent' });
         let leaseProperties = await Property.find({ status: 'Lease' });
         let saleProperties = await Property.find({ status: 'Sale' });
@@ -67,8 +71,6 @@ const getProperties = async (req, res) => {
 
         const shuffleArray = (array) => array.sort(() => Math.random() - 0.5);
 
-        properties = shuffleArray(properties);
-        savedProperties = shuffleArray(savedProperties);
         rentProperties = shuffleArray(rentProperties);
         leaseProperties = shuffleArray(leaseProperties);
         saleProperties = shuffleArray(saleProperties);
@@ -89,7 +91,6 @@ const getProperties = async (req, res) => {
             propertiesForLease: leaseProperties.length,
             propertiesForSale: saleProperties.length,
             properties,
-            savedProperties,
             rentProperties,
             leaseProperties,
             saleProperties,
@@ -98,7 +99,9 @@ const getProperties = async (req, res) => {
             shopSpaces,
             officeBuildings,
             industrialBuildings,
-            newListings
+            newListings,
+            currentPage: page,
+            totalPages: Math.ceil(totalPropertiesCount / 10),
         });
     } catch (error) {
         console.log(error);
@@ -174,7 +177,6 @@ const searchProperty = async (req, res) => {
 
         if (!country || !category || !status || !minPrice || !maxPrice) {
             const properties = await Property.find({ title: { $regex: title, $options: 'i' } });
-
             return res.status(200).json({
                 count: properties.length,
                 properties,
@@ -195,13 +197,16 @@ const searchProperty = async (req, res) => {
             query.category = category;
         }
 
-        if (minPrice || maxPrice) {
+        const minPriceNumber = parseFloat(minPrice);
+        const maxPriceNumber = parseFloat(maxPrice);
+
+        if (!isNaN(minPriceNumber) || !isNaN(maxPriceNumber)) {
             query.price = {};
-            if (minPrice) {
-                query.price.$gte = minPrice;
+            if (!isNaN(minPriceNumber)) {
+                query.price.$gte = minPriceNumber;
             }
-            if (maxPrice) {
-                query.price.$lte = maxPrice;
+            if (!isNaN(maxPriceNumber)) {
+                query.price.$lte = maxPriceNumber;
             }
         }
 
@@ -215,12 +220,12 @@ const searchProperty = async (req, res) => {
             count: properties.length,
             properties,
         });
-
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'An error occurred' });
     }
-}
+};
+
 
 const deleteProperty = async (req, res) => {
     try {
