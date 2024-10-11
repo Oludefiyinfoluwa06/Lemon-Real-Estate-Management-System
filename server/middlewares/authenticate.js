@@ -12,8 +12,7 @@ const authenticate = async (req, res, next) => {
 
     jwt.verify(tokenValue, process.env.JWT_SECRET, async (error, decodedToken) => {
         if (error) {
-            console.log(error);
-            return res.status(400).json({ message: 'Please, authenticate' });
+            return res.status(400).json({ message: 'Please, authenticate', error });
         }
 
         const user = await User.findById(decodedToken.id);

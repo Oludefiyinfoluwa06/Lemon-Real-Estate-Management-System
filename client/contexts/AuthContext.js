@@ -3,6 +3,7 @@ import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import { config } from '../config';
+import { getToken } from '../services/getToken';
 
 import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from '@env';
 
@@ -79,7 +80,7 @@ export const AuthProvider = ({ children }) => {
         setAuthLoading(true);
 
         try {
-            const token = await AsyncStorage.getItem('token');
+            const token = await getToken();
 
             if (!token) {
                 return router.replace('/login');
@@ -130,7 +131,7 @@ export const AuthProvider = ({ children }) => {
 
     const getUser = async () => {
         try {
-            const token = await AsyncStorage.getItem('token');
+            const token = await getToken();
 
             if (!token) {
                 return router.replace('/login');
@@ -144,7 +145,6 @@ export const AuthProvider = ({ children }) => {
 
             setUser(response.data.user);
         } catch (error) {
-            console.log(error.response.data.message);
             setAuthError(error.response.data.message);
 
             setTimeout(() => {
@@ -157,7 +157,7 @@ export const AuthProvider = ({ children }) => {
         setAuthLoading(true);
 
         try {
-            const token = await AsyncStorage.getItem('token');
+            const token = await getToken();
 
             if (!token) {
                 return router.replace('/login');

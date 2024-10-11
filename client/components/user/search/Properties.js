@@ -72,7 +72,7 @@ const Properties = ({
                     disabled={currentPage === 1}
                 />
 
-                <Text className="text-sm font-rregular mx-3 text-white">Page {currentPage} out of {totalPages} page(s)</Text>
+                <Text className="text-sm font-rregular mx-3 text-white">Page {currentPage} of {totalPages}</Text>
 
                 <Button
                     text='Next'

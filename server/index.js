@@ -6,6 +6,7 @@ const methodOverride = require('method-override');
 
 const usersRoute = require('./routes/user.route');
 const propertiesRoute = require('./routes/property.route');
+const reviewsRoute = require('./routes/review.route');
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -23,6 +24,7 @@ mongoose.connect(process.env.dbURI)
 
 app.use('/api/user', usersRoute);
 app.use('/api/property', propertiesRoute);
+app.use('/api/reviews', reviewsRoute);
 
 module.exports = app;
 

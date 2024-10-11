@@ -130,7 +130,7 @@ const PropertyDetails = () => {
                 )}
 
                 {activeTab === 'review' && (
-                    <Review />
+                    <Review propertyId={property?._id} />
                 )}
             </ScrollView>
         </SafeAreaView>

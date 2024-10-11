@@ -3,6 +3,7 @@ import axios from "axios";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { config } from "../config";
 import { useRouter } from "expo-router";
+import { getToken } from "../services/getToken";
 
 const PropertyContext = createContext();
 
@@ -36,7 +37,7 @@ export const PropertyProvider = ({ children }) => {
         setPropertyLoading(true);
 
         try {
-            const token = await AsyncStorage.getItem('token');
+            const token = await getToken();
 
             await axios.post(`${config.API_BASE_URL}/api/property/upload`, { title, description, category, status, price, currency, location, images, video, document }, {
                 headers: {
@@ -52,7 +53,10 @@ export const PropertyProvider = ({ children }) => {
                 router.replace('/agent/properties');
             }, 3000);
         } catch (error) {
-            console.log(error.response.data);
+            if (error.response.data.message === "Please, authenticate") {
+                await AsyncStorage.removeItem('token');
+                router.replace('/login');
+            }
             setPropertyError(error.response.data.message);
         } finally {
             setPropertyLoading(false);
@@ -63,7 +67,7 @@ export const PropertyProvider = ({ children }) => {
         setPropertyLoading(true);
 
         try {
-            const token = await AsyncStorage.getItem('token');
+            const token = await getToken();
             const userId = await AsyncStorage.getItem('userId');
 
             const response = await axios.get(`${config.API_BASE_URL}/api/property/all?page=${page}`, {
@@ -93,7 +97,10 @@ export const PropertyProvider = ({ children }) => {
             setCurrentPage(response.data.currentPage);
             setTotalPages(response.data.totalPages);
         } catch (error) {
-            console.log(error.response.data);
+            if (error.response.data.message === "Please, authenticate") {
+                await AsyncStorage.removeItem('token');
+                router.replace('/login');
+            }
         } finally {
             setPropertyLoading(false);
         }
@@ -103,7 +110,7 @@ export const PropertyProvider = ({ children }) => {
         setPropertyLoading(true);
 
         try {
-            const token = await AsyncStorage.getItem('token');
+            const token = await getToken();
 
             const response = await axios.get(`${config.API_BASE_URL}/api/property/${id}`, {
                 headers: {
@@ -113,7 +120,10 @@ export const PropertyProvider = ({ children }) => {
 
             setProperty(response.data.property);
         } catch (error) {
-            console.log(error.response.data);
+            if (error.response.data.message === "Please, authenticate") {
+                await AsyncStorage.removeItem('token');
+                router.replace('/login');
+            }
         } finally {
             setPropertyLoading(false);
         }
@@ -123,7 +133,7 @@ export const PropertyProvider = ({ children }) => {
         setPropertyLoading(true);
 
         try {
-            const token = await AsyncStorage.getItem('token');
+            const token = await getToken();
 
             const response = await axios.put(`${config.API_BASE_URL}/api/property/${id}`, { title, description, category, status, price, currency, location, images, video, document }, {
                 headers: {
@@ -141,7 +151,10 @@ export const PropertyProvider = ({ children }) => {
                 }
             }, 3000);
         } catch (error) {
-            console.log(error.response.data);
+            if (error.response.data.message === "Please, authenticate") {
+                await AsyncStorage.removeItem('token');
+                router.replace('/login');
+            }
         } finally {
             setPropertyLoading(false);
         }
@@ -151,7 +164,7 @@ export const PropertyProvider = ({ children }) => {
         setPropertyLoading(true);
 
         try {
-            const token = await AsyncStorage.getItem('token');
+            const token = await getToken();
 
             const response = await axios.get(`${config.API_BASE_URL}/api/property?title=${title}&country=${country}&category=${category}&status=${status}&minPrice=${minPrice}&maxPrice=${maxPrice}`, {
                 headers: {
@@ -161,7 +174,10 @@ export const PropertyProvider = ({ children }) => {
 
             setProperties(response.data.properties);
         } catch (error) {
-            console.log(error.response.data);
+            if (error.response.data.message === "Please, authenticate") {
+                await AsyncStorage.removeItem('token');
+                router.replace('/login');
+            }
         } finally {
             setPropertyLoading(false);
         }
@@ -171,7 +187,7 @@ export const PropertyProvider = ({ children }) => {
         setPropertyLoading(true);
 
         try {
-            const token = await AsyncStorage.getItem('token');
+            const token = await getToken();
 
             const response = await axios.delete(`${config.API_BASE_URL}/api/property/${id}`, {
                 headers: {
@@ -181,7 +197,10 @@ export const PropertyProvider = ({ children }) => {
 
             console.log(response.data);
         } catch (error) {
-            console.log(error.response.data);
+            if (error.response.data.message === "Please, authenticate") {
+                await AsyncStorage.removeItem('token');
+                router.replace('/login');
+            }
         } finally {
             setPropertyLoading(false);
         }

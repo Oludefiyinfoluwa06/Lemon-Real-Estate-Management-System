@@ -47,7 +47,7 @@ const About = ({
                             )}
                         </View>
                         <View>
-                            <Text className="text-white font-rbold text-xl">{proprietorName}</Text>
+                            <Text className="text-white font-rbold text-lg">{proprietorName}</Text>
                             <Text className="text-white font-rregular text-md">{companyName}</Text>
                         </View>
                     </View>

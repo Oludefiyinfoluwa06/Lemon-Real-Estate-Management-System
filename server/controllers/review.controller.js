@@ -43,7 +43,8 @@ const createReview = async (req, res) => {
 
 const getReviews = async (req, res) => {
     try {
-        const reviews = await Review.find();
+        const { propertyId } = req.params;
+        const reviews = await Review.find({ propertyId });
 
         if (!reviews) {
             return res.status(404).json({ message: 'No reviews available' });
@@ -56,52 +57,7 @@ const getReviews = async (req, res) => {
     }
 }
 
-const updateReview = async (req, res) => {
-    try {
-        const reviewId = req.params.id;
-        const { text } = req.body;
-
-        if (!isValidObjectId(reviewId)) {
-            return res.status(400).json({ message: 'Invalid ID' });
-        }
-
-        const review = await Review.findByIdAndUpdate(reviewId, { text }, { new: true });
-
-        if (!review) {
-            return res.status(400).json({ message: 'Could not update review, try again' });
-        }
-
-        return res.status(200).json({ message: 'Review updated successfully', review });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: 'An error occurred' });
-    }
-}
-
-const deleteReview = async (req, res) => {
-    try {
-        const reviewId = req.params.id;
-
-        if (!isValidObjectId(reviewId)) {
-            return res.status(400).json({ message: 'Invalid ID' });
-        }
-
-        const review = await Review.findByIdAndDelete(reviewId);
-
-        if (!review) {
-            return res.status(400).json({ message: 'Could not delete review, try again' });
-        }
-
-        return res.status(200).json({ message: 'Review deleted successfully', review });
-    } catch (error) {
-        console.log(error);
-        return res.status(500).json({ message: 'An error occurred' });
-    }
-}
-
 module.exports = {
     createReview,
     getReviews,
-    updateReview,
-    deleteReview,
 }

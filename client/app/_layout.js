@@ -4,6 +4,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useFonts } from 'expo-font';
 import { AuthProvider } from '../contexts/AuthContext';
 import { PropertyProvider } from '../contexts/PropertyContext';
+import { ReviewProvider } from '../contexts/ReviewContext';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -33,28 +34,30 @@ const RootLayout = () => {
     return (
         <AuthProvider>
             <PropertyProvider>
-                <Stack>
-                    <Stack.Screen
-                        name='index'
-                        options={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                        name='(auth)'
-                        options={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                        name='user'
-                        options={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                        name='agent'
-                        options={{ headerShown: false }}
-                    />
-                    <Stack.Screen
-                        name='profile-picture-upload'
-                        options={{ headerShown: false }}
-                    />
-                </Stack>
+                <ReviewProvider>
+                    <Stack>
+                        <Stack.Screen
+                            name='index'
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name='(auth)'
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name='user'
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name='agent'
+                            options={{ headerShown: false }}
+                        />
+                        <Stack.Screen
+                            name='profile-picture-upload'
+                            options={{ headerShown: false }}
+                        />
+                    </Stack>
+                </ReviewProvider>
             </PropertyProvider>
         </AuthProvider>
     );
