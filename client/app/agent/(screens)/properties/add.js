@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, Image, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, ScrollView, Image, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
@@ -24,6 +24,7 @@ const AddProperty = () => {
     const [price, setPrice] = useState('');
     const [currency, setCurrency] = useState('');
     const [location, setLocation] = useState('');
+    const [country, setCountry] = useState('');
     const [propertyImages, setPropertyImages] = useState(Array(5).fill(null));
     const [video, setVideo] = useState('');
     const [document, setDocument] = useState('');
@@ -33,10 +34,16 @@ const AddProperty = () => {
     const router = useRouter();
 
     const categories = [
-        { name: 'Land' }, { name: 'Houses' }, { name: 'Shop Spaces' }, { name: 'Office Building' }, { name: 'Industrial Building' }
+        { name: 'Land' },
+        { name: 'Houses' },
+        { name: 'Shop Spaces' },
+        { name: 'Office Building' },
+        { name: 'Industrial Building' }
     ];
     const statusItems = [
-        { name: 'Rent' }, { name: 'Lease' }, { name: 'Sale' }
+        { name: 'Rent' },
+        { name: 'Lease' },
+        { name: 'Sale' }
     ];
 
     const { uploadProperty, propertyError, propertyMessage, setPropertyError, setPropertyMessage, propertyLoading } = useProperty();
@@ -83,7 +90,7 @@ const AddProperty = () => {
         if (propertyImages.filter(Boolean).length === 0 || video === '' || document === '') {
             return setPropertyError('Select the necessary files');
         }
-        await uploadProperty(title, description, category, status, price, currency, location, propertyImages, video, document);
+        await uploadProperty(title, description, category, status, price, currency, location, country, propertyImages, video, document);
     };
 
     const uploadFileToCloudinary = async (file, type, slot) => {
@@ -258,6 +265,12 @@ const AddProperty = () => {
                             className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
                             keyboardType="numeric"
                         />
+                        <View className="flex-row items-center justify-start gap-3 mb-4">
+                            <Ionicons name="information-circle-outline" size={18} color={"#BBCC13"} />
+                            <Text className="font-rregular text-frenchGray-light text-[13px] leading-tight flex-shrink">
+                                Please note, rental and lease property prices are quoted per annum (yearly).
+                            </Text>
+                        </View>
 
                         <CustomSelect
                             placeholder="Choose a currency"
@@ -271,6 +284,14 @@ const AddProperty = () => {
                             placeholderTextColor="#FFFFFF"
                             value={location}
                             onChangeText={(text) => setLocation(text)}
+                            className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
+                        />
+
+                        <TextInput
+                            placeholder="Country"
+                            placeholderTextColor="#FFFFFF"
+                            value={country}
+                            onChangeText={(text) => setCountry(text)}
                             className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
                         />
 
@@ -298,7 +319,13 @@ const AddProperty = () => {
                                     {img ? (
                                         <Image source={{ uri: img }} className="h-full w-full rounded" />
                                     ) : (
-                                        <Ionicons name="image" size={40} color="#FFFFFF" />
+                                        <View>
+                                            {uploading ? (
+                                                <ActivityIndicator size={"large"} color={"#BBCC13"} />
+                                            ) : (
+                                                <Ionicons name="image" size={40} color="#FFFFFF" />
+                                            )}
+                                        </View>
                                     )}
                                 </TouchableOpacity>
                             ))}
@@ -317,7 +344,11 @@ const AddProperty = () => {
                                 className="h-[150px] w-full rounded bg-frenchGray-dark items-center justify-center mb-4"
                                 onPress={handleVideoUpload}
                             >
-                                <Ionicons name="videocam" size={40} color="#FFFFFF" />
+                                {uploading ? (
+                                    <ActivityIndicator size={"large"} color={"#BBCC13"} />
+                                ) : (
+                                    <Ionicons name="videocam" size={40} color="#FFFFFF" />
+                                )}
                             </TouchableOpacity>
                         )}
 
@@ -334,7 +365,11 @@ const AddProperty = () => {
                                 className="h-[150px] w-full rounded bg-frenchGray-dark items-center justify-center mb-4"
                                 onPress={handleDocumentUpload}
                             >
-                                <Ionicons name="document-text" size={40} color="#FFFFFF" />
+                                {uploading ? (
+                                    <ActivityIndicator size={"large"} color={"#BBCC13"} />
+                                ) : (
+                                    <Ionicons name="document-text" size={40} color="#FFFFFF" />
+                                )}
                             </TouchableOpacity>
                         )}
 
@@ -342,7 +377,7 @@ const AddProperty = () => {
                             <Button text="Back" bg={false} onPress={handlePreviousStep} />
                             <Button
                                 type="user"
-                                text="Add Property"
+                                text={propertyLoading ? "Loading..." : "Add Property"}
                                 bg={true}
                                 onPress={handleAddProperty}
                                 loading={uploading || propertyLoading}

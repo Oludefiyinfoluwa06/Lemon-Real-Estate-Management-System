@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { formatPrice } from '../../../services/formatPrice';
 
 const Listing = ({ properties }) => {
     return (
@@ -23,7 +24,7 @@ const Listing = ({ properties }) => {
                         {property.description.substring(0, 100)}...
                     </Text>
                     <Text className="text-white font-rbold text-xl">
-                        {property?.currency.split(' - ')[1]}{property.price}
+                        {property?.currency.split(' - ')[1]} {formatPrice(property.price)}
                     </Text>
                 </TouchableOpacity>
             ))}

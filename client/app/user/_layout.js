@@ -8,6 +8,10 @@ const UserLayout = () => {
                 options={{ headerShown: false }}
             />
             <Stack.Screen
+                name='(screens)'
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
                 name='profile'
                 options={{ headerShown: false }}
             />

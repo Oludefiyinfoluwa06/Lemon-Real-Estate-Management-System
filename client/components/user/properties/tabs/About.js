@@ -1,18 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
-import { View, Text, TouchableOpacity } from 'react-native';
-import * as Clipboard from 'expo-clipboard';
-import ErrorOrMessageModal from '../../common/ErrorOrMessageModal';
+import { View, Text, TouchableOpacity, Linking, Image } from 'react-native';
 
 const About = ({
     description,
     proprietorName,
     proprietorContact,
     companyName,
+    proprietorProfilePic,
     document,
-    message,
-    setMessage
 }) => {
     return (
         <View className="p-4">
@@ -39,10 +36,18 @@ const About = ({
                 <View className="flex-row items-center justify-between mt-2">
                     <View className="flex-row items-center justify-start gap-4">
                         <View>
-                            <Ionicons name='person-outline' size={30} color={"#BBCC13"} />
+                            {proprietorProfilePic ? (
+                                <Image
+                                    source={{ uri: proprietorProfilePic }}
+                                    style={{ width: 45, height: 45, borderRadius: 36 }}
+                                    resizeMode='cover'
+                                />
+                            ) : (
+                                <Ionicons name = 'person-outline' size = { 30 } color = { "#BBCC13" } />
+                            )}
                         </View>
                         <View>
-                            <Text className="text-white font-rbold text-xl">{proprietorName}</Text>
+                            <Text className="text-white font-rbold text-lg">{proprietorName}</Text>
                             <Text className="text-white font-rregular text-md">{companyName}</Text>
                         </View>
                     </View>
@@ -58,12 +63,9 @@ const About = ({
                         <TouchableOpacity
                             className="rounded-full p-3 items-center justify-center bg-frenchGray-dark"
                             onPress={() => {
-                                Clipboard.setStringAsync(proprietorContact);
-                                setMessage('Phone number copied successfully');
-
-                                setTimeout(() => {
-                                    setMessage('');
-                                }, 3000);
+                                const phoneNumber = `tel:${proprietorContact}`;
+                                Linking.openURL(phoneNumber)
+                                    .catch((err) => console.log('Error opening phone dialer:', err));
                             }}
                         >
                             <Ionicons name='call-outline' size={20} color={"#BBCC13"} />
@@ -71,13 +73,6 @@ const About = ({
                     </View>
                 </View>
             </View>
-
-            <ErrorOrMessageModal
-                visible={message !== ""}
-                modalType="success"
-                onClose={message === ""}
-                text={message}
-            />
         </View>
     );
 }

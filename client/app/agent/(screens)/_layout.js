@@ -16,7 +16,7 @@ const ScreenLayout = () => {
                 options={{ headerShown: false }}
             />
             <Stack.Screen
-                name='properties/update/[id]'
+                name='chat/[id]'
                 options={{ headerShown: false }}
             />
         </Stack>

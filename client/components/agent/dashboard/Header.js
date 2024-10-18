@@ -40,9 +40,9 @@ const Header = () => {
 
             <TouchableOpacity
                 className='bg-frenchGray-dark items-center justify-center w-[50px] h-[50px] rounded-full'
-                onPress={() => router.push('/agent/notifications')}
+                onPress={() => router.push('/agent/properties')}
             >
-                <Ionicons name='notifications-outline' size={23} color={'#FFFFFF'} />
+                <Ionicons name='key-outline' size={23} color={'#FFFFFF'} />
             </TouchableOpacity>
         </View>
     );

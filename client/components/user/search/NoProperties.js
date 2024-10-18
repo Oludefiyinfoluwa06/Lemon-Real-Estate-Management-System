@@ -1,11 +1,11 @@
 import { View, Text } from 'react-native';
 
-const Review = () => {
+const NoProperties = () => {
     return (
         <View>
-            <Text>Review</Text>
+            <Text>NoProperties</Text>
         </View>
     );
 }
 
-export default Review;
+export default NoProperties;

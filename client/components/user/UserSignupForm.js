@@ -11,6 +11,8 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
     const [selectedCountry, setSelectedCountry] = useState({});
     const [showPassword, setShowPassword] = useState(false);
 
+    const [selectedProperties, setSelectedProperties] = useState([]);
+
     const { authLoading, setAuthError, register } = useAuth();
 
     useEffect(() => {
@@ -27,8 +29,6 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
     }, []);
 
     const propertyOptions = [ 'Land', 'Houses', 'Shop Spaces', 'Office Buildings', 'Industrial Buildings' ];
-
-    const [selectedProperties, setSelectedProperties] = useState([]);
 
     const togglePropertySelection = async (property) => {
         setSelectedProperties((prevSelected) => {
@@ -88,8 +88,11 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
     const handleCountryChange = (country) => {
         setSelectedCountry(country);
         const countryDetails = countries.find(c => c.name.common === country);
-        const countryCode = countryDetails.idd.root + (countryDetails.idd.suffixes ? countryDetails.idd.suffixes[0] : '');
-        setUserDetails({ ...userDetails, country: countryDetails.name.common, countryCode });
+        const countryCode = countryDetails?.idd?.root
+            ? countryDetails.idd.root + (countryDetails.idd.suffixes ? countryDetails.idd.suffixes[0] : '')
+            : '';
+
+        setUserDetails({ ...userDetails, country: countryDetails?.name.common, countryCode: countryCode || '' });
     };
 
     const handleSignup = async () => {
@@ -182,7 +185,7 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
                         >
                             <Picker.Item key='select' label='Select country' value='' />
                             {countries.map((country) => (
-                                <Picker.Item key={country.cca2} label={country.name.common} value={country.name.common} />
+                                <Picker.Item key={country?.cca2} label={country?.name.common} value={country?.name.common} />
                             ))}
                         </Picker>
                     </View>
@@ -196,7 +199,7 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
                             className="bg-frenchGray-light text-white p-2 ml-2 rounded-lg flex-1 font-regular"
                             placeholderTextColor="#AFAFAF"
                             value={userDetails.mobileNumber}
-                            onChangeText={(text) => setUserDetails({ ...userDetails, mobileNumber: `${userDetails.countryCode}${text}` })}
+                            onChangeText={(text) => setUserDetails({ ...userDetails, mobileNumber: text })}
                         />
                     </View>
 

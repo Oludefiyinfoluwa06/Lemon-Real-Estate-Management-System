@@ -52,7 +52,7 @@ const register = async (req, res) => {
         const userId = user._id;
         const accessToken = createAccessToken(userId);
 
-        return res.status(201).json({ message: 'Registration successful', accessToken, role: user.role });
+        return res.status(201).json({ message: 'Registration successful', accessToken, role: user.role, id: userId });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'An error occurred' });
@@ -78,7 +78,7 @@ const login = async (req, res) => {
         const userId = user._id;
         const accessToken = createAccessToken(userId);
 
-        return res.status(200).json({ message: 'Login successful', accessToken, role: user.role });
+        return res.status(200).json({ message: 'Login successful', accessToken, role: user.role, id: userId });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: 'An error occurred' });

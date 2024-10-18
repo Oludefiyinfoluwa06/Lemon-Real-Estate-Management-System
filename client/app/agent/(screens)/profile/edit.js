@@ -104,7 +104,7 @@ const EditProfile = () => {
                     >
                         <Ionicons name='chevron-back-outline' size={23} color={'#FFFFFF'} />
                     </TouchableOpacity>
-                    <Text className="text-white font-rbold text-2xl">Edit Profile</Text>
+                    <Text className="text-white font-rbold text-2xl">My Account</Text>
                 </View>
 
                 <View className="mt-4">
@@ -134,38 +134,34 @@ const EditProfile = () => {
                         )}
                     </View>
 
-                    {user?.firstName && user?.lastName ? (
-                        <>
-                            <View className='relative w-full'>
-                                <TextInput
-                                    placeholder="First Name"
-                                    className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular pl-[35px]"
-                                    placeholderTextColor="#AFAFAF"
-                                    value={user?.firstName}
-                                    onChangeText={(text) => setUser({ ...user, firstName: text })}
-                                />
-                                <TouchableOpacity
-                                    className='absolute top-[10px] left-[8px]'
-                                >
-                                    <Ionicons name="person-outline" size={20} color={'#AFAFAF'} />
-                                </TouchableOpacity>
-                            </View>
-                            <View className='relative w-full'>
-                                <TextInput
-                                    placeholder="Last Name"
-                                    className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular pl-[35px]"
-                                    placeholderTextColor="#AFAFAF"
-                                    value={user?.lastName}
-                                    onChangeText={(text) => setUser({ ...user, lastName: text })}
-                                />
-                                <TouchableOpacity
-                                    className='absolute top-[10px] left-[8px]'
-                                >
-                                    <Ionicons name="person-outline" size={20} color={'#AFAFAF'} />
-                                </TouchableOpacity>
-                            </View>
-                        </>
-                    ) : null}
+                    <View className='relative w-full'>
+                        <TextInput
+                            placeholder="First Name"
+                            className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular pl-[35px]"
+                            placeholderTextColor="#AFAFAF"
+                            value={user?.firstName}
+                            onChangeText={(text) => setUser({ ...user, firstName: text })}
+                        />
+                        <TouchableOpacity
+                            className='absolute top-[10px] left-[8px]'
+                        >
+                            <Ionicons name="person-outline" size={20} color={'#AFAFAF'} />
+                        </TouchableOpacity>
+                    </View>
+                    <View className='relative w-full'>
+                        <TextInput
+                            placeholder="Last Name"
+                            className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular pl-[35px]"
+                            placeholderTextColor="#AFAFAF"
+                            value={user?.lastName}
+                            onChangeText={(text) => setUser({ ...user, lastName: text })}
+                        />
+                        <TouchableOpacity
+                            className='absolute top-[10px] left-[8px]'
+                        >
+                            <Ionicons name="person-outline" size={20} color={'#AFAFAF'} />
+                        </TouchableOpacity>
+                    </View>
 
                     <View className='relative w-full'>
                         <TextInput

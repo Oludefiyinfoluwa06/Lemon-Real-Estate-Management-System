@@ -5,16 +5,20 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router } from 'expo-router';
 import * as NavigationBar from 'expo-navigation-bar';
 import { images } from '../assets/constants';
+import { getToken } from '../services/getToken';
 
 const SplashScreen = () => {
     NavigationBar.setBackgroundColorAsync("#212A2B");
 
     useEffect(() => {
         const checkIsLoggedIn = async () => {
-            const token = await AsyncStorage.getItem('token');
+            const token = await getToken();
+            const role = await AsyncStorage.getItem('role');
 
             setTimeout(() => {
-                if (token) return router.replace('/agent/dashboard');
+                if (token && role) {
+                    return role === 'buyer' ? router.replace('/user/home') : router.replace('/agent/dashboard');
+                }
 
                 return router.replace('/login');
             }, 3000);

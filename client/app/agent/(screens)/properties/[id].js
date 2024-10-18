@@ -2,13 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
 import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Video } from 'expo-av';
-import * as WebBrowser from 'expo-web-browser';
 import { useProperty } from '../../../../contexts/PropertyContext';
 import { Ionicons } from '@expo/vector-icons';
 import About from '../../../../components/agent/properties/tabs/About';
 import Gallery from '../../../../components/agent/properties/tabs/Gallery';
 import Review from '../../../../components/agent/properties/tabs/Review';
+import { formatPrice } from '../../../../services/formatPrice';
 
 const PropertyDetails = () => {
     const params = useLocalSearchParams();
@@ -41,13 +40,13 @@ const PropertyDetails = () => {
                         resizeMode="cover"
                     />}
                     <TouchableOpacity
-                        className="absolute top-4 left-4 bg-black bg-opacity-50 rounded-full p-2"
+                        className="absolute top-4 left-4 bg-frenchGray-light rounded-full p-2"
                         onPress={() => router.back()}
                     >
                         <Ionicons name='chevron-back-outline' size={28} color="#FFFFFF" />
                     </TouchableOpacity>
 
-                    <View className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 p-4 flex-row justify-between items-center">
+                    <View className="absolute bottom-0 left-0 right-0 bg-darkUmber-light p-4 flex-row justify-between items-center">
                         <View className="flex-1 items-start">
                             <Text className="text-white text-xl font-rbold">{property?.title}</Text>
                             <View className="flex-row items-center">
@@ -58,7 +57,7 @@ const PropertyDetails = () => {
 
                         <View className="items-end">
                             <Text className="text-chartreuse text-xl font-rmedium">
-                                {property?.currency ? property?.currency.split(' - ')[1] : ''} {property?.price}
+                                {property?.currency ? property?.currency.split(' - ')[1] : ''} {formatPrice(property?.price)}
                                 {property?.status === 'Sale' ? '' : '/year'}
                             </Text>
                             <View className="bg-chartreuse px-3 py-1 rounded-full mt-2">
@@ -104,7 +103,7 @@ const PropertyDetails = () => {
                 )}
 
                 {activeTab === 'review' && (
-                    <Review />
+                    <Review propertyId={params.id} />
                 )}
             </ScrollView>
         </SafeAreaView>
