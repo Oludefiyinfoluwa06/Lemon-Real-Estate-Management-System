@@ -9,7 +9,7 @@ const reviewSchema = new mongoose.Schema({
         required: true,
         ref: 'Property'
     },
-    rating: { type: Number, required: true },
+    rating: { type: Number, default: null },
     replies: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Reply' }]
 }, { timestamps: true });
 

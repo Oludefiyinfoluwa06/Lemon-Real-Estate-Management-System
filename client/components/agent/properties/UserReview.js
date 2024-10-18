@@ -20,10 +20,10 @@ const UserReview = ({ review }) => {
                         </Text>
                     </View>
                 </View>
-                <View className="flex-row items-center">
+                {rating !== null && rating > 0 && <View className="flex-row items-center">
                     <Ionicons name="star" size={16} color="#BBCC13" />
                     <Text className="ml-1 font-rregular text-chartreuse">{rating.toFixed(1)}</Text>
-                </View>
+                </View>}
             </View>
 
             <Text className="font-rregular text-white mt-3">{text}</Text>

@@ -4,6 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useProperty } from '../../contexts/PropertyContext';
 import NoProperties from './NoProperties';
 import { formatPrice } from '../../services/formatPrice';
+import { router } from 'expo-router';
 
 const Status = () => {
     const status = ['Rent', 'Lease', 'Sale'];
@@ -67,9 +68,10 @@ const Status = () => {
                     className='mt-[20px]'
                 >
                     {statusProperties.map(property => (
-                        <View
+                        <TouchableOpacity
                             className='ml-[20px]'
                             key={property._id}
+                            onPress={() => router.push(`/user/properties/${property._id}`)}
                         >
                             <ImageBackground
                                 source={{ uri: property.images[0] }}
@@ -78,13 +80,13 @@ const Status = () => {
                             >
                                 <View className='bg-transparentBlack absolute top-0 left-0 w-full h-full' />
                                 <View className='absolute bottom-0 left-0 p-2 w-full'>
-                                    <TouchableOpacity>
+                                    <View>
                                         <Text className='text-xl font-rbold text-white'>{property.title}</Text>
                                         <Text className='text-lg font-rbold text-gray-400'>{property.currency ? property.currency.split(' - ')[1] : ''} {formatPrice(property?.price)}</Text>
-                                    </TouchableOpacity>
+                                    </View>
                                 </View>
                             </ImageBackground>
-                        </View>
+                        </TouchableOpacity>
                     ))}
                 </ScrollView>
             )}

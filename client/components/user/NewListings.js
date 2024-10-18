@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ImageBackground } from 'react-native';
 import { useProperty } from '../../contexts/PropertyContext';
 import { formatPrice } from '../../services/formatPrice';
+import { router } from 'expo-router';
 
 const NewListings = () => {
     const { getProperties, newListings } = useProperty();
@@ -26,9 +27,10 @@ const NewListings = () => {
                 className='mt-[20px]'
             >
                 {newListings.map(property => (
-                    <View
+                    <TouchableOpacity
                         className='ml-[20px]'
                         key={property._id}
+                        onPress={() => router.push(`/user/properties/${property._id}`)}
                     >
                         <ImageBackground
                             source={{ uri: property.images[0] }}
@@ -37,13 +39,13 @@ const NewListings = () => {
                         >
                             <View className='bg-transparentBlack absolute top-0 left-0 w-full h-full' />
                             <View className='absolute bottom-0 left-0 p-2 flex-row items-center justify-between w-full'>
-                                <TouchableOpacity>
+                                <View>
                                     <Text className='text-xl font-rbold text-white'>{property.title}</Text>
                                     <Text className='text-lg font-rbold text-gray-400'>{property.currency ? property.currency.split(' - ')[1] : ''} {formatPrice(property?.price)}</Text>
-                                </TouchableOpacity>
+                                </View>
                             </View>
                         </ImageBackground>
-                    </View>
+                    </TouchableOpacity>
                 ))}
             </ScrollView>
         </View>

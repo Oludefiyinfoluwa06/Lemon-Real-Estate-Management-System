@@ -45,12 +45,12 @@ const Header = () => {
                         <Ionicons name='search-outline' size={23} color={'#FFFFFF'} />
                     </TouchableOpacity>
 
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         className='bg-frenchGray-dark items-center justify-center w-[50px] h-[50px] rounded-full'
                         onPress={() => router.push('/user/notifications')}
                     >
                         <Ionicons name='notifications-outline' size={23} color={'#FFFFFF'} />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
             </View>
 

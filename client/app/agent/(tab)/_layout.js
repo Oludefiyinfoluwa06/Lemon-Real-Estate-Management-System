@@ -33,7 +33,7 @@ const TabLayout = () => {
         >
             <Tabs.Screen
                 name='dashboard'
-                options={{ 
+                options={{
                     headerShown: false,
                     tabBarIcon: ({ color, focused }) => (
                         <TabIcon
@@ -47,7 +47,7 @@ const TabLayout = () => {
             />
             <Tabs.Screen
                 name='properties'
-                options={{ 
+                options={{
                     headerShown: false,
                     tabBarIcon: ({ color, focused }) => (
                         <TabIcon
@@ -61,7 +61,7 @@ const TabLayout = () => {
             />
             <Tabs.Screen
                 name='chats'
-                options={{ 
+                options={{
                     headerShown: false,
                     tabBarIcon: ({ color, focused }) => (
                         <TabIcon
@@ -75,7 +75,7 @@ const TabLayout = () => {
             />
             <Tabs.Screen
                 name='wallet'
-                options={{ 
+                options={{
                     headerShown: false,
                     tabBarIcon: ({ color, focused }) => (
                         <TabIcon
