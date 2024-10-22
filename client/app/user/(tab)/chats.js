@@ -1,50 +1,60 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, Text, TouchableOpacity, FlatList, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
+import { useChat } from '../../../contexts/ChatContext';
+import EmptyChatList from '../../../components/common/EmptyChatList';
+import { useAuth } from '../../../contexts/AuthContext';
 
 const Chats = () => {
-    const chatList = [
-        {
-            _id: '1',
-            name: 'John Doe',
-            lastMessage: 'Hello, how can I assist you?',
-            timestamp: '10:00 AM',
-            avatar: 'https://via.placeholder.com/40',
-        },
-        {
-            _id: '2',
-            name: 'Jane Smith',
-            lastMessage: 'Thank you for your help!',
-            timestamp: '09:45 AM',
-            avatar: 'https://via.placeholder.com/40',
-        },
-        {
-            _id: '3',
-            name: 'Chris Johnson',
-            lastMessage: 'Can we schedule a meeting?',
-            timestamp: 'Yesterday',
-            avatar: 'https://via.placeholder.com/40',
-        },
-    ];
+    const { chatList, fetchChats } = useChat();
+    const { getUser, user } = useAuth();
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            await getUser();
+        }
+
+        fetchUser();
+    }, []);
+
+    useEffect(() => {
+        const getChats = async () => {
+            if (user?._id) {
+                try {
+                    await fetchChats(user._id);
+                } catch (error) {
+                    console.error('Error fetching chats:', error);
+                }
+            }
+        };
+
+        getChats();
+
+        const interval = setInterval(getChats, 3000);
+
+        return () => clearInterval(interval);
+    }, [user, fetchChats]);
 
     const renderChatItem = ({ item }) => {
         return (
             <TouchableOpacity
                 onPress={() => {
-                    router.push(`/user/chat/${item._id}?name=${item.name}&profilePicture=${item.avatar}`);
+                    router.push(`/user/chat/${user._id === item.receiverId ? item.senderId : item.receiverId}?name=${item.name}&profilePicture=${item.profilePicture}`);
                 }}
-                className="flex-row items-center bg-darkUmber-light p-4 mb-2 rounded-lg"
+                className="flex-row items-center justify-between bg-darkUmber-light p-4 mb-2 rounded-lg"
             >
-                <Image
-                    source={{ uri: item.avatar }}
-                    className="w-10 h-10 rounded-full"
-                />
-                <View className="flex-1 ml-4">
-                    <Text className="text-white font-medium text-lg">{item.name}</Text>
-                    <Text className="text-frenchGray-light">{item.lastMessage}</Text>
+                <View className="flex-row items-center justify-start">
+                    <Image
+                        source={{ uri: item.profilePicture }}
+                        className="w-10 h-10 rounded-full"
+                    />
+                    <View className="flex-1 ml-4">
+                        <Text className="text-white font-medium text-lg">{item.name}</Text>
+                        <Text className="text-frenchGray-light">{item.lastMessage}</Text>
+                    </View>
                 </View>
-                <Text className="text-frenchGray-light">{item.timestamp}</Text>
+                {!item.isRead && item.receiverId === user._id && <View className="bg-chartreuse p-1 rounded-full"></View>}
             </TouchableOpacity>
         );
     };
@@ -54,11 +64,16 @@ const Chats = () => {
             <View className="flex-row justify-between items-center mb-4">
                 <Text className="text-white text-2xl font-bold">Chats</Text>
             </View>
-            <FlatList
-                data={chatList}
-                renderItem={renderChatItem}
-                keyExtractor={(item) => item._id}
-            />
+            {chatList.length > 0 ? (
+                <FlatList
+                    data={chatList}
+                    renderItem={renderChatItem}
+                    keyExtractor={(item) => item._id}
+                    showsVerticalScrollIndicator={false}
+                />
+            ) : (
+                <EmptyChatList />
+            )}
         </SafeAreaView>
     );
 };

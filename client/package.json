@@ -56,7 +56,8 @@
     "react-native-svg": "^14.1.0",
     "react-native-vector-icons": "^10.1.0",
     "react-native-web": "~0.19.6",
-    "reanimated-bottom-sheet": "^1.0.0-alpha.22"
+    "reanimated-bottom-sheet": "^1.0.0-alpha.22",
+    "socket.io-client": "^4.8.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

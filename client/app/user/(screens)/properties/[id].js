@@ -114,11 +114,12 @@ const PropertyDetails = () => {
                 {activeTab === 'about' && (
                     <About
                         description={property?.description}
-                        document={property?.document}
                         proprietorName={property?.agentName}
                         proprietorContact={property?.agentContact}
                         companyName={property?.companyName}
                         proprietorProfilePic={property?.agentProfilePicture}
+                        document={property?.document}
+                        proprietorId={property?.agentId}
                     />
                 )}
 
