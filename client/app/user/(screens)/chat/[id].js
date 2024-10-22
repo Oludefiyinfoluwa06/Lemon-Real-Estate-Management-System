@@ -28,10 +28,16 @@ const ChatScreen = () => {
     useEffect(() => {
         if (user && params.id) {
             getMessages(user._id, params.id);
+
+            const interval = setInterval(() => {
+                getMessages(user._id, params.id);
+            }, 3000);
+
+            return () => clearInterval(interval);
         }
     }, [user, params.id]);
 
-    const handleSendMessage = () => {
+    const handleSendMessage = async () => {
         if (messageText.trim() && user) {
             sendMessage({
                 senderId: user._id,
@@ -39,6 +45,7 @@ const ChatScreen = () => {
                 message: messageText.trim(),
             });
             setMessageText('');
+            await getMessages(user._id, params.id);
         }
     };
 
