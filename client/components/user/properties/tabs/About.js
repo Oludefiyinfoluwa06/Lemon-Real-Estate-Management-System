@@ -10,6 +10,7 @@ const About = ({
     companyName,
     proprietorProfilePic,
     document,
+    proprietorId
 }) => {
     return (
         <View className="p-4">
@@ -43,7 +44,7 @@ const About = ({
                                     resizeMode='cover'
                                 />
                             ) : (
-                                <Ionicons name = 'person-outline' size = { 30 } color = { "#BBCC13" } />
+                                <Ionicons name='person-outline' size={30} color={"#BBCC13"} />
                             )}
                         </View>
                         <View>
@@ -55,7 +56,7 @@ const About = ({
                     <View className="flex-row items-center justify-end gap-4">
                         <TouchableOpacity
                             className="rounded-full p-3 items-center justify-center bg-frenchGray-dark"
-                            onPress={() => router.push("/user/chats")}
+                            onPress={() => router.push(`/user/chat/${proprietorId}?name=${proprietorName}&profilePicture=${proprietorProfilePic}`)}
                         >
                             <Ionicons name='chatbubble-ellipses-outline' size={20} color={"#BBCC13"} />
                         </TouchableOpacity>
