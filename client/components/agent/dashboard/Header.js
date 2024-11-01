@@ -35,7 +35,7 @@ const Header = () => {
                         />}
                 </TouchableOpacity>
 
-                <Text className='text-white font-rbold text-xl'>Welcome, {user.firstName}</Text>
+                <Text className='text-white font-rbold text-xl'>{user.firstName ? `Welcome, ${user.firstName}` : `${user.companyName}`}</Text>
             </View>
 
             <TouchableOpacity

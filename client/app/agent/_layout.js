@@ -15,6 +15,14 @@ const AgentLayout = () => {
                 name='profile'
                 options={{ headerShown: false }}
             />
+            <Stack.Screen
+                name='subscription'
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name='pay'
+                options={{ headerShown: false }}
+            />
         </Stack>
     );
 }

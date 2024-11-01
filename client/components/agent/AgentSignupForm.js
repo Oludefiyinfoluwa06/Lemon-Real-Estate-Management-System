@@ -74,7 +74,7 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
     const handleSignup = async () => {
         if (
             agentDetails.email === '' ||
-            agentDetails.password === '' 
+            agentDetails.password === ''
         ) {
             return setAuthError('Input fields must not be empty');
         }

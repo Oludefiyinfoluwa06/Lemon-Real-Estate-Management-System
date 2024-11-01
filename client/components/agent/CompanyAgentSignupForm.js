@@ -142,7 +142,7 @@ const CompanyAgentSignupForm = ({ agentDetails, setAgentDetails }) => {
                             className="bg-frenchGray-light text-white p-2 ml-2 rounded-lg flex-1 font-regular"
                             placeholderTextColor="#AFAFAF"
                             value={agentDetails.mobileNumber}
-                            onChangeText={(text) => setAgentDetails({ ...agentDetails, mobileNumber: `${agentDetails.countryCode}${text}` })}
+                            onChangeText={(text) => setAgentDetails({ ...agentDetails, mobileNumber: text })}
                         />
                     </View>
 

@@ -13,7 +13,7 @@ const Signup = () => {
         agent: false,
         user: true,
     });
-    
+
     const [userDetails, setUserDetails] = useState({
         propertiesOfInterest: [],
         lastName: '',

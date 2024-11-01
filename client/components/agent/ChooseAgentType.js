@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AgentSignupForm from './AgentSignupForm';
-import IndividualAgentSignupForm from './CompanyAgentSignupForm';
+import CompanyAgentSignupForm from './CompanyAgentSignupForm';
 
 const Continue = ({ agentType, agentTypeIcon, onPress }) => {
     return (
@@ -72,7 +72,7 @@ const ChooseAgentType = () => {
                     />
                 </View>
             : showCompanyAgentForm ?
-                <IndividualAgentSignupForm
+                <CompanyAgentSignupForm
                     agentDetails={companyAgentDetails}
                     setAgentDetails={setCompanyAgentDetails}
                 />

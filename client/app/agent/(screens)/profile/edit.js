@@ -121,20 +121,30 @@ const EditProfile = () => {
                                 />
                                 <View className="absolute bottom-0 right-0">
                                     <Ionicons
-                                        name="camera-outline"
+                                        name="camera"
                                         size={20}
                                         color={"#BBCC13"}
                                     />
                                 </View>
                             </TouchableOpacity>
                         ) : (
-                            <View className='bg-white rounded-full p-[20px]'>
+                            <TouchableOpacity
+                                className='bg-white rounded-full p-[20px] relative'
+                                onPress={handleUploadProfileImage}
+                            >
                                 <Ionicons name='person-outline' color={'#2B3B3C'} size={70} />
-                            </View>
+                                <View className="absolute bottom-2 right-2">
+                                    <Ionicons
+                                        name="camera"
+                                        size={20}
+                                        color={"#BBCC13"}
+                                    />
+                                </View>
+                            </TouchableOpacity>
                         )}
                     </View>
 
-                    <View className='relative w-full'>
+                    {user?.firstName && <View className='relative w-full'>
                         <TextInput
                             placeholder="First Name"
                             className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular pl-[35px]"
@@ -147,8 +157,8 @@ const EditProfile = () => {
                         >
                             <Ionicons name="person-outline" size={20} color={'#AFAFAF'} />
                         </TouchableOpacity>
-                    </View>
-                    <View className='relative w-full'>
+                    </View>}
+                    {user?.lastName && <View className='relative w-full'>
                         <TextInput
                             placeholder="Last Name"
                             className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular pl-[35px]"
@@ -161,7 +171,7 @@ const EditProfile = () => {
                         >
                             <Ionicons name="person-outline" size={20} color={'#AFAFAF'} />
                         </TouchableOpacity>
-                    </View>
+                    </View>}
 
                     <View className='relative w-full'>
                         <TextInput

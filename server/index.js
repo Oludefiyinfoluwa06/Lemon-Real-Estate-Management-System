@@ -10,6 +10,7 @@ const usersRoute = require('./routes/user.route');
 const propertiesRoute = require('./routes/property.route');
 const reviewsRoute = require('./routes/review.route');
 const chatRoute = require('./routes/chat.route');
+const paymentRoute = require('./routes/payment.route');
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -43,6 +44,7 @@ app.use('/api/user', usersRoute);
 app.use('/api/property', propertiesRoute);
 app.use('/api/reviews', reviewsRoute);
 app.use('/api/chat', chatRoute);
+app.use('/api/payment', paymentRoute);
 
 
 io.on('connection', (socket) => {

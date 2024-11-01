@@ -4,7 +4,7 @@ const User = require('../models/user.model');
 const authenticate = async (req, res, next) => {
     const token = req.header('Authorization');
 
-    if (!token) { 
+    if (!token) {
         return res.status(400).json({ message: 'Provide token' });
     }
 

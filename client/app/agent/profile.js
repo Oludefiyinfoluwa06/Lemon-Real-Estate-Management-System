@@ -63,17 +63,22 @@ const Profile = () => {
                     <Button
                         icon="warning-outline"
                         text="Make a complaint"
-                        onClick={() => router.push('/agent/edit-profile')}
+                        onClick={() => router.push('/agent/complaint')}
                     />
                     <Button
                         icon="lock-closed-outline"
                         text="Privacy policy"
-                        onClick={() => router.push('/agent/edit-profile')}
+                        onClick={() => router.push('/agent/privacy-policy')}
                     />
                     <Button
                         icon="document-text-outline"
                         text="Terms and conditions"
-                        onClick={() => router.push('/agent/edit-profile')}
+                        onClick={() => router.push('/agent/terms-condition')}
+                    />
+                    <Button
+                        icon="card-outline"
+                        text="Subscription"
+                        onClick={() => router.push('/agent/subscription')}
                     />
                     <Button
                         icon="log-out-outline"

@@ -8,11 +8,11 @@ const userSchema = new mongoose.Schema({
     profilePicture: { type: String },
     lastName: {
         type: String,
-        required: true,
+        required: () => this.role === 'buyer' | 'individual-agent',
     },
     firstName: {
         type: String,
-        required: true,
+        required: () => this.role === 'buyer' | 'individual-agent',
     },
     middleName: { type: String, },
     companyName: {
@@ -28,7 +28,15 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['buyer', 'individual-agent', 'company-agent'],
         required: true
-    }
+    },
+    hasPaid: {
+        type: Boolean,
+        default: false
+    },
+    durationLeft: {
+        type: Date,
+        default: null
+    },
 });
 
 const User = mongoose.model('users', userSchema);

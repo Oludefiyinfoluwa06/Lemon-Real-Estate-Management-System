@@ -10,9 +10,9 @@ const Dashboard = () => {
     const {
         getProperties,
         numberOfProperties,
-        propertiesForRent,
-        propertiesForLease,
-        propertiesForSale
+        agentRentProperties,
+        agentLeaseProperties,
+        agentSaleProperties
     } = useProperty();
 
     useEffect(() => {
@@ -30,15 +30,15 @@ const Dashboard = () => {
 
                 <PropertiesOverview
                     numberOfProperties={numberOfProperties}
-                    propertiesForRent={propertiesForRent}
-                    propertiesForLease={propertiesForLease}
-                    propertiesForSale={propertiesForSale}
+                    propertiesForRent={agentRentProperties.length}
+                    propertiesForLease={agentLeaseProperties.length}
+                    propertiesForSale={agentSaleProperties.length}
                 />
 
                 <PropertiesAnalytics
-                    propertiesForRent={propertiesForRent}
-                    propertiesForLease={propertiesForLease}
-                    propertiesForSale={propertiesForSale}
+                    propertiesForRent={agentRentProperties.length}
+                    propertiesForLease={agentLeaseProperties.length}
+                    propertiesForSale={agentSaleProperties.length}
                 />
 
                 <View className='mt-[70px]' />

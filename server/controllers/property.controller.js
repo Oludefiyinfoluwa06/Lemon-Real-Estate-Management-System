@@ -55,6 +55,9 @@ const getProperties = async (req, res) => {
         const skip = (page - 1) * 10;
 
         const agentProperties = await Property.find({ agentId: id }).sort({ createdAt: -1 });
+        let agentRentProperties = await Property.find({ agentId: id, status: 'Rent' });
+        let agentLeaseProperties = await Property.find({ agentId: id, status: 'Lease' });
+        let agentSaleProperties = await Property.find({ agentId: id, status: 'Sale' });
 
         const totalPropertiesCount = await Property.countDocuments();
 
@@ -91,6 +94,9 @@ const getProperties = async (req, res) => {
             propertiesForLease: leaseProperties.length,
             propertiesForSale: saleProperties.length,
             properties,
+            agentRentProperties,
+            agentLeaseProperties,
+            agentSaleProperties,
             rentProperties,
             leaseProperties,
             saleProperties,

@@ -22,6 +22,9 @@ export const PropertyProvider = ({ children }) => {
     const [rentProperties, setRentProperties] = useState([]);
     const [leaseProperties, setLeaseProperties] = useState([]);
     const [saleProperties, setSaleProperties] = useState([]);
+    const [agentRentProperties, setAgentRentProperties] = useState([]);
+    const [agentLeaseProperties, setAgentLeaseProperties] = useState([]);
+    const [agentSaleProperties, setAgentSaleProperties] = useState([]);
     const [lands, setLands] = useState([]);
     const [houses, setHouses] = useState([]);
     const [shopSpaces, setShopSpaces] = useState([]);
@@ -85,6 +88,9 @@ export const PropertyProvider = ({ children }) => {
             setPropertiesForLease(response.data.propertiesForLease);
             setPropertiesForRent(response.data.propertiesForRent);
             setPropertiesForSale(response.data.propertiesForSale);
+            setAgentRentProperties(response.data.agentRentProperties);
+            setAgentLeaseProperties(response.data.agentLeaseProperties);
+            setAgentSaleProperties(response.data.agentSaleProperties);
             setRentProperties(response.data.rentProperties);
             setLeaseProperties(response.data.leaseProperties);
             setSaleProperties(response.data.saleProperties);
@@ -226,6 +232,9 @@ export const PropertyProvider = ({ children }) => {
                 rentProperties,
                 leaseProperties,
                 saleProperties,
+                agentRentProperties,
+                agentLeaseProperties,
+                agentSaleProperties,
                 lands,
                 houses,
                 shopSpaces,
