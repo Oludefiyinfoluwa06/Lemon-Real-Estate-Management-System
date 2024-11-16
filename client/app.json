@@ -7,7 +7,13 @@
     "plugins": [
       "expo-router",
       "expo-image-picker",
-      "expo-document-picker"
+      "expo-document-picker",
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow Lemon to use your location."
+        }
+      ]
     ],
     "name": "lemon",
     "slug": "lemon"

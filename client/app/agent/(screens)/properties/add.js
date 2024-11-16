@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, Image, TextInput, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Image, TextInput, TouchableOpacity, ActivityIndicator, Alert, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import * as DocumentPicker from 'expo-document-picker';
-import { Video } from 'expo-av';
-import * as WebBrowser from 'expo-web-browser';
+import { Video, Audio } from 'expo-av';
 import axios from 'axios';
 import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from '@env';
 import Button from '../../../../components/common/Button';
@@ -14,6 +13,7 @@ import { useProperty } from '../../../../contexts/PropertyContext';
 import ErrorOrMessageModal from '../../../../components/common/ErrorOrMessageModal';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import LocationSelector from '../../../../components/agent/properties/LocationSelector';
 
 const AddProperty = () => {
     const [currentStep, setCurrentStep] = useState(1);
@@ -25,11 +25,13 @@ const AddProperty = () => {
     const [currency, setCurrency] = useState('');
     const [location, setLocation] = useState('');
     const [country, setCountry] = useState('');
-    const [propertyImages, setPropertyImages] = useState(Array(5).fill(null));
+    const [propertyImages, setPropertyImages] = useState(Array(4).fill(null));
+    const [propertyImagesUri, setPropertyImagesUri] = useState([]);
     const [video, setVideo] = useState('');
     const [document, setDocument] = useState('');
     const [uploading, setUploading] = useState(false);
     const [currencies, setCurrencies] = useState([]);
+    const [coordinates, setCoordinates] = useState(null);
 
     const router = useRouter();
 
@@ -93,7 +95,37 @@ const AddProperty = () => {
         await uploadProperty(title, description, category, status, price, currency, location, country, propertyImages, video, document);
     };
 
-    const uploadFileToCloudinary = async (file, type, slot) => {
+    const uploadFileToCloudinary = async (file) => {
+        const data = new FormData();
+        data.append('file', {
+            uri: file.assets[0].uri,
+            type: file.assets[0].mimeType,
+            name: file.assets[0].name,
+        });
+        data.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
+
+        setUploading(true);
+        try {
+            const response = await axios.post(
+                `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`,
+                data,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                }
+            );
+
+            setDocument(response.data.secure_url);
+        } catch (error) {
+            Alert.alert('Upload Error', 'Failed to upload document to cloud');
+            console.log('Error uploading to Cloudinary:', error.message);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const uploadMediaToCloudinary = async (file, type, slot) => {
         const data = new FormData();
         data.append('file', {
             uri: file.uri,
@@ -122,8 +154,6 @@ const AddProperty = () => {
                 });
             } else if (type === 'video') {
                 setVideo(response.data.secure_url);
-            } else if (type === 'document') {
-                setDocument(response.data.secure_url);
             }
         } catch (error) {
             console.log('Error uploading to Cloudinary:', error.message);
@@ -132,34 +162,6 @@ const AddProperty = () => {
         }
     };
 
-    const uploadDocumentToCloudinary = async (file) => {
-        const data = new FormData();
-        data.append('file', {
-            uri: file.assets[0].uri,
-            type: file.assets[0].mimeType,
-            name: file.assets[0].name,
-        });
-        data.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-
-        setUploading(true);
-        try {
-            const response = await axios.post(
-                `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/upload`,
-                data,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                });
-
-            setDocument(response.data.secure_url);
-        } catch (error) {
-            console.log('Error uploading to Cloudinary:', error.message);
-        } finally {
-            setUploading(false);
-        }
-    }
-
     const handleImageUpload = async (slot) => {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -167,7 +169,20 @@ const AddProperty = () => {
         });
 
         if (!result.canceled) {
-            uploadFileToCloudinary(result.assets[0], 'image', slot);
+            const { uri, fileSize, width, height } = result.assets[0];
+
+            const isDuplicate = propertyImagesUri.some((img) => {
+                return img && img.fileSize === fileSize && img.width === width && img.height === height;
+            });
+
+            if (isDuplicate) {
+                setPropertyError('This image has already been selected.');
+                return;
+            }
+
+            setPropertyImagesUri([...propertyImagesUri, { uri, fileSize, width, height }])
+
+            uploadMediaToCloudinary(result.assets[0], 'image', slot);
         }
     };
 
@@ -178,18 +193,42 @@ const AddProperty = () => {
         });
 
         if (!result.canceled) {
-            uploadFileToCloudinary(result.assets[0], 'video');
+            const { uri } = result.assets[0];
+
+            const sound = new Audio.Sound();
+
+            try {
+                await sound.loadAsync({ uri });
+                const status = await sound.getStatusAsync();
+                const durationInSeconds = (status.durationMillis || 0) / 1000;
+
+                if (durationInSeconds < 10 || durationInSeconds > 30) {
+                    setPropertyError('The video must be between 10 and 30 seconds.');
+                    return;
+                }
+
+                uploadMediaToCloudinary(result.assets[0], 'video');
+            } catch (error) {
+                console.error('Error processing video metadata:', error);
+                setPropertyError('Unable to process the video. Please try again.');
+            } finally {
+                sound.unloadAsync();
+            }
         }
     };
 
     const handleDocumentUpload = async () => {
-        const result = await DocumentPicker.getDocumentAsync({
-            type: '*/*',
-            copyToCacheDirectory: true,
-        });
+        try {
+            const result = await DocumentPicker.getDocumentAsync({
+                type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                copyToCacheDirectory: true,
+            });
 
-        if (result.type !== 'cancel') {
-            uploadDocumentToCloudinary(result);
+            if (result.type !== 'cancel') {
+                uploadFileToCloudinary(result);
+            }
+        } catch (error) {
+            Alert.alert('Error', 'Failed to pick document');
         }
     };
 
@@ -279,13 +318,14 @@ const AddProperty = () => {
                             onSelect={(value) => setCurrency(`${value.name} - ${value.symbol}`)}
                         />
 
-                        <TextInput
-                            placeholder="Location"
-                            placeholderTextColor="#FFFFFF"
-                            value={location}
-                            onChangeText={(text) => setLocation(text)}
-                            className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
-                        />
+                        <View>
+                            <LocationSelector
+                                onLocationSelect={({ coords, address }) => {
+                                    setCoordinates(coords);
+                                    setLocation(address);
+                                }}
+                            />
+                        </View>
 
                         <TextInput
                             placeholder="Country"
@@ -356,7 +396,14 @@ const AddProperty = () => {
                         {document ? (
                             <TouchableOpacity
                                 className="h-[50px] w-full rounded bg-frenchGray-dark items-center justify-center mb-4"
-                                onPress={() => WebBrowser.openBrowserAsync(document)}
+                                onPress={async () => {
+                                    try {
+                                        await Linking.openURL(document);
+                                    } catch (error) {
+                                        console.log(error);
+                                        Alert.alert('Error', 'Cannot open document externally');
+                                    }
+                                }}
                             >
                                 <Text className="text-white">Preview Document</Text>
                             </TouchableOpacity>
