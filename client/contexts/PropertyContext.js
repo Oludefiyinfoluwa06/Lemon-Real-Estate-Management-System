@@ -36,13 +36,13 @@ export const PropertyProvider = ({ children }) => {
 
     const router = useRouter();
 
-    const uploadProperty = async (title, description, category, status, price, currency, location, images, video, document) => {
+    const uploadProperty = async (title, description, category, status, price, currency, country, images, video, document, coordinates) => {
         setPropertyLoading(true);
 
         try {
             const token = await getToken();
 
-            await axios.post(`${config.API_BASE_URL}/api/property/upload`, { title, description, category, status, price, currency, location, images, video, document }, {
+            await axios.post(`${config.API_BASE_URL}/api/property/upload`, { title, description, category, status, price, currency, country, images, video, document, coordinates }, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                 }

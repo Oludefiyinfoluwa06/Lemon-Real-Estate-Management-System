@@ -3,7 +3,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useProperty } from '../../../../contexts/PropertyContext';
 import { router } from 'expo-router';
-import NoProperties from '../../../../components/user/search/NoProperties';
+import NoProperties from '../../../../components/user/NoProperties';
 import { formatPrice } from '../../../../services/formatPrice';
 
 const SavedProperties = () => {

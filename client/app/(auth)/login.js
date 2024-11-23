@@ -96,10 +96,6 @@ const Login = () => {
                 />
             </View>
 
-            <TouchableOpacity className="mt-4">
-                <Text className="text-frenchGray-light text-center font-rregular">Forgot Password?</Text>
-            </TouchableOpacity>
-
             <TouchableOpacity className="mt-3" onPress={() => router.push('/signup')}>
                 <Text className="text-frenchGray-light text-center font-rregular">Don't have an account? Sign Up</Text>
             </TouchableOpacity>

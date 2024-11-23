@@ -5,7 +5,7 @@ const Property = require("../models/property.model");
 
 const uploadProperty = async (req, res) => {
     try {
-        const { title, description, category, status, price, currency, location, country, images, video, document } = req.body;
+        const { title, description, category, status, price, currency, country, images, video, document, coordinates } = req.body;
 
         const agentId = req.user._id;
 
@@ -28,7 +28,6 @@ const uploadProperty = async (req, res) => {
             status,
             price,
             currency,
-            location,
             country,
             images,
             video,
@@ -37,7 +36,8 @@ const uploadProperty = async (req, res) => {
             agentContact: agent.mobileNumber,
             companyName: agent.companyName,
             agentProfilePicture: agent.profilePicture,
-            document
+            document,
+            coordinates,
         });
 
         return res.status(201).json({ message: 'Property upload successful', property });

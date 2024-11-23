@@ -61,11 +61,6 @@ const Profile = () => {
                         onClick={() => router.push('/user/profile/edit')}
                     />
                     <Button
-                        icon="warning-outline"
-                        text="Make a complaint"
-                        onClick={() => router.push('/user/edit-profile')}
-                    />
-                    <Button
                         icon="lock-closed-outline"
                         text="Privacy policy"
                         onClick={() => router.push('/user/edit-profile')}

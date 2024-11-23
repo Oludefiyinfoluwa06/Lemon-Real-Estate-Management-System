@@ -1,10 +1,10 @@
 import { View, Text, Image, TouchableOpacity } from 'react-native';
-import NoProperties from './NoProperties';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { formatPrice } from '../../../services/formatPrice';
 import { router } from 'expo-router';
 import ErrorOrMessageModal from '../../common/ErrorOrMessageModal';
 import Button from '../../common/Button';
+import NoProperties from '../NoProperties';
 
 const Properties = ({
     properties,
@@ -17,7 +17,7 @@ const Properties = ({
     totalPages
 }) => {
     if (properties.length === 0) {
-        return <NoProperties />;
+        return <NoProperties type='none' />;
     }
 
     return (

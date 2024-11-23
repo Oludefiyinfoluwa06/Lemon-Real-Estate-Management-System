@@ -8,13 +8,13 @@ import { getCountryCurrencyData } from '../../services/currencyConverter';
 import { getToken } from '../../services/getToken';
 import { config } from '../../config';
 import { FLUTTERWAVE_SECRET_KEY } from '@env';
-import { getExpirationDate } from '../../services/getExpirationDate';
 
 const Payment = () => {
     const { user, updateProfile } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [paymentDetails, setPaymentDetails] = useState(null);
     const [error, setError] = useState('');
+    const [isProcessingTrial, setIsProcessingTrial] = useState(false);
 
     const params = useLocalSearchParams();
 
@@ -61,7 +61,7 @@ const Payment = () => {
                 setPaymentDetails(paymentData);
 
             } catch (err) {
-                console.error('Error setting up payment:', err);
+                console.log('Error setting up payment:', err);
                 setError('Failed to setup payment. Please try again.');
             } finally {
                 setIsLoading(false);
@@ -97,7 +97,7 @@ const Payment = () => {
                 throw new Error('Failed to initialize payment');
             }
         } catch (err) {
-            console.error('Payment initialization error:', err);
+            console.log('Payment initialization error:', err);
             Alert.alert(
                 'Payment Error',
                 'Unable to start payment process. Please try again.',
@@ -125,7 +125,7 @@ const Payment = () => {
                 const verificationData = await response.json();
 
                 if (verificationData.status === 'success' && verificationData.data.status === 'successful') {
-                    await updateProfile({ hasPaid: true, durationLeft: getExpirationDate() });
+                    await startPayment();
                     clearInterval(pollInterval);
                     Alert.alert(
                         'Payment Successful',
@@ -146,7 +146,7 @@ const Payment = () => {
 
                 attempts++;
             } catch (err) {
-                console.error('Verification error:', err);
+                console.log('Verification error:', err);
                 clearInterval(pollInterval);
                 Alert.alert(
                     'Verification Error',
@@ -155,6 +155,139 @@ const Payment = () => {
                 );
             }
         }, 5000);
+    };
+
+    const startPayment = async () => {
+        try {
+            const token = await getToken();
+
+            const response = await fetch(`${config.API_BASE_URL}/api/subscription/start-payment`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                Alert.alert(
+                    'Subscription Activated',
+                    'Your 6-month subscription period has started!',
+                    [{
+                        text: 'OK',
+                        onPress: () => router.push("/agent/dashboard")
+                    }]
+                );
+            } else {
+                throw new Error(data.message || 'Failed to start trial');
+            }
+        } catch (err) {
+            console.log('Subscription activation error:', err);
+            Alert.alert(
+                'Subscription Activation Error',
+                err.message || 'Unable to start subscription period. Please try again.',
+                [{ text: 'OK' }]
+            );
+        }
+    };
+
+    const startTrial = async () => {
+        try {
+            setIsProcessingTrial(true);
+            const token = await getToken();
+
+            const response = await fetch(`${config.API_BASE_URL}/api/subscription/start-trial`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                Alert.alert(
+                    'Trial Activated',
+                    'Your 6-month trial period has started!',
+                    [{
+                        text: 'OK',
+                        onPress: () => router.push("/agent/dashboard")
+                    }]
+                );
+            } else {
+                throw new Error(data.message || 'Failed to start trial');
+            }
+        } catch (err) {
+            Alert.alert(
+                'Trial Activation Error',
+                'Unable to start trial period. Please try again.',
+                [{ text: 'OK' }]
+            );
+        } finally {
+            setIsProcessingTrial(false);
+        }
+    };
+
+    const handleTrialRequest = async () => {
+        try {
+            const token = await getToken();
+            const response = await fetch(`${config.API_BASE_URL}/api/subscription/check-eligibility`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (data.status === 'success') {
+                if (data.completed) {
+                    Alert.alert(
+                        'Trial Completed',
+                        'You have completed your trial',
+                        [{ text: 'OK' }]
+                    );
+                } else if (data.ongoing) {
+                    Alert.alert(
+                        'Trial is ongoing',
+                        'You cannot start a trial',
+                        [{ text: 'OK' }]
+                    );
+                } else {
+                    Alert.alert(
+                        'Start Trial',
+                        'Would you like to start your 6-month trial period?',
+                        [
+                            {
+                                text: 'Cancel',
+                                style: 'cancel'
+                            },
+                            {
+                                text: 'Start Trial',
+                                onPress: startTrial
+                            }
+                        ]
+                    );
+                }
+            } else {
+                Alert.alert(
+                    'Trial Unavailable',
+                    'You are not eligible for a trial period. This could be because you\'ve already used a trial or your account type doesn\'t qualify.',
+                    [{ text: 'OK' }]
+                );
+            }
+        } catch (err) {
+            console.log('Eligibility check error:', err);
+            Alert.alert(
+                'Error',
+                'Unable to verify trial eligibility. Please try again.',
+                [{ text: 'OK' }]
+            );
+        }
     };
 
     return (
@@ -195,6 +328,16 @@ const Payment = () => {
                             >
                                 <Text className="text-white font-rbold text-lg">
                                     {isLoading ? 'Processing...' : 'Pay Now'}
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                className="bg-[#BBCC13] p-4 rounded-lg items-center"
+                                onPress={handleTrialRequest}
+                                disabled={isProcessingTrial}
+                            >
+                                <Text className="text-white font-rbold text-lg">
+                                    {isProcessingTrial ? 'Processing...' : '6 months trial'}
                                 </Text>
                             </TouchableOpacity>
                         </View>

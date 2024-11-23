@@ -1,64 +1,13 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import io from 'socket.io-client';
+import React, { createContext, useState, useContext } from 'react';
 import { config } from '../config';
 import axios from 'axios';
 
 const ChatContext = createContext();
 
 export const ChatProvider = ({ children }) => {
-    const [socket, setSocket] = useState(null);
     const [messages, setMessages] = useState([]);
     const [chatList, setChatList] = useState([]);
     const [chatError, setChatError] = useState('');
-    const [isConnected, setIsConnected] = useState(false);
-
-    useEffect(() => {
-        let newSocket;
-        try {
-            newSocket = io(config.API_BASE_URL, {
-                reconnection: true,
-                reconnectionAttempts: 5,
-                reconnectionDelay: 1000,
-            });
-
-            newSocket.on('connect', () => {
-                setIsConnected(true);
-                setSocket(newSocket);
-            });
-
-            newSocket.on('disconnect', () => {
-                setIsConnected(false);
-            });
-
-            newSocket.on('connect_error', (error) => {
-                console.error('Socket connection error:', error);
-                setIsConnected(false);
-            });
-
-            newSocket.on('receiveMessage', (message) => {
-                if (message && typeof message === 'object') {
-                    setMessages((prevMessages) => {
-                        const currentMessages = Array.isArray(prevMessages) ? prevMessages : [];
-                        const messageExists = currentMessages.some(
-                            msg => msg._id === message._id
-                        );
-                        if (!messageExists) {
-                            return [...currentMessages, message];
-                        }
-                        return currentMessages;
-                    });
-                }
-            });
-
-            return () => {
-                if (newSocket) {
-                    newSocket.disconnect();
-                }
-            };
-        } catch (error) {
-            console.error('Socket initialization error:', error);
-        }
-    }, []);
 
     const showError = (errorMessage) => {
         setChatError(errorMessage);
@@ -69,15 +18,9 @@ export const ChatProvider = ({ children }) => {
 
     const sendMessage = async (data) => {
         try {
-            if (!socket || !isConnected) {
-                throw new Error('Socket connection not established');
-            }
-
             if (!data || typeof data !== 'object') {
                 throw new Error('Invalid message data');
             }
-
-            socket.emit('sendMessage', data);
 
             const response = await axios.post(
                 `${config.API_BASE_URL}/api/chat/send`,
@@ -86,10 +29,10 @@ export const ChatProvider = ({ children }) => {
 
             setMessages((prevMessages) => {
                 const currentMessages = Array.isArray(prevMessages) ? prevMessages : [];
-                return [...currentMessages, response.data];
+                return [...currentMessages, response.data.data];
             });
 
-            return response.data;
+            return response.data.data;
         } catch (error) {
             const errorMessage = error.response?.data?.message || error.message;
             showError(errorMessage);
@@ -143,8 +86,7 @@ export const ChatProvider = ({ children }) => {
         getMessages,
         fetchChats,
         chatList: Array.isArray(chatList) ? chatList : [],
-        chatError,
-        isConnected
+        chatError
     };
 
     return (

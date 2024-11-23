@@ -1,9 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { View, Text, TouchableOpacity } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
-const About = ({ description, document }) => {
+const About = ({ description, document, coordinates }) => {
+    const mapRegion = coordinates ? {
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+    } : null;
+
     return (
         <View className="p-4">
             <View className="mb-4">
@@ -22,6 +29,32 @@ const About = ({ description, document }) => {
                     </View>
                     <Ionicons name="arrow-forward-outline" size={24} color="#352C1F" />
                 </TouchableOpacity>
+            )}
+
+            {coordinates && (
+                <View className="mb-6">
+                    <Text className="font-rbold text-2xl text-white mb-3">Location</Text>
+                    <View className="rounded-lg overflow-hidden">
+                        <MapView
+                            className="w-full h-[200px]"
+                            provider={PROVIDER_GOOGLE}
+                            initialRegion={mapRegion}
+                            scrollEnabled={false}
+                            zoomEnabled={false}
+                            rotateEnabled={false}
+                            pitchEnabled={false}
+                        >
+                            <Marker
+                                coordinate={coordinates}
+                                title="Property Location"
+                            >
+                                <View className="bg-chartreuse p-2 rounded-full">
+                                    <Ionicons name="location" size={24} color="#352C1F" />
+                                </View>
+                            </Marker>
+                        </MapView>
+                    </View>
+                </View>
             )}
         </View>
     );

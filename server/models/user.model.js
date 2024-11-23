@@ -4,20 +4,24 @@ const userSchema = new mongoose.Schema({
     propertiesOfInterest: {
         type: [String],
         required: () => this.role === 'buyer',
+        default: null,
     },
-    profilePicture: { type: String },
+    profilePicture: {
+        type: String,
+        default: null,
+    },
     lastName: {
         type: String,
-        required: () => this.role === 'buyer' | 'individual-agent',
+        required: () => this.role === 'buyer' || this.role === 'individual-agent',
     },
     firstName: {
         type: String,
-        required: () => this.role === 'buyer' | 'individual-agent',
+        required: () => this.role === 'buyer' || this.role === 'individual-agent',
     },
     middleName: { type: String, },
     companyName: {
         type: String,
-        required: () => this.role === 'individual-agent' | 'company-agent',
+        required: () => this.role === 'individual-agent' || this.role === 'company-agent',
     },
     currentAddress: { type: String, required: true, },
     country: { type: String, required: true, },
@@ -31,11 +35,33 @@ const userSchema = new mongoose.Schema({
     },
     hasPaid: {
         type: Boolean,
-        default: false
+        default: false,
+        required: () => this.role === 'individual-agent' || this.role === 'company-agent',
     },
-    durationLeft: {
+    paymentStartDate: {
         type: Date,
-        default: null
+        default: null,
+        required: () => this.role === 'individual-agent' || this.role === 'company-agent',
+    },
+    paymentEndDate: {
+        type: Date,
+        default: null,
+        required: () => this.role === 'individual-agent' || this.role === 'company-agent',
+    },
+    isOnTrial: {
+        type: Boolean,
+        default: false,
+        required: () => this.role === 'individual-agent' || this.role === 'company-agent',
+    },
+    trialStartDate: {
+        type: Date,
+        default: null,
+        required: () => this.role === 'individual-agent' || this.role === 'company-agent',
+    },
+    trialEndDate: {
+        type: Date,
+        default: null,
+        required: () => this.role === 'individual-agent' || this.role === 'company-agent',
     },
 });
 

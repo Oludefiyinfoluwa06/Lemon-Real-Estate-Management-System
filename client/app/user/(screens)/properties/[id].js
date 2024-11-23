@@ -74,7 +74,7 @@ const PropertyDetails = () => {
                             <Text className="text-white text-xl font-rbold">{property?.title}</Text>
                             <View className="flex-row items-center">
                                 <Ionicons name="location-outline" size={20} color="#BBCC13" />
-                                <Text className="text-white text-base ml-2 font-rregular">{property?.location}</Text>
+                                <Text className="text-white text-base ml-2 font-rregular">{property?.country}</Text>
                             </View>
                         </View>
 
@@ -120,6 +120,7 @@ const PropertyDetails = () => {
                         proprietorProfilePic={property?.agentProfilePicture}
                         document={property?.document}
                         proprietorId={property?.agentId}
+                        coordinates={property?.coordinates}
                     />
                 )}
 

@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import * as WebBrowser from 'expo-web-browser';
 import { View, Text, TouchableOpacity, Linking, Image } from 'react-native';
+import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
 
 const About = ({
     description,
@@ -10,8 +11,16 @@ const About = ({
     companyName,
     proprietorProfilePic,
     document,
-    proprietorId
+    proprietorId,
+    coordinates,
 }) => {
+    const mapRegion = coordinates ? {
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude,
+        latitudeDelta: 0.0922,
+        longitudeDelta: 0.0421,
+    } : null;
+
     return (
         <View className="p-4">
             <View className="mb-4">
@@ -32,7 +41,7 @@ const About = ({
                 </TouchableOpacity>
             )}
 
-            <View>
+            <View className="mb-6">
                 <Text className="font-rbold text-2xl text-white">Proprietor Info</Text>
                 <View className="flex-row items-center justify-between mt-2">
                     <View className="flex-row items-center justify-start gap-4">
@@ -74,6 +83,42 @@ const About = ({
                     </View>
                 </View>
             </View>
+
+            {coordinates && (
+                <View className="mb-4">
+                    <Text className="font-rbold text-2xl text-white mb-3">Location</Text>
+                    <View className="rounded-lg overflow-hidden">
+                        <MapView
+                            className="w-full h-[200px]"
+                            provider={PROVIDER_GOOGLE}
+                            initialRegion={mapRegion}
+                            scrollEnabled={false}
+                            zoomEnabled={false}
+                            rotateEnabled={false}
+                            pitchEnabled={false}
+                        >
+                            <Marker
+                                coordinate={coordinates}
+                                title="Property Location"
+                            >
+                                <View className="bg-chartreuse p-2 rounded-full">
+                                    <Ionicons name="location" size={24} color="#352C1F" />
+                                </View>
+                            </Marker>
+                        </MapView>
+                        <TouchableOpacity
+                            className="absolute bottom-3 right-3 bg-chartreuse p-2 rounded-lg flex-row items-center"
+                            onPress={() => {
+                                const url = `https://www.google.com/maps/search/?api=1&query=${coordinates.latitude},${coordinates.longitude}`;
+                                Linking.openURL(url);
+                            }}
+                        >
+                            <Ionicons name="navigate" size={20} color="#352C1F" />
+                            <Text className="text-darkUmber-dark font-rbold ml-2">Directions</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            )}
         </View>
     );
 }

@@ -51,7 +51,7 @@ const PropertyDetails = () => {
                             <Text className="text-white text-xl font-rbold">{property?.title}</Text>
                             <View className="flex-row items-center">
                                 <Ionicons name="location-outline" size={20} color="#BBCC13" />
-                                <Text className="text-white text-base ml-2 font-rregular">{property?.location}</Text>
+                                <Text className="text-white text-base ml-2 font-rregular">{property?.country}</Text>
                             </View>
                         </View>
 
@@ -92,6 +92,7 @@ const PropertyDetails = () => {
                     <About
                         description={property?.description}
                         document={property?.document}
+                        coordinates={property?.coordinates}
                     />
                 )}
 

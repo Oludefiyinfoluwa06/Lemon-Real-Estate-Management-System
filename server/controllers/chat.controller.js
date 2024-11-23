@@ -15,18 +15,6 @@ const sendMessage = async (req, res) => {
         const newMessage = new Chat({ senderId, receiverId, message });
         await newMessage.save();
 
-        const receiverSocketId = req.userSocketMap.get(receiverId.toString());
-
-        if (receiverSocketId) {
-            req.io.to(receiverSocketId).emit('receiveMessage', {
-                senderId,
-                receiverId,
-                message,
-                _id: newMessage._id,
-                createdAt: newMessage.createdAt
-            });
-        }
-
         return res.status(201).json({
             success: true,
             data: newMessage

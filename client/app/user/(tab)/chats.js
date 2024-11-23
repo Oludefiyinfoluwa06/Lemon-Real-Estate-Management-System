@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 import { useChat } from '../../../contexts/ChatContext';
 import EmptyChatList from '../../../components/common/EmptyChatList';
 import { useAuth } from '../../../contexts/AuthContext';
+import { Ionicons } from '@expo/vector-icons';
 
 const Chats = () => {
     const { chatList, fetchChats } = useChat();
@@ -45,10 +46,14 @@ const Chats = () => {
                 className="flex-row items-center justify-between bg-darkUmber-light p-4 mb-2 rounded-lg"
             >
                 <View className="flex-row items-center justify-start">
-                    <Image
-                        source={{ uri: item.profilePicture }}
-                        className="w-10 h-10 rounded-full"
-                    />
+                    {item.profilePicture ? (
+                        <Image
+                            source={{ uri: item.profilePicture }}
+                            className="w-10 h-10 rounded-full"
+                        />
+                    ) : (
+                        <Ionicons name="person-circle-outline" size={40} color="#FFFFFF" />
+                    )}
                     <View className="flex-1 ml-4">
                         <Text className="text-white font-medium text-lg">{item.name}</Text>
                         <Text className="text-frenchGray-light">{item.lastMessage}</Text>

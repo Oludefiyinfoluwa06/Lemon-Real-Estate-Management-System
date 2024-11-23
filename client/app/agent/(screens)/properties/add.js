@@ -13,7 +13,8 @@ import { useProperty } from '../../../../contexts/PropertyContext';
 import ErrorOrMessageModal from '../../../../components/common/ErrorOrMessageModal';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import LocationSelector from '../../../../components/agent/properties/LocationSelector';
+import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
+import LocationMap from '../../../../components/agent/properties/LocationMap';
 
 const AddProperty = () => {
     const [currentStep, setCurrentStep] = useState(1);
@@ -23,7 +24,6 @@ const AddProperty = () => {
     const [status, setStatus] = useState('');
     const [price, setPrice] = useState('');
     const [currency, setCurrency] = useState('');
-    const [location, setLocation] = useState('');
     const [country, setCountry] = useState('');
     const [propertyImages, setPropertyImages] = useState(Array(4).fill(null));
     const [propertyImagesUri, setPropertyImagesUri] = useState([]);
@@ -31,7 +31,7 @@ const AddProperty = () => {
     const [document, setDocument] = useState('');
     const [uploading, setUploading] = useState(false);
     const [currencies, setCurrencies] = useState([]);
-    const [coordinates, setCoordinates] = useState(null);
+    const [coordinates, setCoordinates] = useState({});
 
     const router = useRouter();
 
@@ -77,7 +77,7 @@ const AddProperty = () => {
             }
             setCurrentStep(currentStep + 1);
         } else {
-            if (price === '' || currency === '' || location === '') {
+            if (price === '' || currency === '' || country === '') {
                 return setPropertyError('Input fields must not be empty');
             }
             setCurrentStep(currentStep + 1);
@@ -92,7 +92,7 @@ const AddProperty = () => {
         if (propertyImages.filter(Boolean).length === 0 || video === '' || document === '') {
             return setPropertyError('Select the necessary files');
         }
-        await uploadProperty(title, description, category, status, price, currency, location, country, propertyImages, video, document);
+        await uploadProperty(title, description, category, status, price, currency, country, propertyImages, video, document, coordinates);
     };
 
     const uploadFileToCloudinary = async (file) => {
@@ -232,6 +232,10 @@ const AddProperty = () => {
         }
     };
 
+    const handleLocationSelect = (coordinates) => {
+        setCoordinates(coordinates);
+    };
+
     return (
         <SafeAreaView className="bg-darkUmber-dark h-full">
             <ScrollView showsVerticalScrollIndicator={false} className="p-4">
@@ -318,15 +322,6 @@ const AddProperty = () => {
                             onSelect={(value) => setCurrency(`${value.name} - ${value.symbol}`)}
                         />
 
-                        <View>
-                            <LocationSelector
-                                onLocationSelect={({ coords, address }) => {
-                                    setCoordinates(coords);
-                                    setLocation(address);
-                                }}
-                            />
-                        </View>
-
                         <TextInput
                             placeholder="Country"
                             placeholderTextColor="#FFFFFF"
@@ -334,6 +329,9 @@ const AddProperty = () => {
                             onChangeText={(text) => setCountry(text)}
                             className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
                         />
+
+                        <Text className="font-rbold mb-4 text-xl text-white">Select property Location</Text>
+                        <LocationMap onLocationSelect={handleLocationSelect} />
 
                         <View className="flex flex-row justify-between mt-4">
                             <Button text="Back" bg={false} onPress={handlePreviousStep} />
