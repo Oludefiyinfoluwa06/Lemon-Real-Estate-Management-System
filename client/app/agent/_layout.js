@@ -12,7 +12,7 @@ const AgentLayout = () => {
                 options={{ headerShown: false }}
             />
             <Stack.Screen
-                name='profile'
+                name='wallet'
                 options={{ headerShown: false }}
             />
             <Stack.Screen

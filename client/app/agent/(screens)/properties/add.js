@@ -64,7 +64,7 @@ const AddProperty = () => {
                 });
                 setCurrencies(Array.from(currencyMap.entries()).map(([name, symbol]) => ({ name, symbol })));
             } catch (error) {
-                console.error('Error setting currencies:', error);
+                console.log('Error setting currencies:', error);
             }
         };
         getCurrency();
@@ -209,7 +209,7 @@ const AddProperty = () => {
 
                 uploadMediaToCloudinary(result.assets[0], 'video');
             } catch (error) {
-                console.error('Error processing video metadata:', error);
+                console.log('Error processing video metadata:', error);
                 setPropertyError('Unable to process the video. Please try again.');
             } finally {
                 sound.unloadAsync();

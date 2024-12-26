@@ -185,7 +185,7 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
                         >
                             <Picker.Item key='select' label='Select country' value='' />
                             {countries.map((country) => (
-                                <Picker.Item key={country?.cca2} label={country?.name.common} value={country?.name.common} />
+                                <Picker.Item key={country?.name.common} label={country?.name.common} value={country?.name.common} />
                             ))}
                         </Picker>
                     </View>

@@ -117,7 +117,7 @@ const fetchChats = async (req, res) => {
 
         return res.status(200).json(chatList);
     } catch (error) {
-        console.error('Error fetching chats:', error);
+        console.log('Error fetching chats:', error);
         return res.status(500).json({
             message: 'An error occurred while fetching chats',
             error: error.message
