@@ -10,11 +10,12 @@ import { config } from '../../config';
 import { FLUTTERWAVE_SECRET_KEY } from '@env';
 
 const Payment = () => {
-    const { user, updateProfile } = useAuth();
+    const { user } = useAuth();
     const [isLoading, setIsLoading] = useState(false);
     const [paymentDetails, setPaymentDetails] = useState(null);
     const [error, setError] = useState('');
     const [isProcessingTrial, setIsProcessingTrial] = useState(false);
+    const [remainingTime, setRemainingTime] = useState('');
 
     const params = useLocalSearchParams();
 
@@ -23,6 +24,28 @@ const Payment = () => {
     };
 
     const PAYMENT_ENDPOINT = `${config.API_BASE_URL}/api/payment/initialize`;
+
+    useEffect(() => {
+        if (user.isOnTrial) {
+            const interval = setInterval(() => {
+                const now = new Date();
+                const end = new Date(user.trialEndDate);
+                const timeDiff = end - now;
+
+                if (timeDiff <= 0) {
+                    clearInterval(interval);
+                    setRemainingTime('Trial ended');
+                } else {
+                    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeDiff / (1000 * 60 * 60)) % 24);
+                    const minutes = Math.floor((timeDiff / (1000 * 60)) % 60);
+                    setRemainingTime(`${days}d ${hours}h ${minutes}m left`);
+                }
+            }, 1000);
+
+            return () => clearInterval(interval);
+        }
+    }, [user.isOnTrial, user.trialEndDate]);
 
     useEffect(() => {
         const setupPayment = async () => {
@@ -322,7 +345,12 @@ const Payment = () => {
                             </View>
 
                             <TouchableOpacity
-                                className="bg-[#BBCC13] p-4 rounded-lg items-center"
+                                className={`bg-[#BBCC13] p-4 rounded-lg items-center ${
+                                    isLoading || user.isOnTrial
+                                        ? 'bg-gray-400'
+                                        : 'bg-[#BBCC13]'
+                                    }
+                                `}
                                 onPress={initiatePayment}
                                 disabled={isLoading}
                             >
@@ -332,12 +360,18 @@ const Payment = () => {
                             </TouchableOpacity>
 
                             <TouchableOpacity
-                                className="bg-[#BBCC13] p-4 rounded-lg items-center"
+                                className={`p-4 rounded-lg items-center ${
+                                    isProcessingTrial || user.isOnTrial ? 'bg-gray-400' : 'bg-[#BBCC13]'
+                                }`}
                                 onPress={handleTrialRequest}
-                                disabled={isProcessingTrial}
+                                disabled={isProcessingTrial || user.isOnTrial}
                             >
                                 <Text className="text-white font-rbold text-lg">
-                                    {isProcessingTrial ? 'Processing...' : '6 months trial'}
+                                    {isProcessingTrial
+                                        ? 'Processing...'
+                                        : user.isOnTrial
+                                        ? remainingTime || 'Calculating...'
+                                        : 'Start 6 months trial'}
                                 </Text>
                             </TouchableOpacity>
                         </View>
