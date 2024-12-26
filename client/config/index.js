@@ -1,3 +1,3 @@
 export const config = {
-  API_BASE_URL: 'http://192.168.243.68:5000',
+  API_BASE_URL: 'https://lemon-api.vercel.app',
 };
