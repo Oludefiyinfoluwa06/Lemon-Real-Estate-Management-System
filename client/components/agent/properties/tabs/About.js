@@ -7,8 +7,8 @@ const About = ({ description, document, coordinates }) => {
     const mapRegion = coordinates ? {
         latitude: coordinates.latitude,
         longitude: coordinates.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
+        latitudeDelta: 0.001,
+        longitudeDelta: 0.001,
     } : null;
 
     return (
@@ -39,10 +39,14 @@ const About = ({ description, document, coordinates }) => {
                             className="w-full h-[200px]"
                             provider={PROVIDER_GOOGLE}
                             initialRegion={mapRegion}
-                            scrollEnabled={false}
-                            zoomEnabled={false}
+                            scrollEnabled={true}
+                            zoomEnabled={true}
                             rotateEnabled={false}
                             pitchEnabled={false}
+                            showsUserLocation={true}
+                            showsBuildings={true}
+                            showsTraffic={true}
+                            showsPointsOfInterest={true}
                         >
                             <Marker
                                 coordinate={coordinates}
