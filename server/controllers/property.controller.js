@@ -227,7 +227,7 @@ const searchProperty = async (req, res) => {
             properties,
         });
     } catch (error) {
-        console.error(error);
+        console.log(error);
         res.status(500).json({ message: 'An error occurred' });
     }
 };

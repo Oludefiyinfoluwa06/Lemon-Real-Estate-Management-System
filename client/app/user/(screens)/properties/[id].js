@@ -1,44 +1,68 @@
 import { useEffect, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, Animated, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useProperty } from '../../../../contexts/PropertyContext';
 import About from '../../../../components/user/properties/tabs/About';
 import Gallery from '../../../../components/user/properties/tabs/Gallery';
 import Review from '../../../../components/user/properties/tabs/Review';
 import { formatPrice } from '../../../../services/formatPrice';
+import { SharedElement } from 'react-navigation-shared-element';
+
+const { width } = Dimensions.get('window');
 
 const PropertyDetails = () => {
     const params = useLocalSearchParams();
     const { getProperty, property, propertyLoading, updateProperty } = useProperty();
     const [activeTab, setActiveTab] = useState("about");
-
     const [userId, setUserId] = useState("");
+    const [scrollY] = useState(new Animated.Value(0));
+
+    const headerHeight = scrollY.interpolate({
+        inputRange: [0, 350],
+        outputRange: [350, 250],
+        extrapolate: 'clamp'
+    });
+
+    const headerOpacity = scrollY.interpolate({
+        inputRange: [0, 350],
+        outputRange: [1, 0.8],
+        extrapolate: 'clamp'
+    });
 
     const getUserId = async () => {
-        return await AsyncStorage.getItem('userId');
+        try {
+            return await AsyncStorage.getItem('userId') || "";
+        } catch (error) {
+            console.log('Error getting userId:', error);
+            return "";
+        }
     }
 
     useEffect(() => {
         const fetchUserId = async () => {
-            const userId = await getUserId();
-            setUserId(userId);
+            const id = await getUserId();
+            setUserId(id);
         }
-
         fetchUserId();
     }, []);
 
     useEffect(() => {
         const getPropertyDetails = async () => {
-            await getProperty(params.id);
+            if (params?.id) {
+                try {
+                    await getProperty(params.id);
+                } catch (error) {
+                    console.log('Error fetching property:', error);
+                }
+            }
         };
-
         getPropertyDetails();
-    }, []);
+    }, [params?.id]);
 
-    if (propertyLoading) {
+    if (propertyLoading || !property) {
         return (
             <SafeAreaView className="flex-1 bg-darkUmber-dark justify-center items-center">
                 <ActivityIndicator size="large" color="#BBCC13" />
@@ -46,95 +70,136 @@ const PropertyDetails = () => {
         );
     }
 
+    const renderTabButton = (tabName, icon) => (
+        <TouchableOpacity
+            className={`px-6 py-3 rounded-full flex-row items-center space-x-2
+                ${activeTab === tabName ? 'bg-chartreuse' : 'bg-darkUmber-light'}`}
+            onPress={() => setActiveTab(tabName)}
+        >
+            <MaterialCommunityIcons
+                name={icon}
+                size={20}
+                color={activeTab === tabName ? '#1A1A1A' : '#BBCC13'}
+            />
+            <Text className={`text-base ${activeTab === tabName ? 'text-darkUmber-dark font-rbold' : 'text-white font-rregular'}`}>
+                {tabName.charAt(0).toUpperCase() + tabName.slice(1)}
+            </Text>
+        </TouchableOpacity>
+    );
+
+    const handleUpdateProperty = async () => {
+        if (property?._id) {
+            try {
+                await updateProperty(property._id);
+            } catch (error) {
+                console.log('Error updating property:', error);
+            }
+        }
+    };
+
     return (
         <SafeAreaView className="flex-1 bg-darkUmber-dark">
-            <ScrollView showsVerticalScrollIndicator={false} className="flex-1">
-                <View className="relative h-[350px]">
-                    {property?.images && <Image
-                        source={{ uri: property?.images[0] }}
+            <Animated.ScrollView
+                showsVerticalScrollIndicator={false}
+                className="flex-1"
+                onScroll={Animated.event(
+                    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+                    { useNativeDriver: false }
+                )}
+                scrollEventThrottle={16}
+            >
+                <Animated.View className="relative" style={{ height: headerHeight }}>
+                    <Animated.Image
+                        source={{ uri: property?.images?.[0] || null }}
                         className="w-full h-full"
                         resizeMode="cover"
-                    />}
-                    <TouchableOpacity
-                        className="absolute top-4 left-4 bg-transparentBlack rounded-full p-2"
-                        onPress={() => router.back()}
-                    >
-                        <Ionicons name='chevron-back-outline' size={28} color="#FFFFFF" />
-                    </TouchableOpacity>
+                        style={{ opacity: headerOpacity }}
+                    />
+                    <View className="absolute top-4 w-full flex-row justify-between px-4">
+                        <TouchableOpacity
+                            className="bg-transparentBlack rounded-full p-3"
+                            onPress={() => router.back()}
+                        >
+                            <Ionicons name='chevron-back-outline' size={24} color="#FFFFFF" />
+                        </TouchableOpacity>
 
-                    <TouchableOpacity
-                        className="absolute top-4 right-4 bg-transparentBlack rounded-full p-3"
-                        onPress={async () => await updateProperty(property._id)}
-                    >
-                        <Ionicons name={property.savedBy && property.savedBy.includes(userId) ? "heart" : "heart-outline"} color={"#BBCC13"} size={25} />
-                    </TouchableOpacity>
-
-                    <View className="absolute bottom-0 left-0 right-0 bg-darkUmber-light p-4 flex-row justify-between items-center">
-                        <View className="flex-1 items-start">
-                            <Text className="text-white text-xl font-rbold">{property?.title}</Text>
-                            <View className="flex-row items-center">
-                                <Ionicons name="location-outline" size={20} color="#BBCC13" />
-                                <Text className="text-white text-base ml-2 font-rregular">{property?.country}</Text>
-                            </View>
-                        </View>
-
-                        <View className="items-end">
-                            <Text className="text-chartreuse text-xl font-rmedium">
-                                {property?.currency ? property?.currency.split(' - ')[1] : ''} {formatPrice(property?.price)}
-                                {property?.status === 'Sale' ? '' : '/year'}
-                            </Text>
-                            <View className="bg-chartreuse px-3 py-1 rounded-full mt-2">
-                                <Text className="text-darkUmber-dark font-rbold">For {property?.status}</Text>
-                            </View>
-                        </View>
+                        <TouchableOpacity
+                            className="bg-transparentBlack rounded-full p-3"
+                            onPress={handleUpdateProperty}
+                        >
+                            <Ionicons
+                                name={property?.savedBy?.includes(userId) ? "heart" : "heart-outline"}
+                                color={property?.savedBy?.includes(userId) ? "#BBCC13" : "#FFFFFF"}
+                                size={24}
+                            />
+                        </TouchableOpacity>
                     </View>
+
+                    <View className="absolute bottom-0 left-0 right-0 bg-darkUmber-light px-4 py-6 rounded-t-3xl">
+                        <View className="flex-row justify-between items-start mb-4">
+                            <View className="flex-1">
+                                <Text className="text-white text-2xl font-rbold mb-2">{property?.title || 'Property Title'}</Text>
+                                <View className="flex-row items-center">
+                                    <Ionicons name="location-outline" size={20} color="#BBCC13" />
+                                    <Text className="text-white text-base ml-2 font-rregular">{property?.country || 'Location'}</Text>
+                                </View>
+                            </View>
+
+                            <View className="items-end">
+                                <View className="bg-chartreuse px-4 py-2 rounded-full mb-2">
+                                    <Text className="text-darkUmber-dark font-rbold">For {property?.status || 'Sale'}</Text>
+                                </View>
+                                <Text className="text-chartreuse text-xl font-rmedium">
+                                    {property?.currency ? property.currency.split(' - ')[1] : ''} {formatPrice(property?.price || 0)}
+                                    {property?.status === 'Sale' ? '' : '/year'}
+                                </Text>
+                            </View>
+                        </View>
+
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            className="flex-row space-x-4"
+                        >
+                            {renderTabButton('about', 'information-outline')}
+                            {renderTabButton('gallery', 'image-multiple-outline')}
+                            {renderTabButton('review', 'star-outline')}
+                        </ScrollView>
+                    </View>
+                </Animated.View>
+
+                <View className="px-3 py-6">
+                    {activeTab === 'about' && property && (
+                        <SharedElement id={`property.${property._id}.about`}>
+                            <About
+                                description={property.description}
+                                proprietorName={property.agentName}
+                                proprietorContact={property.agentContact}
+                                companyName={property.companyName}
+                                proprietorProfilePic={property.agentProfilePicture}
+                                document={property.document}
+                                proprietorId={property.agentId}
+                                coordinates={property.coordinates}
+                            />
+                        </SharedElement>
+                    )}
+
+                    {activeTab === 'gallery' && property && (
+                        <SharedElement id={`property.${property._id}.gallery`}>
+                            <Gallery
+                                photos={property.images}
+                                video={property.video}
+                            />
+                        </SharedElement>
+                    )}
+
+                    {activeTab === 'review' && property && (
+                        <SharedElement id={`property.${property._id}.review`}>
+                            <Review propertyId={property._id} />
+                        </SharedElement>
+                    )}
                 </View>
-
-                <View className="flex-row items-center justify-between p-4">
-                    <TouchableOpacity
-                        className={`px-4 py-2 ${activeTab === 'about' ? 'border-b-2 border-b-chartreuse' : ''}`}
-                        onPress={() => setActiveTab("about")}
-                    >
-                        <Text className="text-xl text-white font-rregular">About</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        className={`px-4 py-2 ${activeTab === 'gallery' ? 'border-b-2 border-b-chartreuse' : ''}`}
-                        onPress={() => setActiveTab("gallery")}
-                    >
-                        <Text className="text-xl text-white font-rregular">Gallery</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        className={`px-4 py-2 ${activeTab === 'review' ? 'border-b-2 border-b-chartreuse' : ''}`}
-                        onPress={() => setActiveTab("review")}
-                    >
-                        <Text className="text-xl text-white font-rregular">Reviews</Text>
-                    </TouchableOpacity>
-                </View>
-
-                {activeTab === 'about' && (
-                    <About
-                        description={property?.description}
-                        proprietorName={property?.agentName}
-                        proprietorContact={property?.agentContact}
-                        companyName={property?.companyName}
-                        proprietorProfilePic={property?.agentProfilePicture}
-                        document={property?.document}
-                        proprietorId={property?.agentId}
-                        coordinates={property?.coordinates}
-                    />
-                )}
-
-                {activeTab === 'gallery' && (
-                    <Gallery
-                        photos={property?.images}
-                        video={property?.video}
-                    />
-                )}
-
-                {activeTab === 'review' && (
-                    <Review propertyId={property?._id} />
-                )}
-            </ScrollView>
+            </Animated.ScrollView>
         </SafeAreaView>
     );
 };

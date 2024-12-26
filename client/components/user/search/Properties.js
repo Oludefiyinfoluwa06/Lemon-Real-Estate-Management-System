@@ -44,7 +44,7 @@ const Properties = ({
                             <Text className="text-white font-rbold text-lg">{property.title}</Text>
                             <View className="flex-row items-center justify-start flex-1 mt-1">
                                 <Ionicons name='location-outline' color={'#BBCC13'} size={18} />
-                                <Text className="font-rregular text-[14px] text-white ml-1">{property.location}</Text>
+                                <Text className="font-rregular text-[14px] text-white ml-1">{property.country}</Text>
                             </View>
                             <View className="flex-row items-center justify-start flex-1 mt-1">
                                 <Ionicons name='pricetag-outline' color={'#BBCC13'} size={18} />

@@ -74,15 +74,15 @@ const TabLayout = () => {
                 }}
             />
             <Tabs.Screen
-                name='wallet'
+                name='profile'
                 options={{
                     headerShown: false,
                     tabBarIcon: ({ color, focused }) => (
                         <TabIcon
-                            icon={'wallet-outline'}
+                            icon={'person-outline'}
                             color={color}
                             focused={focused}
-                            name='Wallet'
+                            name='Profile'
                         />
                     ),
                 }}

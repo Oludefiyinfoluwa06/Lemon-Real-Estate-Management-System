@@ -76,6 +76,81 @@ export const AuthProvider = ({ children }) => {
         }
     };
 
+    const forgotPassword = async (email) => {
+        setAuthLoading(true);
+
+        try {
+            const response = await axios.post(`${config.API_BASE_URL}/api/user/forgot-password`, { email });
+
+            setAuthMessage(response.data.message);
+
+            setTimeout(() => {
+                setAuthMessage('');
+
+                router.replace(`/verify-otp?email=${email}`);
+            }, 3000);
+
+        } catch (err) {
+            setAuthError(err.response.data.message);
+
+            setTimeout(() => {
+                setAuthError('');
+            }, 3000);
+        } finally {
+            setAuthLoading(false);
+        }
+    };
+
+    const verifyOtp = async (email, otp) => {
+        setAuthLoading(true);
+
+        try {
+            const response = await axios.post(`${config.API_BASE_URL}/api/user/verify-otp`, { email, otp });
+
+            setAuthMessage(response.data.message);
+
+            setTimeout(() => {
+                setAuthMessage('');
+
+                router.replace(`/reset-password?email=${email}`);
+            }, 3000);
+
+        } catch (err) {
+            setAuthError(err.response.data.message);
+
+            setTimeout(() => {
+                setAuthError('');
+            }, 3000);
+        } finally {
+            setAuthLoading(false);
+        }
+    };
+
+    const resetPassword = async (email, password) => {
+        setAuthLoading(true);
+
+        try {
+            const response = await axios.post(`${config.API_BASE_URL}/api/user/reset-password`, { email, password });
+
+            setAuthMessage(response.data.message);
+
+            setTimeout(() => {
+                setAuthMessage('');
+
+                router.replace('/login');
+            }, 3000);
+
+        } catch (err) {
+            setAuthError(err.response.data.message);
+
+            setTimeout(() => {
+                setAuthError('');
+            }, 3000);
+        } finally {
+            setAuthLoading(false);
+        }
+    };
+
     const uploadProfilePicture = async (role, image) => {
         setAuthLoading(true);
 
@@ -201,6 +276,9 @@ export const AuthProvider = ({ children }) => {
             authMessage,
             register,
             login,
+            forgotPassword,
+            verifyOtp,
+            resetPassword,
             uploadProfilePicture,
             getUser,
             user,

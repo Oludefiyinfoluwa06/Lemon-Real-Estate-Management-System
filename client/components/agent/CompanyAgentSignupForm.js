@@ -19,7 +19,7 @@ const CompanyAgentSignupForm = ({ agentDetails, setAgentDetails }) => {
                 const countriesData = await fetchCountries();
                 setCountries(countriesData);
             } catch (error) {
-                console.error('Error fetching countries:', error);
+                console.log('Error fetching countries:', error);
             }
         };
 
@@ -63,7 +63,9 @@ const CompanyAgentSignupForm = ({ agentDetails, setAgentDetails }) => {
     const handleCountryChange = (country) => {
         setSelectedCountry(country);
         const countryDetails = countries.find(c => c.name.common === country);
-        const countryCode = countryDetails.idd.root + (countryDetails.idd.suffixes ? countryDetails.idd.suffixes[0] : '');
+        const countryCode = countryDetails?.idd?.root
+            ? countryDetails.idd.root + (countryDetails.idd.suffixes ? countryDetails.idd.suffixes[0] : '')
+            : '';
         setAgentDetails({ ...agentDetails, country: countryDetails.name.common, countryCode });
     };
 
@@ -128,7 +130,7 @@ const CompanyAgentSignupForm = ({ agentDetails, setAgentDetails }) => {
                         >
                             <Picker.Item key='select' label='Select country' value='' />
                             {countries.map((country) => (
-                                <Picker.Item key={country.cca2} label={country.name.common} value={country.name.common} />
+                                <Picker.Item key={country?.name.common} label={country?.name.common} value={country?.name.common} />
                             ))}
                         </Picker>
                     </View>

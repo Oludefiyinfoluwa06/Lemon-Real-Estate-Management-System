@@ -25,7 +25,7 @@ const Chats = () => {
                 try {
                     await fetchChats(user._id);
                 } catch (error) {
-                    console.error('Error fetching chats:', error);
+                    console.log('Error fetching chats:', error);
                 }
             }
         };

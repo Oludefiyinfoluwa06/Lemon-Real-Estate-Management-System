@@ -1,16 +1,13 @@
 import { useEffect } from 'react';
 import { View, Text, Image, ScrollView, StatusBar, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as NavigationBar from 'expo-navigation-bar';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
-import { useAuth } from '../../contexts/AuthContext';
-import Button from '../../components/agent/profile/Button';
+import { useAuth } from '../../../contexts/AuthContext';
+import Button from '../../../components/agent/profile/Button';
 
 const Profile = () => {
     const { getUser, user, logout } = useAuth();
-
-    NavigationBar.setBackgroundColorAsync("#212A2B");
 
     useEffect(() => {
         const getUserDetails = async () => {
@@ -81,6 +78,8 @@ const Profile = () => {
                         onClick={async () => await logout()}
                     />
                 </View>
+
+                <View className="mb-[40px]" />
             </ScrollView>
 
             <StatusBar backgroundColor={'#3D454B'} />

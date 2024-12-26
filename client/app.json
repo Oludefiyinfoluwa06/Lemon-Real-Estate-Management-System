@@ -15,7 +15,23 @@
         }
       ]
     ],
-    "name": "lemon",
-    "slug": "lemon"
+    "name": "Lemon",
+    "icon": "./assets/common/logo.png",
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "c7e609ae-b1e2-4adf-b25e-776ac6dfd8a4"
+      }
+    },
+    "android": {
+      "package": "com.oftotech.lemon",
+      "config": {
+        "googleMaps": {
+          "apiKey": "@GOOGLE_MAPS_API_KEY"
+        }
+      }
+    }
   }
 }
