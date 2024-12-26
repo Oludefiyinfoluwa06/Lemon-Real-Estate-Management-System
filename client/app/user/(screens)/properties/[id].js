@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { router, useLocalSearchParams } from 'expo-router';
-import { View, Text, ScrollView, Image, TouchableOpacity, ActivityIndicator, Animated, Dimensions } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -10,8 +10,6 @@ import Gallery from '../../../../components/user/properties/tabs/Gallery';
 import Review from '../../../../components/user/properties/tabs/Review';
 import { formatPrice } from '../../../../services/formatPrice';
 import { SharedElement } from 'react-navigation-shared-element';
-
-const { width } = Dimensions.get('window');
 
 const PropertyDetails = () => {
     const params = useLocalSearchParams();

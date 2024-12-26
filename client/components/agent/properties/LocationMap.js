@@ -31,8 +31,8 @@ const LocationMap = ({ onLocationSelect }) => {
                 const newRegion = {
                     latitude: location.coords.latitude,
                     longitude: location.coords.longitude,
-                    latitudeDelta: 0.0922,
-                    longitudeDelta: 0.0421,
+                    latitudeDelta: 0.001,
+                    longitudeDelta: 0.001,
                 };
 
                 setRegion(newRegion);
@@ -71,8 +71,14 @@ const LocationMap = ({ onLocationSelect }) => {
             provider={PROVIDER_GOOGLE}
             region={region}
             onPress={handleMapPress}
+            scrollEnabled={true}
+            zoomEnabled={true}
+            rotateEnabled={false}
+            pitchEnabled={false}
             showsUserLocation={true}
-            showsMyLocationButton={true}
+            showsBuildings={true}
+            showsTraffic={true}
+            showsPointsOfInterest={true}
         >
             {selectedLocation && (
                 <Marker

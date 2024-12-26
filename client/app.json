@@ -16,7 +16,7 @@
       ]
     ],
     "name": "Lemon",
-    "icon": "./assets/common/logo.png",
+    "icon": "./assets/common/logo-2.jpg",
     "extra": {
       "router": {
         "origin": false

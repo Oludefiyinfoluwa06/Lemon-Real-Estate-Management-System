@@ -33,6 +33,11 @@ const userSchema = new mongoose.Schema({
         enum: ['buyer', 'individual-agent', 'company-agent'],
         required: true
     },
+    isIdVerified: {
+        type: Boolean,
+        default: false,
+        required: () => this.role === 'individual-agent' || this.role === 'company-agent',
+    },
     hasPaid: {
         type: Boolean,
         default: false,

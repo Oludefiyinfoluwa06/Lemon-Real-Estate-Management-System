@@ -13,7 +13,6 @@ import { useProperty } from '../../../../contexts/PropertyContext';
 import ErrorOrMessageModal from '../../../../components/common/ErrorOrMessageModal';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import MapView, { PROVIDER_GOOGLE } from 'react-native-maps';
 import LocationMap from '../../../../components/agent/properties/LocationMap';
 
 const AddProperty = () => {
@@ -220,7 +219,10 @@ const AddProperty = () => {
     const handleDocumentUpload = async () => {
         try {
             const result = await DocumentPicker.getDocumentAsync({
-                type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                type: [
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'application/msword',
+                ],
                 copyToCacheDirectory: true,
             });
 

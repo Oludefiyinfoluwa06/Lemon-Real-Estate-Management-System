@@ -18,7 +18,7 @@ const About = ({
         latitude: coordinates.latitude,
         longitude: coordinates.longitude,
         latitudeDelta: 0.001,
-        longitudeDelta: 0.001
+        longitudeDelta: 0.001,
     } : null;
 
     return (
@@ -96,9 +96,9 @@ const About = ({
                             zoomEnabled={true}
                             rotateEnabled={false}
                             pitchEnabled={false}
-                            showsUserLocation={false}
+                            showsUserLocation={true}
                             showsBuildings={true}
-                            showsTraffic={false}
+                            showsTraffic={true}
                             showsPointsOfInterest={true}
                         >
                             <Marker
