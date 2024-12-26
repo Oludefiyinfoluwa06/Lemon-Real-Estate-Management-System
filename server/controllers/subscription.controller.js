@@ -143,7 +143,7 @@ const checkTrialEligibility = async (req, res) => {
             });
         }
 
-        const isCompleted = new Date(user.trialEndDate).getTime() < Date.now();
+        const isCompleted = user.trialEndDate === null ? false : new Date(user.trialEndDate).getTime() < Date.now();
 
         const isOngoing = new Date(user.trialEndDate).getTime() >= Date.now();
 
