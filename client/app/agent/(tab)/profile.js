@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View, Text, Image, ScrollView, StatusBar, TouchableOpacity } from 'react-native';
+import { View, Text, Image, ScrollView, StatusBar, TouchableOpacity, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
@@ -60,12 +60,17 @@ const Profile = () => {
                     <Button
                         icon="lock-closed-outline"
                         text="Privacy policy"
-                        onClick={() => router.push('/agent/privacy-policy')}
+                        onClick={() => Linking.openURL('https://lemon-theta-seven.vercel.app')}
                     />
                     <Button
                         icon="document-text-outline"
                         text="Terms and conditions"
-                        onClick={() => router.push('/agent/terms-condition')}
+                        onClick={() => Linking.openURL('https://lemon-theta-seven.vercel.app')}
+                    />
+                    <Button
+                        icon="id-card-outline"
+                        text="Verify your ID"
+                        onClick={() => router.push('/agent/verify-id')}
                     />
                     <Button
                         icon="card-outline"

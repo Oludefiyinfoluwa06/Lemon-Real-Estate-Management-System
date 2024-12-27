@@ -333,7 +333,9 @@ const AddProperty = () => {
                         />
 
                         <Text className="font-rbold mb-4 text-xl text-white">Select property Location</Text>
-                        <LocationMap onLocationSelect={handleLocationSelect} />
+                        <View className="h-[400px] w-full mb-4">
+                            <LocationMap onLocationSelect={handleLocationSelect} />
+                        </View>
 
                         <View className="flex flex-row justify-between mt-4">
                             <Button text="Back" bg={false} onPress={handlePreviousStep} />
