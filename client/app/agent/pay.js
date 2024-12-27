@@ -16,6 +16,7 @@ const Payment = () => {
     const [error, setError] = useState('');
     const [isProcessingTrial, setIsProcessingTrial] = useState(false);
     const [remainingTime, setRemainingTime] = useState('');
+    const [paymentCountdown, setPaymentCountdown] = useState('');
 
     const params = useLocalSearchParams();
 
@@ -46,6 +47,28 @@ const Payment = () => {
             return () => clearInterval(interval);
         }
     }, [user.isOnTrial, user.trialEndDate]);
+
+    useEffect(() => {
+        if (user.hasPaid) {
+            const interval = setInterval(() => {
+                const now = new Date();
+                const end = new Date(user.paymentEndDate);
+                const timeDiff = end - now;
+
+                if (timeDiff <= 0) {
+                    clearInterval(interval);
+                    setPaymentCountdown('Payment period ended');
+                } else {
+                    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((timeDiff / (1000 * 60 * 60)) % 24);
+                    const minutes = Math.floor((timeDiff / (1000 * 60)) % 60);
+                    setPaymentCountdown(`${days}d ${hours}h ${minutes}m left`);
+                }
+            }, 1000);
+
+            return () => clearInterval(interval);
+        }
+    }, [user.hasPaid, user.paymentEndDate]);
 
     useEffect(() => {
         const setupPayment = async () => {
@@ -346,22 +369,22 @@ const Payment = () => {
 
                             <TouchableOpacity
                                 className={`bg-[#BBCC13] p-4 rounded-lg items-center ${
-                                    isLoading || user.isOnTrial
+                                    isLoading || user.isOnTrial || user.hasPaid
                                         ? 'bg-gray-400'
                                         : 'bg-[#BBCC13]'
                                     }
                                 `}
                                 onPress={initiatePayment}
-                                disabled={isLoading}
+                                disabled={isLoading || user.isOnTrial || user.hasPaid}
                             >
                                 <Text className="text-white font-rbold text-lg">
-                                    {isLoading ? 'Processing...' : 'Pay Now'}
+                                    {isLoading ? 'Processing...' : user.hasPaid ? paymentCountdown || 'Calculating...' : 'Pay Now'}
                                 </Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
                                 className={`p-4 rounded-lg items-center ${
-                                    isProcessingTrial || user.isOnTrial ? 'bg-gray-400' : 'bg-[#BBCC13]'
+                                    isProcessingTrial || user.isOnTrial || user.hasPaid ? 'bg-gray-400' : 'bg-[#BBCC13]'
                                 }`}
                                 onPress={handleTrialRequest}
                                 disabled={isProcessingTrial || user.isOnTrial}

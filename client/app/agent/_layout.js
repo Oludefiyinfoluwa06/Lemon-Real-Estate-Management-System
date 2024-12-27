@@ -16,6 +16,10 @@ const AgentLayout = () => {
                 options={{ headerShown: false }}
             />
             <Stack.Screen
+                name='verify-id'
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
                 name='subscription'
                 options={{ headerShown: false }}
             />

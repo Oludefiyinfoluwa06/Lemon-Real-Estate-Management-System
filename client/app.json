@@ -28,16 +28,7 @@
     "android": {
       "package": "com.oftotech.lemon",
       "permissions": ["INTERNET", "ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
-      "usesCleartextTraffic": true,
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/common/logo-2.jpg",
-        "backgroundColor": "#212A2B"
-      },
-      "config": {
-        "googleMaps": {
-          "apiKey": "@GOOGLE_MAPS_API_KEY"
-        }
-      }
+      "usesCleartextTraffic": true
     }
   }
 }
