@@ -1,5 +1,15 @@
-const { register, login, getUser, updateUser, forgotPassword, verifyOtp, resetPassword } = require('../controllers/user.controller');
+const {
+    register,
+    login,
+    getUser,
+    updateUser,
+    forgotPassword,
+    verifyOtp,
+    resetPassword,
+    idVerification
+} = require('../controllers/user.controller');
 const { authenticate } = require('../middlewares/authenticate');
+const { upload } = require('../middlewares/image-upload');
 
 const router = require('express').Router();
 
@@ -10,5 +20,6 @@ router.post('/verify-otp', verifyOtp);
 router.post('/reset-password', resetPassword);
 router.put('/update', authenticate, updateUser);
 router.get('/', authenticate, getUser);
+router.post('/id/verify', authenticate, upload.single('idImage'), idVerification);
 
 module.exports = router;

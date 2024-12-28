@@ -98,7 +98,7 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
     const handleSignup = async () => {
         if (
             userDetails.email === '' ||
-            userDetails.password === '' 
+            userDetails.password === ''
         ) {
             return setAuthError('Input fields must not be empty');
         }
