@@ -123,14 +123,13 @@ const forgotPassword = async (req, res) => {
             html: emailBody
         }
 
-        transporter.sendMail(mailOptions, async (err, info) => {
+        await transporter.sendMail(mailOptions, async (err, info) => {
             if (err) {
                 return res.json({ 'error': 'An error occurred' });
             }
-
-            await Otp.create({ email, otp, otpExpires });
         });
 
+        await Otp.create({ email, otp, otpExpires });
 
         return res.status(200).json({ message: 'Otp sent successfully' });
     } catch (error) {
