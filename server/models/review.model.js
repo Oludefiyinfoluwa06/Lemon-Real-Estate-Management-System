@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const reviewSchema = new mongoose.Schema({
     text: { type: String, required: true },
-    userProfilePicture: { type: String, required: true },
+    userProfilePicture: { type: String },
     userName: { type: String, required: true },
     propertyId: {
         type: mongoose.Schema.Types.ObjectId,

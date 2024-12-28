@@ -1,5 +1,4 @@
 const { isValidObjectId } = require("mongoose");
-const mongoose = require("mongoose");
 const User = require("../models/user.model");
 const Property = require("../models/property.model");
 
@@ -231,7 +230,6 @@ const searchProperty = async (req, res) => {
         res.status(500).json({ message: 'An error occurred' });
     }
 };
-
 
 const deleteProperty = async (req, res) => {
     try {

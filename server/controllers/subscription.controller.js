@@ -63,6 +63,13 @@ const startPayment = async (req, res) => {
             });
         }
 
+        if (user.hasPaid) {
+            return res.status(404).json({
+                status: 'error',
+                message: 'You\'re currently on a paid subscription'
+            });
+        }
+
         const startDate = new Date();
         const endDate = new Date(startDate.getTime() + PAYMENT_DURATION);
 

@@ -12,7 +12,7 @@ const createReview = async (req, res) => {
         }
 
         if (!isValidObjectId(userId)) {
-            return res.status(400).json({ message: 'Invalid property Id' });
+            return res.status(400).json({ message: 'Invalid user Id' });
         }
 
         const user = await User.findById(userId);
