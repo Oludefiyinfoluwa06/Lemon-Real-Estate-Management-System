@@ -17,6 +17,7 @@
     "express": "^4.18.3",
     "flutterwave-node-v3": "^1.1.10",
     "gridfs-stream": "^1.1.1",
+    "idanalyzer": "^1.2.7",
     "jsonwebtoken": "^9.0.2",
     "method-override": "^3.0.0",
     "mongodb": "^5.9.1",

@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { isValidObjectId } = require("mongoose");
 const nodemailer = require('nodemailer');
+const { IDVerificationService } = require("../services/id-validation.service");
 
 const createAccessToken = async (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: 360000 });
@@ -227,6 +228,45 @@ const getUser = async (req, res) => {
     }
 }
 
+const idVerification = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: 'No image file provided'
+            });
+        }
+
+        const countryCode = req.body.countryCode?.toUpperCase();
+        const documentType = req.body.documentType?.toUpperCase();
+
+        if (!countryCode) {
+            return res.status(400).json({
+                success: false,
+                message: 'Country code is required'
+            });
+        }
+
+        const verificationService = new IDVerificationService();
+
+        const result = await verificationService.verifyDocument(
+            req.file.buffer,
+            countryCode,
+            documentType
+        );
+
+        await User.findByIdAndUpdate(req.user._id, { isIdVerified: true }, { new: true });
+
+        return res.status(200).json(result);
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: error.message || 'Internal server error during ID verification',
+        });
+    }
+};
+
 module.exports = {
     register,
     login,
@@ -235,4 +275,5 @@ module.exports = {
     resetPassword,
     updateUser,
     getUser,
+    idVerification,
 }
