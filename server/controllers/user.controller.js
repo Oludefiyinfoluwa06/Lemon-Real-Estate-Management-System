@@ -180,7 +180,7 @@ const resetPassword = async (req, res) => {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const updatedUser = await User.findByIdAndUpdate(user._id, { password: hashedPassword });
+    const updatedUser = await User.findByIdAndUpdate(user._id, { password: hashedPassword }, { new: true }).select('-password');
 
     return res.status(200).json({ message: 'Password was reset successfully', user: updatedUser });
 }
