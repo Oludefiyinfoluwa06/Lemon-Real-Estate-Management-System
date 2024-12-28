@@ -4,12 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { isValidObjectId } = require("mongoose");
 const nodemailer = require('nodemailer');
-const axios = require('axios');
 const { IDVerificationService } = require("../services/id-validation.service");
-
-const TRULIOO_BASE_URL = 'https://gateway.trulioo.com/trial';
-const OCR_API_ENDPOINT = 'https://your-ocr-service.com/api/v1/extract';
-const TRULIOO_CONFIGURATION_NAME = 'Identity Verification';
 
 const createAccessToken = async (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: 360000 });
