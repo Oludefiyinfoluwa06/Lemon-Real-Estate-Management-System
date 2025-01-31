@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "lint": "prettier . --write & prettier --check ."
   },
   "author": "Timothy",
   "license": "ISC",
@@ -19,6 +20,7 @@
     "gridfs-stream": "^1.1.1",
     "idanalyzer": "^1.2.7",
     "jsonwebtoken": "^9.0.2",
+    "mammoth": "^1.9.0",
     "method-override": "^3.0.0",
     "mongodb": "^5.9.1",
     "mongoose": "^8.4.0",
@@ -27,6 +29,10 @@
     "multer-gridfs-storage": "^5.0.2",
     "nodemailer": "^6.9.16",
     "nodemon": "^3.1.0",
+    "pdf2image": "^1.2.3",
+    "prettier": "^3.4.2",
+    "puppeteer": "^24.1.1",
+    "sharp": "^0.33.5",
     "socket.io": "^4.8.0",
     "validator": "^13.11.0",
     "ws": "^8.18.0"

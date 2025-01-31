@@ -1,79 +1,79 @@
-import React, { useState, useEffect } from 'react';
-import { Alert, View, StyleSheet } from 'react-native';
-import { WebView } from 'react-native-webview';
-import * as Location from 'expo-location';
+import React, { useState, useEffect } from "react";
+import { Alert, View, StyleSheet } from "react-native";
+import { WebView } from "react-native-webview";
+import * as Location from "expo-location";
 
 const LocationMap = ({ onLocationSelect }) => {
-    const [region, setRegion] = useState({
-        latitude: 37.78825,
-        longitude: -122.4324,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-    });
+  const [region, setRegion] = useState({
+    latitude: 37.78825,
+    longitude: -122.4324,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  });
 
-    const [selectedLocation, setSelectedLocation] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
-    useEffect(() => {
-        const getLocation = async () => {
-            try {
-                const { status } = await Location.requestForegroundPermissionsAsync();
+  useEffect(() => {
+    const getLocation = async () => {
+      try {
+        const { status } = await Location.requestForegroundPermissionsAsync();
 
-                if (status !== 'granted') {
-                    Alert.alert(
-                        'Permission Denied',
-                        'Please enable location services to use this feature.',
-                        [{ text: 'OK' }]
-                    );
-                    return;
-                }
-
-                const location = await Location.getCurrentPositionAsync({});
-                setRegion({
-                    latitude: location.coords.latitude,
-                    longitude: location.coords.longitude,
-                    latitudeDelta: 0.001,
-                    longitudeDelta: 0.001,
-                });
-
-                setSelectedLocation({
-                    latitude: location.coords.latitude,
-                    longitude: location.coords.longitude,
-                });
-            } catch (error) {
-                Alert.alert('Error', 'Could not fetch location.');
-            }
-        };
-
-        getLocation();
-    }, []);
-
-    const handleMapClick = (event) => {
-        const { latlng } = event;
-        const newRegion = {
-            latitude: latlng.lat,
-            longitude: latlng.lng,
-            latitudeDelta: region.latitudeDelta,
-            longitudeDelta: region.longitudeDelta,
-        };
-
-        setRegion(newRegion);
-        setSelectedLocation(latlng);
-
-        if (onLocationSelect) {
-            onLocationSelect(latlng);
+        if (status !== "granted") {
+          Alert.alert(
+            "Permission Denied",
+            "Please enable location services to use this feature.",
+            [{ text: "OK" }],
+          );
+          return;
         }
+
+        const location = await Location.getCurrentPositionAsync({});
+        setRegion({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+          latitudeDelta: 0.001,
+          longitudeDelta: 0.001,
+        });
+
+        setSelectedLocation({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+      } catch (error) {
+        Alert.alert("Error", "Could not fetch location.");
+      }
     };
 
-    const handleMessage = (event) => {
-        try {
-            const data = JSON.parse(event.nativeEvent.data);
-            handleMapClick(data);
-        } catch (error) {
-            console.warn('Error parsing WebView message:', error);
-        }
+    getLocation();
+  }, []);
+
+  const handleMapClick = (event) => {
+    const { latlng } = event;
+    const newRegion = {
+      latitude: latlng.lat,
+      longitude: latlng.lng,
+      latitudeDelta: region.latitudeDelta,
+      longitudeDelta: region.longitudeDelta,
     };
 
-    const mapHtml = `
+    setRegion(newRegion);
+    setSelectedLocation(latlng);
+
+    if (onLocationSelect) {
+      onLocationSelect(latlng);
+    }
+  };
+
+  const handleMessage = (event) => {
+    try {
+      const data = JSON.parse(event.nativeEvent.data);
+      handleMapClick(data);
+    } catch (error) {
+      console.warn("Error parsing WebView message:", error);
+    }
+  };
+
+  const mapHtml = `
         <!DOCTYPE html>
         <html lang="en">
         <head>
@@ -147,31 +147,31 @@ const LocationMap = ({ onLocationSelect }) => {
         </html>
     `;
 
-    return (
-        <View style={styles.container}>
-            <WebView
-                originWhitelist={['*']}
-                source={{ html: mapHtml }}
-                style={styles.webview}
-                onMessage={handleMessage}
-                javaScriptEnabled={true}
-                domStorageEnabled={true}
-            />
-        </View>
-    );
+  return (
+    <View style={styles.container}>
+      <WebView
+        originWhitelist={["*"]}
+        source={{ html: mapHtml }}
+        style={styles.webview}
+        onMessage={handleMessage}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+      />
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        width: '100%',
-        height: '100%',
-        borderRadius: 8,
-        overflow: 'hidden',
-    },
-    webview: {
-        width: '100%',
-        height: '100%',
-    },
+  container: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  webview: {
+    width: "100%",
+    height: "100%",
+  },
 });
 
 export default LocationMap;

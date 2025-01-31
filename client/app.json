@@ -27,7 +27,11 @@
     },
     "android": {
       "package": "com.oftotech.lemon",
-      "permissions": ["INTERNET", "ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
+      "permissions": [
+        "INTERNET",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
       "usesCleartextTraffic": true
     }
   }
