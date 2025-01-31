@@ -31,6 +31,7 @@ export const PropertyProvider = ({ children }) => {
     const [officeBuildings, setOfficeBuildings] = useState([]);
     const [industrialBuildings, setIndustrialBuildings] = useState([]);
     const [newListings, setNewListings] = useState([]);
+    const [sponsoredProperties, setSponsoredProperties] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
 
@@ -83,6 +84,7 @@ export const PropertyProvider = ({ children }) => {
 
             setAgentProperties(response.data.agentProperties);
             setProperties(response.data.properties);
+            setSponsoredProperties(response.data.sponsoredProperties);
             setSavedProperties(savedProperties);
             setNumberOfProperties(response.data.numberOfProperties);
             setPropertiesForLease(response.data.propertiesForLease);
@@ -241,6 +243,7 @@ export const PropertyProvider = ({ children }) => {
                 officeBuildings,
                 industrialBuildings,
                 newListings,
+                sponsoredProperties,
                 currentPage,
                 totalPages,
                 getProperty,

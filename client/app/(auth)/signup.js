@@ -66,14 +66,14 @@ const Signup = () => {
                 <View className="flex-row items-center justify-center mb-6 w-full">
                     <Button
                         type='agent'
-                        text='Sign Up as Proprietor'
+                        text='Sign Up as Proprietor (Property owner)'
                         bg={selected.agent}
                         onPress={() => toggleSelection('agent')}
                     />
 
                     <Button
                         type='user'
-                        text='Sign Up as User'
+                        text='Sign Up as User (property buyer)'
                         bg={selected.user}
                         onPress={() => toggleSelection('user')} />
                 </View>

@@ -11,6 +11,7 @@ const chatRoute = require('./routes/chat.route');
 const paymentRoute = require('./routes/payment.route');
 const emailRoute = require('./routes/email.route');
 const subscriptionRoute = require('./routes/subscription.route');
+const advertisementRoute = require('./routes/advertisement.route');
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -35,5 +36,6 @@ app.use('/api/chat', chatRoute);
 app.use('/api/payment', paymentRoute);
 app.use('/api/email', emailRoute);
 app.use('/api/subscription', subscriptionRoute);
+app.use('/api/advertise', advertisementRoute);
 
 module.exports = app;

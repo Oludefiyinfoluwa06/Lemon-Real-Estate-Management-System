@@ -60,19 +60,24 @@ const getProperties = async (req, res) => {
 
         const totalPropertiesCount = await Property.countDocuments();
 
-        const properties = await Property.find().skip(skip).limit(10);
-        let rentProperties = await Property.find({ status: 'Rent' });
-        let leaseProperties = await Property.find({ status: 'Lease' });
-        let saleProperties = await Property.find({ status: 'Sale' });
+        const properties = await Property.find()
+            .sort({ isOnAdvertisement: -1, _id: 1 })
+            .skip(skip)
+            .limit(10);
+        let rentProperties = await Property.find({ status: 'Rent' }).limit(10);
+        let leaseProperties = await Property.find({ status: 'Lease' }).limit(10);
+        let saleProperties = await Property.find({ status: 'Sale' }).limit(10);
+        let sponsoredProperties = await Property.find({ isOnAdvertisement: true }).limit(10);
 
-        let lands = await Property.find({ category: 'Land' });
-        let houses = await Property.find({ category: 'Houses' });
-        let shopSpaces = await Property.find({ category: 'Shop Spaces' });
-        let officeBuildings = await Property.find({ category: 'Office Building' });
-        let industrialBuildings = await Property.find({ category: 'Industrial Building' });
+        let lands = await Property.find({ category: 'Land' }).limit(10);
+        let houses = await Property.find({ category: 'Houses' }).limit(10);
+        let shopSpaces = await Property.find({ category: 'Shop Spaces' }).limit(10);
+        let officeBuildings = await Property.find({ category: 'Office Building' }).limit(10);
+        let industrialBuildings = await Property.find({ category: 'Industrial Building' }).limit(10);
 
         const shuffleArray = (array) => array.sort(() => Math.random() - 0.5);
 
+        sponsoredProperties = shuffleArray(sponsoredProperties);
         rentProperties = shuffleArray(rentProperties);
         leaseProperties = shuffleArray(leaseProperties);
         saleProperties = shuffleArray(saleProperties);
@@ -84,14 +89,15 @@ const getProperties = async (req, res) => {
 
         const oneMonthAgo = new Date();
         oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-        const newListings = await Property.find({ createdAt: { $gte: oneMonthAgo } });
+        const newListings = await Property.find({ createdAt: { $gte: oneMonthAgo } }).limit(10);
 
         return res.status(200).json({
             agentProperties,
+            sponsoredProperties,
             numberOfProperties: agentProperties.length,
-            propertiesForRent: rentProperties.length,
-            propertiesForLease: leaseProperties.length,
-            propertiesForSale: saleProperties.length,
+            propertiesForRent: agentRentProperties.length,
+            propertiesForLease: agentLeaseProperties.length,
+            propertiesForSale: agentSaleProperties.length,
             properties,
             agentRentProperties,
             agentLeaseProperties,

@@ -24,6 +24,7 @@ const propertySchema = new mongoose.Schema({
     companyName: { type: String, required: true },
     agentProfilePicture: { type: String },
     document: { type: String, required: true },
+    isDocumentPublic: { type: Boolean, default: false },
     savedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     coordinates: {
         latitude: {
@@ -35,7 +36,10 @@ const propertySchema = new mongoose.Schema({
             required: true,
         },
     },
-    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }]
+    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Review' }],
+    isOnAdvertisement: { type: Boolean, default: false },
+    advertisementStartDate: { type: Date, default: null },
+    advertisementEndDate: { type: Date, default: null }
 }, { timestamps: true });
 
 const Property = mongoose.model('properties', propertySchema);

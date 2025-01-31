@@ -11,6 +11,7 @@ const About = ({
     companyName,
     proprietorProfilePic,
     document,
+    isDocumentPublic,
     proprietorId,
     coordinates,
 }) => {
@@ -21,7 +22,7 @@ const About = ({
                 <Text className="text-white font-rregular mt-2">{description}</Text>
             </View>
 
-            {document && (
+            {(document && isDocumentPublic) && (
                 <TouchableOpacity
                     className="mb-6 p-4 bg-chartreuse rounded-lg flex-row items-center justify-between"
                     onPress={() => WebBrowser.openBrowserAsync(document)}

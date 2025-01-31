@@ -7,6 +7,7 @@ import NewListings from '../../../components/user/NewListings';
 import Status from '../../../components/user/Status';
 import { useProperty } from '../../../contexts/PropertyContext';
 import NoProperties from '../../../components/user/NoProperties';
+import SponsoredProperties from '../../../components/user/SponsoredProperties';
 
 const Home = () => {
     const { getProperties, properties } = useProperty();
@@ -27,6 +28,7 @@ const Home = () => {
                     <NoProperties type='none' />
                 ) : (
                     <>
+                        <SponsoredProperties />
                         <Categories />
                         <Status />
                         <NewListings />

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, Alert, TouchableOpacity, StatusBar } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import * as ImagePicker from 'expo-image-picker';
+import * as DocumentPicker from 'expo-document-picker';
 import { config, DOCUMENT_TYPE_DESCRIPTIONS } from '../../config';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { fetchCountries } from '../../services/countryApi';
@@ -39,7 +39,7 @@ const VerifyId = () => {
     const [idDocument, setIdDocument] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const { user } = useAuth();
+    const { user, getUser } = useAuth();
 
     const router = useRouter();
 
@@ -91,18 +91,10 @@ const VerifyId = () => {
         setCountryCode(countryDetails?.cca2);
     };
 
-    const pickImage = async () => {
-        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-        if (!permissionResult.granted) {
-            Alert.alert('Permission Required', 'Please grant access to your photo library.');
-            return;
-        }
-
-        const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            quality: 1,
+    const pickDocument = async () => {
+        const result = await DocumentPicker.getDocumentAsync({
+            type: ['image/*', 'application/pdf'],
+            copyToCacheDirectory: true
         });
 
         if (!result.canceled) {
@@ -140,6 +132,7 @@ const VerifyId = () => {
 
             if (response.data) {
                 Alert.alert('ID Verification', 'Your ID has been verified successfully');
+                getUser();
             } else {
                 Alert.alert('Extraction Failed', result.error || 'Unable to process ID.');
             }
@@ -191,7 +184,7 @@ const VerifyId = () => {
                     <View>
                         <CustomButton
                             text="Select ID Document"
-                            onPress={pickImage}
+                            onPress={pickDocument}
                             variant="primary"
                         />
 

@@ -68,6 +68,10 @@ const PropertyDetails = () => {
         );
     }
 
+    const handleAdvertise = () => {
+        router.push(`/agent/advertise?propertyId=${property._id}`);
+    };
+
     const renderTabButton = (tabName, icon) => (
         <TouchableOpacity
             className={`px-6 py-3 rounded-full flex-row items-center space-x-2
@@ -180,6 +184,13 @@ const PropertyDetails = () => {
                             <Review propertyId={property._id} />
                         </SharedElement>
                     )}
+
+                    <TouchableOpacity
+                        className="mt-6 bg-chartreuse p-4 rounded-lg items-center"
+                        onPress={handleAdvertise}
+                    >
+                        <Text className="text-darkUmber-dark font-rbold text-lg">Advertise</Text>
+                    </TouchableOpacity>
                 </View>
             </Animated.ScrollView>
         </SafeAreaView>

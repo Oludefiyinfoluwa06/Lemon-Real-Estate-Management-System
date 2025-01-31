@@ -176,6 +176,7 @@ const PropertyDetails = () => {
                                 companyName={property.companyName}
                                 proprietorProfilePic={property.agentProfilePicture}
                                 document={property.document}
+                                isDocumentPublic={property.isDocumentPublic}
                                 proprietorId={property.agentId}
                                 coordinates={property.coordinates}
                             />

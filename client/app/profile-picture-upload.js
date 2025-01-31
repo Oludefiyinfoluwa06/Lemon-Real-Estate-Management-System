@@ -63,15 +63,6 @@ const ProfilePictureUpload = () => {
 
                 <View className="w-full mt-6">
                     <Button
-                        text="Skip"
-                        bg={false}
-                        onPress={async () => {
-                            await AsyncStorage.setItem('role', role);
-                            router.replace(`${role === 'company-agent' || role === 'individual-agent' ? '/agent/dashboard' : '/user/home'}`)
-                        }}
-                    />
-
-                    <Button
                         text={authLoading ? "Loading..." : "Upload"}
                         bg={true}
                         onPress={handleUploadProfilePicture}

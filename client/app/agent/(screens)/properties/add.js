@@ -219,10 +219,7 @@ const AddProperty = () => {
     const handleDocumentUpload = async () => {
         try {
             const result = await DocumentPicker.getDocumentAsync({
-                type: [
-                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                    'application/msword',
-                ],
+                type: ['application/pdf'],
                 copyToCacheDirectory: true,
             });
 

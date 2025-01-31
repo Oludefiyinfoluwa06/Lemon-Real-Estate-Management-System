@@ -27,6 +27,14 @@ const AgentLayout = () => {
                 name='pay'
                 options={{ headerShown: false }}
             />
+            <Stack.Screen
+                name='advertise-pay'
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name='advertise'
+                options={{ headerShown: false }}
+            />
         </Stack>
     );
 }
