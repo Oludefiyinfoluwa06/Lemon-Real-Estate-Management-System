@@ -22,7 +22,7 @@ router.put("/update", authenticate, updateUser);
 router.get("/", authenticate, getUser);
 router.post(
   "/id/verify",
-  authenticate,
+  // authenticate,
   upload.single("idImage"),
   idVerification,
 );

@@ -106,7 +106,7 @@ const VerifyId = () => {
 
   const pickDocument = async () => {
     const result = await DocumentPicker.getDocumentAsync({
-      type: ["image/*", "application/pdf"],
+      type: ["image/*"],
       copyToCacheDirectory: true,
     });
 

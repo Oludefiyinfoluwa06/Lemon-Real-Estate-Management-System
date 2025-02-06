@@ -1,5 +1,7 @@
 const axios = require("axios");
 const FormData = require("form-data");
+const sharp = require("sharp");
+const fileType = require("file-type");
 const {
   REGION_MAPPING,
   SECURITY_FEATURE_REQUIREMENTS,
@@ -21,40 +23,6 @@ class IDVerificationService {
       }
     }
     return "US";
-  }
-
-  async preprocessFile(file) {
-    let fileBuffer;
-    let fileExtension;
-
-    if (typeof file === "string") {
-      fileExtension = path.extname(file).toLowerCase().slice(1);
-      fileBuffer = fs.readFileSync(file);
-    } else if (file instanceof Buffer) {
-      const fileTypeResult = await fileType.fromBuffer(file);
-      if (!fileTypeResult) {
-        throw new Error("Unable to detect file type");
-      }
-      fileExtension = fileTypeResult.ext;
-      fileBuffer = file;
-    } else {
-      throw new Error("Invalid file input. Provide file path or buffer.");
-    }
-
-    if (!this.supportedFileTypes.includes(fileExtension)) {
-      throw new Error(`Unsupported file type: ${fileExtension}`);
-    }
-
-    if (fileBuffer.length > this.maxFileSize) {
-      throw new Error("File exceeds maximum size of 10MB");
-    }
-
-    if (fileExtension === "pdf") {
-      return this.convertPDFToImage(fileBuffer);
-    } else if (fileExtension === "doc") {
-    }
-
-    return sharp(fileBuffer).toFormat("jpeg").toBuffer();
   }
 
   async convertPDFToImage(pdfBuffer) {
@@ -166,53 +134,42 @@ class IDVerificationService {
   }
 
   async verifyDocument(file, countryCode, documentType = null) {
-    const {
-      countryCode,
-      documentType = null,
-      conversionOptions = {
-        quality: 80,
-        format: "jpeg",
-        width: 1700,
-      },
-    } = options;
+    const documentConverter = new DocumentConverter();
+    const conversionOptions = {
+      quality: 80,
+      format: "jpeg",
+      width: 1700,
+    };
 
     try {
       if (!countryCode) {
-        throw new Error("Country code is required");
+        throw new Error("Select a country");
       }
 
       let fileBuffer;
       let fileExtension;
 
-      if (typeof file === "string") {
-        fileExtension = path.extname(file).toLowerCase().slice(1);
-        fileBuffer = fs.readFileSync(file);
-      } else if (file instanceof Buffer) {
-        const fileTypeResult = await fileType.fromBuffer(file);
+      if (typeof file.buffer === "string") {
+        fileExtension = path.extname(file.buffer).toLowerCase().slice(1);
+        fileBuffer = fs.readFileSync(file.buffer);
+      } else if (file.buffer instanceof Buffer) {
+        const fileTypeResult = await fileType.fromBuffer(file.buffer);
         if (!fileTypeResult) {
           throw new Error("Unable to detect file type");
         }
         fileExtension = fileTypeResult.ext;
-        fileBuffer = file;
+        fileBuffer = file.buffer;
       } else {
         throw new Error("Invalid file input. Provide file path or buffer.");
       }
 
-      const convertibleTypes = ["doc", "docx", "pdf"];
-
       const imageTypes = ["jpg", "jpeg", "png"];
 
       let imageBuffers;
-      if (convertibleTypes.includes(fileExtension)) {
-        imageBuffers = await DocumentConverter.convertDocToImages(
-          fileBuffer,
-          conversionOptions,
-        );
-      } else if (imageTypes.includes(fileExtension)) {
-        const sharp = require("sharp");
+      if (imageTypes.includes(fileExtension)) {
         imageBuffers = [await sharp(fileBuffer).toFormat("jpeg").toBuffer()];
       } else {
-        throw new Error(`Unsupported file type: ${fileExtension}`);
+        throw new Error(`Unsupported file type: ${fileExtension}. Supported types include ${imageTypes.join(', ')}`);
       }
 
       const imageBuffer = imageBuffers[0];
@@ -244,6 +201,8 @@ class IDVerificationService {
 
       const response = await axios.post(apiUrl, form, { headers });
       const result = response.data;
+
+      console.log(result);
 
       if (!result || result.error) {
         throw new Error(result.error?.message || "ID verification failed");

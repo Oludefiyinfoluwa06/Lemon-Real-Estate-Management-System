@@ -1,9 +1,9 @@
-const User = require("../models/user.model");
-const Otp = require("../models/otp.model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { isValidObjectId } = require("mongoose");
 const nodemailer = require("nodemailer");
+const User = require("../models/user.model");
+const Otp = require("../models/otp.model");
 const { IDVerificationService } = require("../services/id-validation.service");
 
 const createAccessToken = async (id) => {
@@ -118,9 +118,9 @@ const forgotPassword = async (req, res) => {
     const otpExpires = new Date(Date.now() + 2 * 60 * 60 * 1000);
 
     const emailBody = `
-            <h1>Otp Request</h1>
-            <p>The otp you requested is ${otp} and it expires in 2 hours</p>
-        `;
+      <h1>Otp Request</h1>
+      <p>The otp you requested is ${otp} and it expires in 2 hours</p>
+    `;
 
     const transporter = nodemailer.createTransport({
       service: "gmail",
@@ -268,7 +268,7 @@ const idVerification = async (req, res) => {
     if (!countryCode) {
       return res.status(400).json({
         success: false,
-        message: "Country code is required",
+        message: "Select a country",
       });
     }
 
