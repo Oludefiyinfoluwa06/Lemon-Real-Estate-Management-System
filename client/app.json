@@ -13,6 +13,12 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow Lemon to use your location."
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Lemon to access your camera to scan ID documents."
+        }
       ]
     ],
     "name": "Lemon",
@@ -27,7 +33,11 @@
     },
     "android": {
       "package": "com.oftotech.lemon",
-      "permissions": ["INTERNET", "ACCESS_FINE_LOCATION", "ACCESS_COARSE_LOCATION"],
+      "permissions": [
+        "INTERNET",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
       "usesCleartextTraffic": true
     }
   }

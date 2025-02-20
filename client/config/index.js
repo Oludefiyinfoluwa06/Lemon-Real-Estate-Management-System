@@ -1,72 +1,72 @@
 export const config = {
-  API_BASE_URL: 'https://lemon-api.vercel.app',
+  API_BASE_URL: "https://lemon-api.vercel.app",
 };
 
 export const DOCUMENT_TYPE_DESCRIPTIONS = {
-  'PP': 'Passport',
-  'DL': 'Driver\'s License',
-  'ID': 'National ID Card',
-  'BC': 'Birth Certificate',
-  'RC': 'Residence Card',
+  PP: "Passport",
+  DL: "Driver's License",
+  ID: "National ID Card",
+  BC: "Birth Certificate",
+  RC: "Residence Card",
 
-  'NG': {
-    'NIN': 'National Identity Number Card',
-    'BVN': 'Bank Verification Number Card',
-    'VC': 'Voter\'s Card',
+  NG: {
+    NIN: "National Identity Number Card",
+    BVN: "Bank Verification Number Card",
+    VC: "Voter's Card",
   },
 
-  'UK': {
-    'NINO': 'National Insurance Number Card',
+  UK: {
+    NINO: "National Insurance Number Card",
   },
 
-  'FR': {
-    'CNI': 'Carte Nationale d\'Identité',
-    'TS': 'Titre de Séjour',
+  FR: {
+    CNI: "Carte Nationale d'Identité",
+    TS: "Titre de Séjour",
   },
 
-  'DE': {
-    'PA': 'Personalausweis',
+  DE: {
+    PA: "Personalausweis",
   },
 
-  'IT': {
-    'CIE': 'Carta d\'Identità Elettronica',
-    'CF': 'Codice Fiscale',
+  IT: {
+    CIE: "Carta d'Identità Elettronica",
+    CF: "Codice Fiscale",
   },
 
-  'ES': {
-    'NIE': 'Número de Identidad de Extranjero',
-    'DNI': 'Documento Nacional de Identidad',
+  ES: {
+    NIE: "Número de Identidad de Extranjero",
+    DNI: "Documento Nacional de Identidad",
   },
 
-  'USA': {
-    'SSC': 'Social Security Card',
-    'SC': 'State ID Card',
-    'MC': 'Medicare Card',
+  USA: {
+    SSC: "Social Security Card",
+    SC: "State ID Card",
+    MC: "Medicare Card",
   },
 
-  'IN': {
-    'AA': 'Aadhaar Card',
-    'PAN': 'Permanent Account Number Card',
+  IN: {
+    AA: "Aadhaar Card",
+    PAN: "Permanent Account Number Card",
   },
 
-  'CN': {
-    'SFZ': 'Resident Identity Card',
-    'HKB': 'Hukou Book',
+  CN: {
+    SFZ: "Resident Identity Card",
+    HKB: "Hukou Book",
   },
 
-  'SG': {
-    'NRIC': 'National Registration Identity Card',
-    'FIN': 'Foreign Identification Number',
+  SG: {
+    NRIC: "National Registration Identity Card",
+    FIN: "Foreign Identification Number",
   },
 
-  'BR': {
-    'RG': 'Registro Geral',
-    'CNH': 'Carteira Nacional de Habilitação',
-    'CPF': 'Cadastro de Pessoas Físicas',
+  BR: {
+    RG: "Registro Geral",
+    CNH: "Carteira Nacional de Habilitação",
+    CPF: "Cadastro de Pessoas Físicas",
   },
 
-  'MX': {
-    'INE': 'Instituto Nacional Electoral Card',
-    'RFC': 'Registro Federal de Contribuyentes',
+  MX: {
+    INE: "Instituto Nacional Electoral Card",
+    RFC: "Registro Federal de Contribuyentes",
   },
 };
