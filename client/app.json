@@ -13,10 +13,16 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow Lemon to use your location."
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Lemon to access your camera to scan ID documents."
+        }
       ]
     ],
     "name": "Lemon",
-    "icon": "./assets/common/logo.png",
+    "icon": "./assets/common/logo-2.jpg",
     "extra": {
       "router": {
         "origin": false
@@ -27,11 +33,12 @@
     },
     "android": {
       "package": "com.oftotech.lemon",
-      "config": {
-        "googleMaps": {
-          "apiKey": "@GOOGLE_MAPS_API_KEY"
-        }
-      }
+      "permissions": [
+        "INTERNET",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
+      "usesCleartextTraffic": true
     }
   }
 }

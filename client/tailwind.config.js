@@ -3,22 +3,22 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        "chartreuse": "#BBCC13",
-        "frenchGray": {
-          "light": "#57606D",
-          "dark": "#3D454B",
+        chartreuse: "#BBCC13",
+        frenchGray: {
+          light: "#57606D",
+          dark: "#3D454B",
         },
-        "darkBrown": "#616A60",
-        "darkUmber": {
-          "light": "#2B3B3C",
-          "dark": "#212A2B"
+        darkBrown: "#616A60",
+        darkUmber: {
+          light: "#2B3B3C",
+          dark: "#212A2B",
         },
-        transparentBlack: 'rgba(0,0,0,0.45)',
-        transparentWhite: 'rgba(255,255,255,0.1)',
-        textError: '#721c24',
-        bgError: '#f8d7da',
-        textSuccess: '#173a28',
-        bgSuccess: '#cdeeaa',
+        transparentBlack: "rgba(0,0,0,0.45)",
+        transparentWhite: "rgba(255,255,255,0.1)",
+        textError: "#721c24",
+        bgError: "#f8d7da",
+        textSuccess: "#173a28",
+        bgSuccess: "#cdeeaa",
       },
       fontFamily: {
         rthin: ["Raleway-Thin", "sans-serif"],
@@ -34,5 +34,4 @@ module.exports = {
     },
   },
   plugins: [],
-}
-
+};

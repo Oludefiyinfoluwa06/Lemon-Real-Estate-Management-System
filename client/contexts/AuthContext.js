@@ -1,216 +1,322 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
-import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
-import { config } from '../config';
-import { getToken } from '../services/getToken';
+import React, { createContext, useState, useContext, useEffect } from "react";
+import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+import { config } from "../config";
+import { getToken } from "../services/getToken";
 
-import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from '@env';
+import { CLOUDINARY_CLOUD_NAME, CLOUDINARY_UPLOAD_PRESET } from "@env";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    const [authLoading, setAuthLoading] = useState(false);
-    const [authError, setAuthError] = useState('');
-    const [authMessage, setAuthMessage] = useState('');
-    const [user, setUser] = useState({});
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState("");
+  const [authMessage, setAuthMessage] = useState("");
+  const [user, setUser] = useState({});
 
-    useEffect(() => {
-        setAuthError('');
-        setAuthMessage('');
-    }, []);
+  useEffect(() => {
+    setAuthError("");
+    setAuthMessage("");
+  }, []);
 
-    const register = async (userData) => {
-        setAuthLoading(true);
+  const register = async (userData) => {
+    setAuthLoading(true);
 
-        try {
-            const response = await axios.post(`${config.API_BASE_URL}/api/user/register`, userData);
+    try {
+      const response = await axios.post(
+        `${config.API_BASE_URL}/api/user/register`,
+        userData,
+      );
 
-            setAuthMessage(response.data.message);
+      setAuthMessage(response.data.message);
 
-            await AsyncStorage.setItem('token', response.data.accessToken);
-            await AsyncStorage.setItem('userId', response.data.id);
+      await AsyncStorage.setItem("token", response.data.accessToken);
+      await AsyncStorage.setItem("userId", response.data.id);
 
-            setTimeout(() => {
-                setAuthMessage('');
+      setTimeout(() => {
+        setAuthMessage("");
 
-                router.replace(`/profile-picture-upload?role=${response.data.role}`);
-            }, 3000);
-        } catch (err) {
-            setAuthError(err.response.data.message);
+        router.replace(`/profile-picture-upload?role=${response.data.role}`);
+      }, 3000);
+    } catch (err) {
+      setAuthError(err.response.data.message);
 
-            setTimeout(() => {
-                setAuthError('');
-            }, 3000);
-        } finally {
-            setAuthLoading(false);
-        }
-    };
-
-    const login = async (credentials) => {
-        setAuthLoading(true);
-
-        try {
-            const response = await axios.post(`${config.API_BASE_URL}/api/user/login`, credentials);
-
-            setAuthMessage(response.data.message);
-
-            await AsyncStorage.setItem('token', response.data.accessToken);
-            await AsyncStorage.setItem('role', response.data.role);
-            await AsyncStorage.setItem('userId', response.data.id);
-
-            setTimeout(() => {
-                setAuthMessage('');
-
-                response.data.role === 'individual-agent' || response.data.role === 'company-agent' ? router.replace('/agent/dashboard') : router.replace('/user/home');
-            }, 3000);
-
-        } catch (err) {
-            setAuthError(err.response.data.message);
-
-            setTimeout(() => {
-                setAuthError('');
-            }, 3000);
-        } finally {
-            setAuthLoading(false);
-        }
-    };
-
-    const uploadProfilePicture = async (role, image) => {
-        setAuthLoading(true);
-
-        try {
-            const token = await getToken();
-
-            if (!token) {
-                return router.replace('/login');
-            }
-
-            const formData = new FormData();
-            formData.append('file', {
-                uri: image,
-                type: 'image/jpeg',
-                name: 'upload.jpg',
-            });
-            formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-
-            const imgResponse = await axios.post(
-                `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                }
-            );
-
-            const response = await axios.put(`${config.API_BASE_URL}/api/user/update`, { profilePicture: imgResponse.data.url }, {
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            });
-
-            setAuthMessage(response.data.message);
-            await AsyncStorage.setItem('role', role);
-
-            setTimeout(() => {
-                setAuthMessage('');
-
-                role === 'individual-agent' || role === 'company-agent' ? router.replace('/agent/dashboard') : router.replace('/user/home');
-            }, 3000);
-        } catch (error) {
-            setAuthError(error.response.data.message);
-
-            setTimeout(() => {
-                setAuthError('');
-            }, 3000);
-        } finally {
-            setAuthLoading(false);
-        }
+      setTimeout(() => {
+        setAuthError("");
+      }, 3000);
+    } finally {
+      setAuthLoading(false);
     }
+  };
 
-    const getUser = async () => {
-        try {
-            const token = await getToken();
+  const login = async (credentials) => {
+    setAuthLoading(true);
 
-            if (!token) {
-                return router.replace('/login');
-            }
+    try {
+      const response = await axios.post(
+        `${config.API_BASE_URL}/api/user/login`,
+        credentials,
+      );
 
-            const response = await axios.get(`${config.API_BASE_URL}/api/user`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
+      setAuthMessage(response.data.message);
 
-            setUser(response.data.user);
-        } catch (error) {
-            setAuthError(error.response.data.message);
+      await AsyncStorage.setItem("token", response.data.accessToken);
+      await AsyncStorage.setItem("role", response.data.role);
+      await AsyncStorage.setItem("userId", response.data.id);
 
-            setTimeout(() => {
-                setAuthError('');
-            }, 3000);
-        }
+      setTimeout(() => {
+        setAuthMessage("");
+
+        response.data.role === "individual-agent" ||
+        response.data.role === "company-agent"
+          ? router.replace("/agent/dashboard")
+          : router.replace("/user/home");
+      }, 3000);
+    } catch (err) {
+      setAuthError(err.response.data.message);
+
+      setTimeout(() => {
+        setAuthError("");
+      }, 3000);
+    } finally {
+      setAuthLoading(false);
     }
+  };
 
-    const updateProfile = async (user) => {
-        setAuthLoading(true);
+  const forgotPassword = async (email) => {
+    setAuthLoading(true);
 
-        try {
-            const token = await getToken();
+    try {
+      const response = await axios.post(
+        `${config.API_BASE_URL}/api/user/forgot-password`,
+        { email },
+      );
 
-            if (!token) {
-                return router.replace('/login');
-            }
+      setAuthMessage(response.data.message);
 
-            const response = await axios.put(`${config.API_BASE_URL}/api/user/update`, user, {
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            });
+      setTimeout(() => {
+        setAuthMessage("");
 
-            setAuthMessage(response.data.message);
+        router.replace(`/verify-otp?email=${email}`);
+      }, 3000);
+    } catch (err) {
+      setAuthError(err.response.data.message);
 
-            setTimeout(() => {
-                setAuthMessage('');
-
-                user.role === 'individual-agent' || user.role === 'company-agent' ? router.replace('/agent/profile') : router.replace('/user/profile');
-            }, 3000);
-        } catch (error) {
-            setAuthError(error.response.data.message);
-
-            setTimeout(() => {
-                setAuthError('');
-            }, 3000);
-        } finally {
-            setAuthLoading(false);
-        }
+      setTimeout(() => {
+        setAuthError("");
+      }, 3000);
+    } finally {
+      setAuthLoading(false);
     }
+  };
 
-    const logout = async () => {
-        await AsyncStorage.removeItem('token');
-        router.replace('/login');
-    };
+  const verifyOtp = async (email, otp) => {
+    setAuthLoading(true);
 
-    return (
-        <AuthContext.Provider value={{
-            authLoading,
-            setAuthError,
-            authError,
-            setAuthMessage,
-            authMessage,
-            register,
-            login,
-            uploadProfilePicture,
-            getUser,
-            user,
-            setUser,
-            updateProfile,
-            logout
-        }}>
-            {children}
-        </AuthContext.Provider>
-    );
+    try {
+      const response = await axios.post(
+        `${config.API_BASE_URL}/api/user/verify-otp`,
+        { email, otp },
+      );
+
+      setAuthMessage(response.data.message);
+
+      setTimeout(() => {
+        setAuthMessage("");
+
+        router.replace(`/reset-password?email=${email}`);
+      }, 3000);
+    } catch (err) {
+      setAuthError(err.response.data.message);
+
+      setTimeout(() => {
+        setAuthError("");
+      }, 3000);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const resetPassword = async (email, password) => {
+    setAuthLoading(true);
+
+    try {
+      const response = await axios.post(
+        `${config.API_BASE_URL}/api/user/reset-password`,
+        { email, password },
+      );
+
+      setAuthMessage(response.data.message);
+
+      setTimeout(() => {
+        setAuthMessage("");
+
+        router.replace("/login");
+      }, 3000);
+    } catch (err) {
+      setAuthError(err.response.data.message);
+
+      setTimeout(() => {
+        setAuthError("");
+      }, 3000);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const uploadProfilePicture = async (role, image) => {
+    setAuthLoading(true);
+
+    try {
+      const token = await getToken();
+
+      if (!token) {
+        return router.replace("/login");
+      }
+
+      const formData = new FormData();
+      formData.append("file", {
+        uri: image,
+        type: "image/jpeg",
+        name: "upload.jpg",
+      });
+      formData.append("upload_preset", CLOUDINARY_UPLOAD_PRESET);
+
+      const imgResponse = await axios.post(
+        `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+
+      const response = await axios.put(
+        `${config.API_BASE_URL}/api/user/update`,
+        { profilePicture: imgResponse.data.url },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      setAuthMessage(response.data.message);
+      await AsyncStorage.setItem("role", role);
+
+      setTimeout(() => {
+        setAuthMessage("");
+
+        role === "individual-agent" || role === "company-agent"
+          ? router.replace("/agent/dashboard")
+          : router.replace("/user/home");
+      }, 3000);
+    } catch (error) {
+      setAuthError(error.response.data.message);
+
+      setTimeout(() => {
+        setAuthError("");
+      }, 3000);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const getUser = async () => {
+    try {
+      const token = await getToken();
+
+      if (!token) {
+        return router.replace("/login");
+      }
+
+      const response = await axios.get(`${config.API_BASE_URL}/api/user`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setUser(response.data.user);
+    } catch (error) {
+      setAuthError(error.response.data.message);
+
+      setTimeout(() => {
+        setAuthError("");
+      }, 3000);
+    }
+  };
+
+  const updateProfile = async (user) => {
+    setAuthLoading(true);
+
+    try {
+      const token = await getToken();
+
+      if (!token) {
+        return router.replace("/login");
+      }
+
+      const response = await axios.put(
+        `${config.API_BASE_URL}/api/user/update`,
+        user,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      setAuthMessage(response.data.message);
+
+      setTimeout(() => {
+        setAuthMessage("");
+
+        user.role === "individual-agent" || user.role === "company-agent"
+          ? router.replace("/agent/profile")
+          : router.replace("/user/profile");
+      }, 3000);
+    } catch (error) {
+      setAuthError(error.response.data.message);
+
+      setTimeout(() => {
+        setAuthError("");
+      }, 3000);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    await AsyncStorage.removeItem("token");
+    router.replace("/login");
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        authLoading,
+        setAuthError,
+        authError,
+        setAuthMessage,
+        authMessage,
+        register,
+        login,
+        forgotPassword,
+        verifyOtp,
+        resetPassword,
+        uploadProfilePicture,
+        getUser,
+        user,
+        setUser,
+        updateProfile,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => useContext(AuthContext);
