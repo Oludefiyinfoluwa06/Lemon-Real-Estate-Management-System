@@ -55,7 +55,6 @@ const uploadProperty = async (req, res) => {
       .status(201)
       .json({ message: "Property upload successful", property });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "An error occurred" });
   }
 };
@@ -148,7 +147,6 @@ const getProperties = async (req, res) => {
       totalPages: Math.ceil(totalPropertiesCount / 10),
     });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "An error occurred" });
   }
 };
@@ -171,7 +169,6 @@ const getProperty = async (req, res) => {
 
     return res.status(200).json({ property });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "An error occurred" });
   }
 };
@@ -244,7 +241,6 @@ const updateProperty = async (req, res) => {
       .status(200)
       .json({ message: "Property updated successfully", property });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "An error occurred" });
   }
 };
@@ -301,7 +297,6 @@ const searchProperty = async (req, res) => {
       properties,
     });
   } catch (error) {
-    console.log(error);
     res.status(500).json({ message: "An error occurred" });
   }
 };
@@ -322,7 +317,6 @@ const deleteProperty = async (req, res) => {
       .status(200)
       .json({ message: "Property deleted successfully", property });
   } catch (error) {
-    console.log(error);
     res.status(500).json({ message: "An error occurred" });
   }
 };

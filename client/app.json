@@ -13,6 +13,12 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Allow Lemon to use your location."
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow Lemon to access your camera to scan ID documents."
+        }
       ]
     ],
     "name": "Lemon",

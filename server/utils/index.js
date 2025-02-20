@@ -1,5 +1,4 @@
 const REGION_MAPPING = {
-  // European region countries
   EU: [
     "NG",
     "GB",
@@ -52,7 +51,6 @@ const REGION_MAPPING = {
     "CY",
   ],
 
-  // Asia-Pacific region countries
   APAC: [
     "CN",
     "JP",
@@ -94,7 +92,6 @@ const REGION_MAPPING = {
     "PF",
   ],
 
-  // North American region countries
   US: [
     "US",
     "CA",
@@ -139,105 +136,83 @@ const REGION_MAPPING = {
   ],
 };
 
-// Document types by country (common ID documents for each country)
 const DOCUMENT_TYPES = {
-  // Africa
-  NG: ["NIN", "DL", "PP", "VC", "BVN"], // Nigeria
-  GH: ["NID", "DL", "PP", "VC", "NHIS"], // Ghana
-  ZA: ["ID", "DL", "PP", "RC"], // South Africa
-  KE: ["ID", "DL", "PP", "AC"], // Kenya
-  EG: ["NID", "DL", "PP"], // Egypt
+  NG: ["NIN", "DL", "PP", "VC", "BVN"],
+  GH: ["NID", "DL", "PP", "VC", "NHIS"],
+  ZA: ["ID", "DL", "PP", "RC"],
+  KE: ["ID", "DL", "PP", "AC"],
+  EG: ["NID", "DL", "PP"],
 
-  // Europe
-  GB: ["DL", "PP", "RC", "NINO"], // United Kingdom
-  FR: ["CNI", "DL", "PP", "TS"], // France
-  DE: ["PA", "DL", "PP", "ID"], // Germany
-  IT: ["CIE", "DL", "PP", "CF"], // Italy
-  ES: ["DNI", "DL", "PP", "NIE"], // Spain
+  GB: ["DL", "PP", "RC", "NINO"],
+  FR: ["CNI", "DL", "PP", "TS"],
+  DE: ["PA", "DL", "PP", "ID"],
+  IT: ["CIE", "DL", "PP", "CF"],
+  ES: ["DNI", "DL", "PP", "NIE"],
 
-  // North America
-  US: ["DL", "PP", "SSC", "SC", "MC"], // United States
-  CA: ["DL", "PP", "PR", "HC"], // Canada
-  MX: ["INE", "DL", "PP", "RFC"], // Mexico
+  US: ["DL", "PP", "SSC", "SC", "MC"],
+  CA: ["DL", "PP", "PR", "HC"],
+  MX: ["INE", "DL", "PP", "RFC"],
 
-  // South America
-  BR: ["RG", "CNH", "PP", "CPF"], // Brazil
-  AR: ["DNI", "DL", "PP", "CUIL"], // Argentina
-  CO: ["CC", "DL", "PP", "CE"], // Colombia
+  BR: ["RG", "CNH", "PP", "CPF"],
+  AR: ["DNI", "DL", "PP", "CUIL"],
+  CO: ["CC", "DL", "PP", "CE"],
 
-  // Asia
   CN: ["SFZ", "DL", "PP", "HKB"], // China
   JP: ["MY", "DL", "PP", "RC"], // Japan
   IN: ["AA", "DL", "PP", "VC", "PAN"], // India
   SG: ["NRIC", "DL", "PP", "FIN"], // Singapore
   KR: ["RRC", "DL", "PP", "ARC"], // South Korea
 
-  // Oceania
-  AU: ["DL", "PP", "MC", "KC"], // Australia
-  NZ: ["DL", "PP", "BC", "CC"], // New Zealand
+  AU: ["DL", "PP", "MC", "KC"],
+  NZ: ["DL", "PP", "BC", "CC"],
 };
 
-// Document type descriptions for reference
 const DOCUMENT_TYPE_DESCRIPTIONS = {
-  // Generic Documents
   PP: "Passport",
   DL: "Driver's License",
   ID: "National ID Card",
   BC: "Birth Certificate",
   RC: "Residence Card",
 
-  // Nigeria
   NIN: "National Identity Number Card",
   BVN: "Bank Verification Number Card",
   VC: "Voter's Card",
 
-  // UK
   NINO: "National Insurance Number Card",
 
-  // France
   CNI: "Carte Nationale d'Identité",
   TS: "Titre de Séjour",
 
-  // Germany
   PA: "Personalausweis",
 
-  // Italy
   CIE: "Carta d'Identità Elettronica",
   CF: "Codice Fiscale",
 
-  // Spain
   DNI: "Documento Nacional de Identidad",
   NIE: "Número de Identidad de Extranjero",
 
-  // USA
   SSC: "Social Security Card",
   SC: "State ID Card",
   MC: "Medicare Card",
 
-  // India
   AA: "Aadhaar Card",
   PAN: "Permanent Account Number Card",
 
-  // China
   SFZ: "Resident Identity Card",
   HKB: "Hukou Book",
 
-  // Singapore
   NRIC: "National Registration Identity Card",
   FIN: "Foreign Identification Number",
 
-  // Brazil
   RG: "Registro Geral",
   CNH: "Carteira Nacional de Habilitação",
   CPF: "Cadastro de Pessoas Físicas",
 
-  // Mexico
   INE: "Instituto Nacional Electoral Card",
   RFC: "Registro Federal de Contribuyentes",
 };
 
 const VALIDATION_RULES = {
-  // Generic document types
   PP: {
     expiryRequired: true,
     ageCheck: true,
@@ -295,7 +270,6 @@ const VALIDATION_RULES = {
     ],
   },
 
-  // Country-specific rules
   NG: {
     NIN: {
       expiryRequired: false,

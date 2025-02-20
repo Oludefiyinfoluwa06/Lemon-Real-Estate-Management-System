@@ -66,7 +66,6 @@ const register = async (req, res) => {
         id: userId,
       });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "An error occurred" });
   }
 };
@@ -99,7 +98,6 @@ const login = async (req, res) => {
         id: userId,
       });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "An error occurred" });
   }
 };
@@ -147,7 +145,6 @@ const forgotPassword = async (req, res) => {
 
     return res.status(200).json({ message: "Otp sent successfully" });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "An error occurred" });
   }
 };
@@ -179,7 +176,6 @@ const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: "Invalid or expired OTP" });
     }
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "An error occurred" });
   }
 };
@@ -223,7 +219,6 @@ const updateUser = async (req, res) => {
       .status(200)
       .json({ message: "You've updated your profile details successfully" });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "An error occurred" });
   }
 };
@@ -248,7 +243,6 @@ const getUser = async (req, res) => {
 
     return res.status(200).json({ user: userWithoutPassword });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "An error occurred" });
   }
 };
@@ -275,7 +269,7 @@ const idVerification = async (req, res) => {
     const verificationService = new IDVerificationService();
 
     const result = await verificationService.verifyDocument(
-      req.file,
+      req.file.buffer,
       countryCode,
       documentType,
     );

@@ -24,12 +24,11 @@ app.use(methodOverride("_method"));
 mongoose
   .connect(process.env.DB_URI)
   .then(() => {
-    console.log("DB connected successfully");
-    app.listen(port, () =>
-      console.log(`Server running on port: http://localhost:${port}!`),
-    );
+    app.listen(port, () => `Server running on port: http://localhost:${port}!`);
   })
-  .catch((err) => console.log(err, "Connection unsuccessful"));
+  .catch((err) => {
+    throw new Error(err, "Connection unsuccessful");
+  });
 
 app.get("/", (req, res) => res.json("Hello world"));
 app.use("/api/user", usersRoute);

@@ -5,7 +5,7 @@ const authenticate = async (req, res, next) => {
   const token = req.header("Authorization");
 
   if (!token) {
-    return res.status(400).json({ message: "Provide token, you're unauthorized" });
+    return res.status(401).json({ message: "Provide token, you're unauthorized" });
   }
 
   const tokenValue = token.split(" ")[1];
@@ -15,7 +15,7 @@ const authenticate = async (req, res, next) => {
     process.env.JWT_SECRET,
     async (error, decodedToken) => {
       if (error) {
-        return res.status(400).json({ message: "Please, authenticate", error });
+        return res.status(401).json({ message: "Please, authenticate", error });
       }
 
       const user = await User.findById(decodedToken.id);

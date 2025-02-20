@@ -42,8 +42,7 @@ const PropertyDetails = () => {
     try {
       return (await AsyncStorage.getItem("userId")) || "";
     } catch (error) {
-      console.log("Error getting userId:", error);
-      return "";
+      throw error;
     }
   };
 
@@ -61,7 +60,7 @@ const PropertyDetails = () => {
         try {
           await getProperty(params.id);
         } catch (error) {
-          console.log("Error fetching property:", error);
+          throw error;
         }
       }
     };
@@ -100,7 +99,7 @@ const PropertyDetails = () => {
       try {
         await updateProperty(property._id);
       } catch (error) {
-        console.log("Error updating property:", error);
+        throw error;
       }
     }
   };

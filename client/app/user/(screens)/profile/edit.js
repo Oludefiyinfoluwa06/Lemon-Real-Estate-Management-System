@@ -74,7 +74,7 @@ const EditProfile = () => {
           setUser({ ...user, profilePicture: jsonResponse.secure_url });
         }
       } catch (error) {
-        console.log("Error uploading to Cloudinary:", error.message);
+        throw error;
       }
     }
   };

@@ -52,7 +52,6 @@ const SplashScreen = () => {
           return router.replace("/login");
         }, 2500);
       } catch (error) {
-        console.error("Error checking login status:", error);
         router.replace("/login");
       }
     };

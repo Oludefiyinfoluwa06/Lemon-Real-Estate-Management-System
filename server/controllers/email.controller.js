@@ -33,7 +33,6 @@ const sendMessage = async (req, res) => {
       return res.json({ message: "Email sent successfully" });
     });
   } catch (error) {
-    console.log(error);
     return res.json({ error: error.message });
   }
 };

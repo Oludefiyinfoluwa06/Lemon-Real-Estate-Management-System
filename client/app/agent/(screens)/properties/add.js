@@ -81,7 +81,7 @@ const AddProperty = () => {
           })),
         );
       } catch (error) {
-        console.log("Error setting currencies:", error);
+        throw error;
       }
     };
     getCurrency();
@@ -157,7 +157,7 @@ const AddProperty = () => {
       setDocument(response.data.secure_url);
     } catch (error) {
       Alert.alert("Upload Error", "Failed to upload document to cloud");
-      console.log("Error uploading to Cloudinary:", error.message);
+      throw error;
     } finally {
       setUploading(false);
     }
@@ -194,7 +194,7 @@ const AddProperty = () => {
         setVideo(response.data.secure_url);
       }
     } catch (error) {
-      console.log("Error uploading to Cloudinary:", error.message);
+      throw error;
     } finally {
       setUploading(false);
     }
@@ -204,17 +204,38 @@ const AddProperty = () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       quality: 1,
+      base64: true,
     });
 
     if (!result.canceled) {
-      const { uri, fileSize, width, height } = result.assets[0];
+      const { uri, base64, fileSize, width, height } = result.assets[0];
+
+      const getImageHash = (base64Data) => {
+        if (!base64Data) return '';
+        const sampleSize = 1000;
+        const sample = base64Data.slice(0, sampleSize);
+        let hash = 0;
+        for (let i = 0; i < sample.length; i++) {
+          hash = ((hash << 5) - hash) + sample.charCodeAt(i);
+          hash = hash & hash;
+        }
+        return hash.toString();
+      };
+
+      const newImageHash = getImageHash(base64);
 
       const isDuplicate = propertyImagesUri.some((img) => {
+        if (img.hash && img.hash === newImageHash) {
+          return true;
+        }
+
+        const sizeDiff = Math.abs(img.fileSize - fileSize) / fileSize;
         return (
           img &&
-          img.fileSize === fileSize &&
+          sizeDiff < 0.01 &&
           img.width === width &&
-          img.height === height
+          img.height === height &&
+          img.uri === uri
         );
       });
 
@@ -225,7 +246,13 @@ const AddProperty = () => {
 
       setPropertyImagesUri([
         ...propertyImagesUri,
-        { uri, fileSize, width, height },
+        {
+          uri,
+          fileSize,
+          width,
+          height,
+          hash: newImageHash,
+        },
       ]);
 
       uploadMediaToCloudinary(result.assets[0], "image", slot);
@@ -255,7 +282,7 @@ const AddProperty = () => {
 
         uploadMediaToCloudinary(result.assets[0], "video");
       } catch (error) {
-        console.log("Error processing video metadata:", error);
+        throw error;
         setPropertyError("Unable to process the video. Please try again.");
       } finally {
         sound.unloadAsync();
@@ -471,7 +498,7 @@ const AddProperty = () => {
                   try {
                     await Linking.openURL(document);
                   } catch (error) {
-                    console.log(error);
+                    throw error;
                     Alert.alert("Error", "Cannot open document externally");
                   }
                 }}

@@ -1,19 +1,10 @@
-const axios = require("axios");
-const FormData = require("form-data");
-const sharp = require("sharp");
-const fileType = require("file-type");
-const {
-  REGION_MAPPING,
-  SECURITY_FEATURE_REQUIREMENTS,
-  VALIDATION_RULES,
-} = require("../utils");
-const { DocumentConverter } = require("./document-converter");
+const axios = require('axios');
+const FormData = require('form-data');
+const { REGION_MAPPING, SECURITY_FEATURE_REQUIREMENTS, VALIDATION_RULES } = require('../utils');
 
 class IDVerificationService {
   constructor() {
     this.apiInstances = {};
-    this.supportedFileTypes = ["jpg", "jpeg", "png", "pdf", "doc", "docx"];
-    this.maxFileSize = 10 * 1024 * 1024;
   }
 
   getRegionForCountry(countryCode) {
@@ -22,21 +13,7 @@ class IDVerificationService {
         return region;
       }
     }
-    return "US";
-  }
-
-  async convertPDFToImage(pdfBuffer) {
-    try {
-      const pages = await pdf2image.convertPDF(pdfBuffer, {
-        width: 2550,
-        height: 3300,
-        pageNumber: 1,
-      });
-
-      return sharp(pages[0]).toFormat("jpeg").toBuffer();
-    } catch (error) {
-      throw new Error(`PDF conversion error: ${error.message}`);
-    }
+    return 'US';
   }
 
   async validateDocument(result, documentType, countryCode) {
@@ -57,32 +34,26 @@ class IDVerificationService {
       validationRules.documentNumberFormat &&
       !validationRules.documentNumberFormat.test(result.document_number)
     ) {
-      validationResults.errors.push("Invalid document number format");
+      validationResults.errors.push('Invalid document number format');
       validationResults.isValid = false;
     }
 
     if (validationRules.ageCheck) {
       const age = this.calculateAge(result.dob);
       if (age < validationRules.minAge || age > validationRules.maxAge) {
-        validationResults.errors.push(
-          `Age ${age} is outside valid range (${validationRules.minAge}-${validationRules.maxAge})`,
-        );
+        validationResults.errors.push(`Age ${age} is outside valid range (${validationRules.minAge}-${validationRules.maxAge})`);
         validationResults.isValid = false;
       }
     }
 
     if (validationRules.expiryRequired) {
       if (!result.expiry_date) {
-        validationResults.errors.push("Missing expiry date");
+        validationResults.errors.push('Missing expiry date');
         validationResults.isValid = false;
       } else {
-        const daysUntilExpiry = this.calculateDaysUntilExpiry(
-          result.expiry_date,
-        );
+        const daysUntilExpiry = this.calculateDaysUntilExpiry(result.expiry_date);
         if (daysUntilExpiry < validationRules.expiryMinDays) {
-          validationResults.errors.push(
-            `Document expires in ${daysUntilExpiry} days (minimum ${validationRules.expiryMinDays} days required)`,
-          );
+          validationResults.errors.push(`Document expires in ${daysUntilExpiry} days (minimum ${validationRules.expiryMinDays} days required)`);
           validationResults.isValid = false;
         }
       }
@@ -93,13 +64,8 @@ class IDVerificationService {
         const securityRequirements = SECURITY_FEATURE_REQUIREMENTS[feature];
         const featureResult = result.security_features?.[feature];
 
-        if (
-          !featureResult ||
-          featureResult.confidence < securityRequirements.minConfidence
-        ) {
-          validationResults.errors.push(
-            `Failed security feature check: ${feature}`,
-          );
+        if (!featureResult || featureResult.confidence < securityRequirements.minConfidence) {
+          validationResults.errors.push(`Failed security feature check: ${feature}`);
           validationResults.isValid = false;
         }
       }
@@ -112,7 +78,7 @@ class IDVerificationService {
     if (VALIDATION_RULES[countryCode]?.[documentType]) {
       return VALIDATION_RULES[countryCode][documentType];
     }
-    return VALIDATION_RULES[documentType] || VALIDATION_RULES["ID"];
+    return VALIDATION_RULES[documentType] || VALIDATION_RULES['ID'];
   }
 
   calculateAge(dateOfBirth) {
@@ -133,88 +99,48 @@ class IDVerificationService {
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   }
 
-  async verifyDocument(file, countryCode, documentType = null) {
-    const documentConverter = new DocumentConverter();
-    const conversionOptions = {
-      quality: 80,
-      format: "jpeg",
-      width: 1700,
-    };
-
+  async verifyDocument(imageBuffer, countryCode, documentType = null) {
     try {
-      if (!countryCode) {
-        throw new Error("Select a country");
+      if (!imageBuffer || imageBuffer.length === 0) {
+        throw new Error('No image buffer provided or it is empty.');
       }
 
-      let fileBuffer;
-      let fileExtension;
+      const base64Image = imageBuffer.toString('base64');
 
-      if (typeof file.buffer === "string") {
-        fileExtension = path.extname(file.buffer).toLowerCase().slice(1);
-        fileBuffer = fs.readFileSync(file.buffer);
-      } else if (file.buffer instanceof Buffer) {
-        const fileTypeResult = await fileType.fromBuffer(file.buffer);
-        if (!fileTypeResult) {
-          throw new Error("Unable to detect file type");
-        }
-        fileExtension = fileTypeResult.ext;
-        fileBuffer = file.buffer;
-      } else {
-        throw new Error("Invalid file input. Provide file path or buffer.");
-      }
-
-      const imageTypes = ["jpg", "jpeg", "png"];
-
-      let imageBuffers;
-      if (imageTypes.includes(fileExtension)) {
-        imageBuffers = [await sharp(fileBuffer).toFormat("jpeg").toBuffer()];
-      } else {
-        throw new Error(`Unsupported file type: ${fileExtension}. Supported types include ${imageTypes.join(', ')}`);
-      }
-
-      const imageBuffer = imageBuffers[0];
-      const base64Image = imageBuffer.toString("base64");
-      const imageFileBuffer = Buffer.from(base64Image, "base64");
+      const imageFileBuffer = Buffer.from(base64Image, 'base64');
 
       const region = this.getRegionForCountry(countryCode);
-      const apiUrl =
-        region === "US"
-          ? "https://api.idanalyzer.com"
-          : `https://api-${region}.idanalyzer.com`;
+      const apiUrl = region === 'US' ? 'https://api.idanalyzer.com' : `https://api-${region}.idanalyzer.com`;
 
       const form = new FormData();
-      form.append("apikey", process.env.IDANALYZER_API_KEY);
-      form.append("file", imageFileBuffer, {
-        filename: "document.jpg",
-        contentType: "image/jpeg",
-      });
-      form.append("documentType", documentType || "");
-      form.append("biometric", "true");
-      form.append("verify_expiry", "true");
-      form.append("verify_documentnumber", "true");
-      form.append("verify_age", "true");
-      form.append("validate_security_features", "true");
+      form.append('apikey', process.env.IDANALYZER_API_KEY);
+      form.append('file', imageFileBuffer, { filename: 'document.jpg', contentType: 'image/jpeg' });
+      form.append('documentType', documentType || '');
+      form.append('biometric', 'true');
+      form.append('verify_expiry', 'true');
+      form.append('verify_documentnumber', 'true');
+      form.append('verify_age', 'true');
+      form.append('validate_security_features', 'true');
 
       const headers = {
         ...form.getHeaders(),
       };
 
       const response = await axios.post(apiUrl, form, { headers });
+
       const result = response.data;
 
-      console.log(result);
-
       if (!result || result.error) {
-        throw new Error(result.error?.message || "ID verification failed");
+        throw new Error(result.error?.message || 'ID verification failed');
       }
 
       const validationResults = await this.validateDocument(
         result.result,
         result.result?.document_type || documentType,
-        countryCode,
+        countryCode
       );
 
-      const verificationResult = {
+      return {
         success: validationResults.isValid,
         data: {
           documentNumber: result.result?.document_number,
@@ -237,19 +163,9 @@ class IDVerificationService {
           faceDetection: result.result?.face || {},
         },
         rawResult: result,
-        images: {
-          count: imageBuffers.length,
-          format: conversionOptions.format,
-          processingDetails: {
-            originalFileType: fileExtension,
-            conversionOptions,
-          },
-        },
       };
-
-      return verificationResult;
     } catch (error) {
-      throw new Error(`Document verification failed: ${error.message}`);
+      throw new Error(error.message || 'An error occurred during ID verification.');
     }
   }
 }

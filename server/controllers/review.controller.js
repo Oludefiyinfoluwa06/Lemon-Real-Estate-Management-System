@@ -36,7 +36,6 @@ const createReview = async (req, res) => {
 
     return res.status(201).json({ message: "Review posted successfully" });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "An error occurred" });
   }
 };
@@ -52,7 +51,6 @@ const getReviews = async (req, res) => {
 
     return res.status(200).json({ reviews });
   } catch (error) {
-    console.log(error);
     return res.status(500).json({ message: "An error occurred" });
   }
 };

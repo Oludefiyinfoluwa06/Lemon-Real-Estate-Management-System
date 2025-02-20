@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { View, Text, TouchableOpacity, FlatList, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
@@ -10,41 +10,77 @@ import { Ionicons } from "@expo/vector-icons";
 const Chats = () => {
   const { chatList, fetchChats } = useChat();
   const { getUser, user } = useAuth();
+  const [lastUpdate, setLastUpdate] = useState(null);
+  const [localChatList, setLocalChatList] = useState([]);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      await getUser();
-    };
-
-    fetchUser();
+    getUser();
   }, []);
 
   useEffect(() => {
-    const getChats = async () => {
-      if (user?._id) {
-        try {
-          await fetchChats(user._id);
-        } catch (error) {
-          console.log("Error fetching chats:", error);
+    if (chatList.length > 0) {
+      const sortedChats = [...chatList].sort((a, b) => {
+        if (a.receiverId === user?._id && !a.isRead && b.isRead) return -1;
+        if (b.receiverId === user?._id && !b.isRead && a.isRead) return 1;
+
+        const timeA = new Date(a.updatedAt || 0).getTime();
+        const timeB = new Date(b.updatedAt || 0).getTime();
+
+        if (timeA !== timeB) {
+          return timeB - timeA;
         }
+
+        return a._id.localeCompare(b._id);
+      });
+
+      const shouldUpdate = JSON.stringify(sortedChats) !== JSON.stringify(localChatList);
+      if (shouldUpdate) {
+        setLocalChatList(sortedChats);
+      }
+    } else {
+      setLocalChatList([]);
+    }
+  }, [chatList, user?._id]);
+
+  useEffect(() => {
+    let isSubscribed = true;
+    const FETCH_INTERVAL = 3000;
+    const UPDATE_THRESHOLD = 2000;
+
+    const getChats = async () => {
+      if (!user?._id || !isSubscribed) return;
+
+      try {
+        const currentTime = Date.now();
+        if (!lastUpdate || currentTime - lastUpdate >= UPDATE_THRESHOLD) {
+          await fetchChats(user._id);
+          setLastUpdate(currentTime);
+        }
+      } catch (error) {
+        throw error;
       }
     };
 
     getChats();
+    const interval = setInterval(getChats, FETCH_INTERVAL);
 
-    const interval = setInterval(getChats, 3000);
+    return () => {
+      isSubscribed = false;
+      clearInterval(interval);
+    };
+  }, [user, fetchChats, lastUpdate]);
 
-    return () => clearInterval(interval);
-  }, [user, fetchChats]);
+  const renderChatItem = useCallback(({ item }) => {
+    const navigateToChat = () => {
+      const chatPartnerId = user._id === item.receiverId ? item.senderId : item.receiverId;
+      router.push(
+        `/user/chat/${chatPartnerId}?name=${encodeURIComponent(item.name)}&profilePicture=${encodeURIComponent(item.profilePicture || '')}`
+      );
+    };
 
-  const renderChatItem = ({ item }) => {
     return (
       <TouchableOpacity
-        onPress={() => {
-          router.push(
-            `/user/chat/${user._id === item.receiverId ? item.senderId : item.receiverId}?name=${item.name}&profilePicture=${item.profilePicture}`,
-          );
-        }}
+        onPress={navigateToChat}
         className="flex-row items-center justify-between bg-darkUmber-light p-4 mb-2 rounded-lg"
       >
         <View className="flex-row items-center justify-start">
@@ -58,27 +94,39 @@ const Chats = () => {
           )}
           <View className="flex-1 ml-4">
             <Text className="text-white font-medium text-lg">{item.name}</Text>
-            <Text className="text-frenchGray-light">{item.lastMessage}</Text>
+            <Text
+              className="text-frenchGray-light"
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {item.lastMessage}
+            </Text>
           </View>
         </View>
         {!item.isRead && item.receiverId === user._id && (
-          <View className="bg-chartreuse p-1 rounded-full"></View>
+          <View className="bg-chartreuse w-3 h-3 rounded-full" />
         )}
       </TouchableOpacity>
     );
-  };
+  }, [user?._id]);
+
+  const keyExtractor = useCallback((item) => item._id, []);
 
   return (
     <SafeAreaView className="flex-1 bg-darkUmber-dark p-4">
       <View className="flex-row justify-between items-center mb-4">
         <Text className="text-white text-2xl font-bold">Chats</Text>
       </View>
-      {chatList.length > 0 ? (
+      {localChatList.length > 0 ? (
         <FlatList
-          data={chatList}
+          data={localChatList}
           renderItem={renderChatItem}
-          keyExtractor={(item) => item._id}
+          keyExtractor={keyExtractor}
           showsVerticalScrollIndicator={false}
+          initialNumToRender={10}
+          maxToRenderPerBatch={10}
+          windowSize={5}
+          removeClippedSubviews={true}
         />
       ) : (
         <EmptyChatList />

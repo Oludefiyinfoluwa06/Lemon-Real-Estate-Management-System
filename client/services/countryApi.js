@@ -10,7 +10,6 @@ export const fetchCountries = async () => {
     );
     return sortedCountries;
   } catch (error) {
-    console.log("Failed after retries:", error);
     throw error;
   }
 };

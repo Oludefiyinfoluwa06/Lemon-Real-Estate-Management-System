@@ -32,8 +32,6 @@ const startTrial = async (req, res) => {
 
     await user.save();
 
-    console.log("Trial activated");
-
     return res.status(200).json({
       status: "success",
       message: "Trial period started successfully",
@@ -43,7 +41,6 @@ const startTrial = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log("Trial error");
     return res.status(500).json({
       status: "error",
       message: error.message,

@@ -99,7 +99,6 @@ const Payment = () => {
 
         setPaymentDetails(paymentData);
       } catch (err) {
-        console.log("Error setting up payment:", err);
         setError("Failed to setup payment. Please try again.");
       } finally {
         setIsLoading(false);
@@ -135,7 +134,6 @@ const Payment = () => {
         throw new Error("Failed to initialize payment");
       }
     } catch (err) {
-      console.log("Payment initialization error:", err);
       Alert.alert(
         "Payment Error",
         "Unable to start payment process. Please try again.",
@@ -192,7 +190,6 @@ const Payment = () => {
 
         attempts++;
       } catch (err) {
-        console.log("Verification error:", err);
         clearInterval(pollInterval);
         Alert.alert(
           "Verification Error",

@@ -114,7 +114,6 @@ const Payment = () => {
 
         setPaymentDetails(paymentData);
       } catch (err) {
-        console.log("Error setting up payment:", err);
         setError("Failed to setup payment. Please try again.");
       } finally {
         setIsLoading(false);
@@ -150,7 +149,6 @@ const Payment = () => {
         throw new Error("Failed to initialize payment");
       }
     } catch (err) {
-      console.log("Payment initialization error:", err);
       Alert.alert(
         "Payment Error",
         "Unable to start payment process. Please try again.",
@@ -207,7 +205,6 @@ const Payment = () => {
 
         attempts++;
       } catch (err) {
-        console.log("Verification error:", err);
         clearInterval(pollInterval);
         Alert.alert(
           "Verification Error",
@@ -250,7 +247,6 @@ const Payment = () => {
         throw new Error(data.message || "Failed to start trial");
       }
     } catch (err) {
-      console.log("Subscription activation error:", err);
       Alert.alert(
         "Subscription Activation Error",
         err.message || "Unable to start subscription period. Please try again.",
@@ -351,7 +347,6 @@ const Payment = () => {
         );
       }
     } catch (err) {
-      console.log("Eligibility check error:", err);
       Alert.alert(
         "Error",
         "Unable to verify trial eligibility. Please try again.",

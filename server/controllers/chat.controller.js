@@ -37,7 +37,7 @@ const getChatMessages = async (req, res) => {
         { senderId, receiverId },
         { senderId: receiverId, receiverId: senderId },
       ],
-    }).sort({ createdAt: 1 });
+    });
 
     return res.status(200).json(messages);
   } catch (error) {
@@ -114,7 +114,6 @@ const fetchChats = async (req, res) => {
 
     return res.status(200).json(chatList);
   } catch (error) {
-    console.log("Error fetching chats:", error);
     return res.status(500).json({
       message: "An error occurred while fetching chats",
       error: error.message,

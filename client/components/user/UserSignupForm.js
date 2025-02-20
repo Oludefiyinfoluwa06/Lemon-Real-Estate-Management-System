@@ -21,7 +21,7 @@ const UserSignupForm = ({ userDetails, setUserDetails }) => {
         const countriesData = await fetchCountries();
         setCountries(countriesData);
       } catch (error) {
-        console.log("Error fetching countries:", error);
+        throw error;
       }
     };
 
