@@ -16,18 +16,15 @@ const uploadProperty = async (req, res) => {
       video,
       document,
       coordinates,
+      documentType,
     } = req.body;
 
     const agentId = req.user._id;
-
-    const isValidId = isValidObjectId(agentId);
-
-    if (!isValidId) {
+    if (!isValidObjectId(agentId)) {
       return res.status(400).json({ message: "Invalid ID" });
     }
 
     const agent = await User.findById(agentId);
-
     if (!agent) {
       return res.status(404).json({ message: "Agent Details not found" });
     }
@@ -48,12 +45,11 @@ const uploadProperty = async (req, res) => {
       companyName: agent.companyName,
       agentProfilePicture: agent.profilePicture,
       document,
+      documentType,
       coordinates,
     });
 
-    return res
-      .status(201)
-      .json({ message: "Property upload successful", property });
+    return res.status(201).json({ message: "Property upload successful", property });
   } catch (error) {
     return res.status(500).json({ message: "An error occurred" });
   }

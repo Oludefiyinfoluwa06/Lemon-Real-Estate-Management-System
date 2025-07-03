@@ -8,7 +8,7 @@ const propertySchema = new mongoose.Schema(
     status: {
       type: String,
       enum: ["Rent", "Lease", "Sale"],
-      required: true,
+      default: null,
     },
     price: { type: Number, required: true },
     currency: { type: String, required: true },
@@ -25,6 +25,7 @@ const propertySchema = new mongoose.Schema(
     companyName: { type: String, required: true },
     agentProfilePicture: { type: String },
     document: { type: String, required: true },
+    documentType: { type: String, required: true },
     isDocumentPublic: { type: Boolean, default: false },
     savedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     coordinates: {
