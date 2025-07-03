@@ -83,7 +83,7 @@ const ProfilePictureUpload = () => {
 
         <View className="w-full mt-6">
           <Button
-            text={authLoading ? "Loading..." : "Upload"}
+            text={!authLoading ? "Upload" : "Loading..."}
             bg={true}
             onPress={handleUploadProfilePicture}
           />

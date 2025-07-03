@@ -189,8 +189,7 @@ const Advertise = () => {
                       {error}
                     </Text>
                     <Text className="text-white font-rbold text-2xl mt-2">
-                      ₦
-                      {DURATION_PRICES[selectedDuration].price.toLocaleString()}
+                      ₦{DURATION_PRICES[selectedDuration].price.toLocaleString()}
                     </Text>
                   </>
                 ) : (
@@ -213,7 +212,6 @@ const Advertise = () => {
                     `/agent/advertise-pay?propertyId=${propertyId}&duration=${selectedDuration}&amount=${convertedPrice || DURATION_PRICES[selectedDuration].price}`,
                   )
                 }
-                // disabled={property.}
               />
             </View>
           </View>

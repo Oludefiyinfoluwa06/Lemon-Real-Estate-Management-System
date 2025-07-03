@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -45,11 +45,12 @@ const AddProperty = () => {
   const router = useRouter();
 
   const categories = [
-    { name: "Land" },
+    { name: "Lands" },
     { name: "Houses" },
     { name: "Shop Spaces" },
-    { name: "Office Building" },
-    { name: "Industrial Building" },
+    { name: "Office Buildings" },
+    { name: "Industrial Buildings" },
+    { name: "Hotels" },
   ];
   const statusItems = [{ name: "Rent" }, { name: "Lease" }, { name: "Sale" }];
 
@@ -67,18 +68,15 @@ const AddProperty = () => {
       try {
         const countries = await fetchCountries();
         const currencyMap = new Map();
-        countries.forEach((country) => {
-          if (country.currencies) {
-            Object.values(country.currencies).forEach((currency) => {
-              currencyMap.set(currency.name, currency.symbol);
+        countries.forEach((c) => {
+          if (c.currencies) {
+            Object.values(c.currencies).forEach((cur) => {
+              currencyMap.set(cur.name, cur.symbol);
             });
           }
         });
         setCurrencies(
-          Array.from(currencyMap.entries()).map(([name, symbol]) => ({
-            name,
-            symbol,
-          })),
+          Array.from(currencyMap.entries()).map(([name, symbol]) => ({ name, symbol })),
         );
       } catch (error) {
         throw error;
@@ -89,35 +87,37 @@ const AddProperty = () => {
 
   const handleNextStep = () => {
     if (currentStep === 1) {
-      if (
-        title === "" ||
-        description === "" ||
-        category === "" ||
-        status === ""
-      ) {
+      if (!title || !description || !category || !status) {
         return setPropertyError("Input fields must not be empty");
       }
-      setCurrentStep(currentStep + 1);
-    } else {
-      if (price === "" || currency === "" || country === "") {
+      setCurrentStep(2);
+    } else if (currentStep === 2) {
+      if (!price || !currency || !country) {
         return setPropertyError("Input fields must not be empty");
       }
-      setCurrentStep(currentStep + 1);
+      setCurrentStep(3);
     }
   };
 
   const handlePreviousStep = () => {
-    setCurrentStep(currentStep - 1);
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
   const handleAddProperty = async () => {
     if (
       propertyImages.filter(Boolean).length === 0 ||
-      video === "" ||
-      document === ""
+      !video ||
+      !document
     ) {
       return setPropertyError("Select the necessary files");
     }
+    const documentType =
+      category === "Hotels"
+        ? "CAC/Tax"
+        : status === "Rent"
+        ? "Proof of Ownership"
+        : "Property Document";
+
     await uploadProperty(
       title,
       description,
@@ -130,6 +130,7 @@ const AddProperty = () => {
       video,
       document,
       coordinates,
+      documentType
     );
   };
 
@@ -309,6 +310,13 @@ const AddProperty = () => {
     setCoordinates(coordinates);
   };
 
+  const docLabel =
+    category === "Hotels"
+      ? "Upload CAC/Tax Document"
+      : status === "Rent"
+      ? "Upload Proof of Ownership"
+      : "Upload Property Document";
+
   return (
     <SafeAreaView className="bg-darkUmber-dark h-full">
       <ScrollView showsVerticalScrollIndicator={false} className="p-4">
@@ -362,12 +370,12 @@ const AddProperty = () => {
               options={categories}
               onSelect={(value) => setCategory(value.name)}
             />
-            <CustomSelect
+            {category !== 'Hotels' && <CustomSelect
               placeholder="Choose a status"
               selectedValue={status}
               options={statusItems}
               onSelect={(value) => setStatus(value.name)}
-            />
+            />}
 
             <Button text="Next" bg={true} onPress={handleNextStep} />
           </View>
@@ -489,29 +497,28 @@ const AddProperty = () => {
             )}
 
             <Text className="font-rbold mb-2 text-xl text-white">
-              Upload Document
+              {docLabel}
             </Text>
             {document ? (
               <TouchableOpacity
-                className="h-[50px] w-full rounded bg-frenchGray-dark items-center justify-center mb-4"
                 onPress={async () => {
                   try {
                     await Linking.openURL(document);
-                  } catch (error) {
-                    throw error;
+                  } catch {
                     Alert.alert("Error", "Cannot open document externally");
                   }
                 }}
+                className="h-[50px] w-full rounded bg-frenchGray-dark items-center justify-center mb-4"
               >
                 <Text className="text-white">Preview Document</Text>
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
-                className="h-[150px] w-full rounded bg-frenchGray-dark items-center justify-center mb-4"
                 onPress={handleDocumentUpload}
+                className="h-[150px] w-full rounded bg-frenchGray-dark items-center justify-center mb-4"
               >
                 {uploading ? (
-                  <ActivityIndicator size={"large"} color={"#BBCC13"} />
+                  <ActivityIndicator size="large" color="#BBCC13" />
                 ) : (
                   <Ionicons name="document-text" size={40} color="#FFFFFF" />
                 )}

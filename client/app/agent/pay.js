@@ -15,7 +15,6 @@ import { useAuth } from "../../contexts/AuthContext";
 import { getCountryCurrencyData } from "../../services/currencyConverter";
 import { getToken } from "../../services/getToken";
 import { config } from "../../config";
-import { FLUTTERWAVE_SECRET_KEY } from "@env";
 
 const Payment = () => {
   const { user } = useAuth();
@@ -27,31 +26,27 @@ const Payment = () => {
   const [paymentCountdown, setPaymentCountdown] = useState("");
 
   const params = useLocalSearchParams();
+  const PAYMENT_INITIALIZE_ENDPOINT = `${config.API_BASE_URL}/api/payment/initialize`;
+  const PAYMENT_VERIFY_ENDPOINT = `${config.API_BASE_URL}/api/payment/verify`;
 
-  const convertPriceToNumber = (formattedPrice) => {
-    return Number(formattedPrice.replace(/[^0-9.]/g, ""));
-  };
-
-  const PAYMENT_ENDPOINT = `${config.API_BASE_URL}/api/payment/initialize`;
+  const convertPriceToNumber = (formattedPrice) => Number(formattedPrice.replace(/[^0-9.]/g, ""));
 
   useEffect(() => {
     if (user.isOnTrial) {
       const interval = setInterval(() => {
         const now = new Date();
         const end = new Date(user.trialEndDate);
-        const timeDiff = end - now;
-
-        if (timeDiff <= 0) {
+        const diff = end - now;
+        if (diff <= 0) {
           clearInterval(interval);
           setRemainingTime("Trial ended");
         } else {
-          const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((timeDiff / (1000 * 60 * 60)) % 24);
-          const minutes = Math.floor((timeDiff / (1000 * 60)) % 60);
-          setRemainingTime(`${days}d ${hours}h ${minutes}m left`);
+          const d = Math.floor(diff / 86400000);
+          const h = Math.floor((diff % 86400000) / 3600000);
+          const m = Math.floor((diff % 3600000) / 60000);
+          setRemainingTime(`${d}d ${h}h ${m}m left`);
         }
       }, 1000);
-
       return () => clearInterval(interval);
     }
   }, [user.isOnTrial, user.trialEndDate]);
@@ -61,156 +56,100 @@ const Payment = () => {
       const interval = setInterval(() => {
         const now = new Date();
         const end = new Date(user.paymentEndDate);
-        const timeDiff = end - now;
-
-        if (timeDiff <= 0) {
+        const diff = end - now;
+        if (diff <= 0) {
           clearInterval(interval);
           setPaymentCountdown("Payment period ended");
         } else {
-          const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((timeDiff / (1000 * 60 * 60)) % 24);
-          const minutes = Math.floor((timeDiff / (1000 * 60)) % 60);
-          setPaymentCountdown(`${days}d ${hours}h ${minutes}m left`);
+          const d = Math.floor(diff / 86400000);
+          const h = Math.floor((diff % 86400000) / 3600000);
+          const m = Math.floor((diff % 3600000) / 60000);
+          setPaymentCountdown(`${d}d ${h}h ${m}m left`);
         }
       }, 1000);
-
       return () => clearInterval(interval);
     }
   }, [user.hasPaid, user.paymentEndDate]);
 
   useEffect(() => {
-    const setupPayment = async () => {
+    const setup = async () => {
       if (!user?.country || !user?.email) {
         setError("User details not available");
         return;
       }
-
       setIsLoading(true);
       setError("");
-
       try {
         const countryData = await getCountryCurrencyData(user.country);
+        if (!countryData) throw new Error("Currency data not found");
 
-        if (!countryData) {
-          throw new Error("Unable to get currency data for your country");
-        }
-
-        const tx_ref = `PRE_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
-
-        const paymentData = {
-          tx_ref,
-          amount: convertPriceToNumber(params.amount),
+        const reference = `PSK_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
+        setPaymentDetails({
+          reference,
+          amount: convertPriceToNumber(params.amount) * 100,
+          email: user.email,
           currency: countryData.code,
-          customer: {
-            email: user.email,
-            name: user.companyName || "Customer",
-            phonenumber: user.mobileNumber || "",
-          },
-          customizations: {
-            title: "Premium Subscription",
-            description: "6 Months Premium Access",
-          },
-        };
-
-        setPaymentDetails(paymentData);
-      } catch (err) {
+        });
+      } catch {
         setError("Failed to setup payment. Please try again.");
       } finally {
         setIsLoading(false);
       }
     };
-
-    setupPayment();
+    setup();
   }, [user]);
 
   const initiatePayment = async () => {
-    if (!paymentDetails) return;
-    const token = await getToken();
+    if (!paymentDetails) {
+      return;
+    }
 
+    setIsLoading(true);
     try {
-      setIsLoading(true);
-
-      const response = await fetch(PAYMENT_ENDPOINT, {
-        method: "POST",
+      const token = await getToken();
+      const resp = await fetch(PAYMENT_INITIALIZE_ENDPOINT, {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(paymentDetails),
       });
-
-      const data = await response.json();
-
-      if (data.status === "success" && data.data.link) {
-        await Linking.openURL(data.data.link);
-
-        await startVerificationPolling(paymentDetails.tx_ref);
+      const { data, status } = await resp.json();
+      if (status === 'success' && data.authorization_url) {
+        await Linking.openURL(data.authorization_url);
+        await pollVerification(paymentDetails.reference);
       } else {
-        throw new Error("Failed to initialize payment");
+        throw new Error('Initialization failed');
       }
-    } catch (err) {
-      Alert.alert(
-        "Payment Error",
-        "Unable to start payment process. Please try again.",
-        [{ text: "OK" }],
-      );
+    } catch {
+      Alert.alert('Payment Error','Unable to start payment. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const startVerificationPolling = async (txRef) => {
+  const pollVerification = async (reference) => {
     let attempts = 0;
-    const maxAttempts = 10;
-
-    const pollInterval = setInterval(async () => {
+    const max = 10;
+    const interval = setInterval(async () => {
+      attempts++;
       try {
-        const response = await fetch(
-          `https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref=${txRef}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${FLUTTERWAVE_SECRET_KEY}`,
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
-        const verificationData = await response.json();
-
-        if (
-          verificationData.status === "success" &&
-          verificationData.data.status === "successful"
-        ) {
-          await startPayment();
-          clearInterval(pollInterval);
-          Alert.alert(
-            "Payment Successful",
-            "Your premium subscription has been activated!",
-            [
-              {
-                text: "OK",
-                onPress: () => router.push("/agent/dashboard"),
-              },
-            ],
-          );
-        } else if (attempts >= maxAttempts) {
-          clearInterval(pollInterval);
-          Alert.alert(
-            "Verification Timeout",
-            "Please contact support if payment was made.",
-            [{ text: "OK" }],
-          );
+        const token = await getToken();
+        const resp = await fetch(`${PAYMENT_VERIFY_ENDPOINT}?reference=${reference}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const { status, data } = await resp.json();
+        if (status === 'success' && data.status === 'success') {
+          clearInterval(interval);
+          Alert.alert('Payment Successful','Your subscription is active!',[{ onPress: () => router.push('/agent/dashboard'), text: 'OK' }]);
+        } else if (attempts >= max) {
+          clearInterval(interval);
+          Alert.alert('Verification Timeout','Please contact support if payment was made.');
         }
-
-        attempts++;
-      } catch (err) {
-        clearInterval(pollInterval);
-        Alert.alert(
-          "Verification Error",
-          "An error occurred during verification. Please try again or contact support.",
-          [{ text: "OK" }],
-        );
+      } catch {
+        clearInterval(interval);
+        Alert.alert('Verification Error','An error occurred.');
       }
     }, 5000);
   };
