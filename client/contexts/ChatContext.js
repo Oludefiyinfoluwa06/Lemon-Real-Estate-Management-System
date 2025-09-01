@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState, useContext, useEffect } from "react";
 import { config } from "../config";
 import axios from "axios";
 
@@ -8,6 +8,8 @@ export const ChatProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
   const [chatList, setChatList] = useState([]);
   const [chatError, setChatError] = useState("");
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showMessageNotification, setShowMessageNotification] = useState(false);
 
   const showError = (errorMessage) => {
     setChatError(errorMessage);
@@ -80,6 +82,14 @@ export const ChatProvider = ({ children }) => {
     }
   };
 
+  // Count unread messages when chat list updates
+  useEffect(() => {
+    if (Array.isArray(chatList)) {
+      const count = chatList.filter((chat) => !chat.isRead).length;
+      setUnreadCount(count);
+    }
+  }, [chatList]);
+
   const value = {
     messages: Array.isArray(messages) ? messages : [],
     sendMessage,
@@ -87,6 +97,9 @@ export const ChatProvider = ({ children }) => {
     fetchChats,
     chatList: Array.isArray(chatList) ? chatList : [],
     chatError,
+    unreadCount,
+    showMessageNotification,
+    setShowMessageNotification,
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

@@ -29,7 +29,7 @@ const generateUniqueReferenceId = async (maxAttempts = 10) => {
 
 const initializePayment = async (req, res) => {
   try {
-    const { reference, amount, email, currency } = req.body;
+    const { amount, email, currency } = req.body;
     const response = await fetch('https://api.paystack.co/transaction/initialize', {
       method: 'POST',
       headers: {
@@ -37,9 +37,9 @@ const initializePayment = async (req, res) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        reference,
         amount,
         email,
+        channels: ['card', 'bank', 'ussd', 'bank_transfer'],
         currency,
       }),
     });
@@ -48,12 +48,13 @@ const initializePayment = async (req, res) => {
     const customReference = await generateUniqueReferenceId();
 
     await Payment.create({
+      userId: req.user._id,
       paystackReference: data.data.reference,
       customReference,
       amount,
     });
 
-    return res.json(data);
+    return res.json({ status: 'success', data: data.data });
   } catch (err) {
     return res.status(500).json({ status: 'error', message: err.message });
   }
@@ -71,7 +72,8 @@ const verifyPayment = async (req, res) => {
     if (data.status) {
       await Payment.findOneAndUpdate({ paystackReference: reference }, { status: 'Verified' });
     }
-    return res.json({ status: data.status ? 'success' : 'error', data: data.data });
+
+    return res.json({ status: data.status, data: data.data });
   } catch (err) {
     return res.status(500).json({ status: 'error', message: err.message });
   }

@@ -24,7 +24,9 @@ app.use(methodOverride("_method"));
 mongoose
   .connect(process.env.DB_URI)
   .then(() => {
-    app.listen(port, () => `Server running on port: http://localhost:${port}!`);
+    app.listen(port, () => {
+      console.log(`Server running on port: http://localhost:${port}!`);
+    });
   })
   .catch((err) => {
     throw new Error(err, "Connection unsuccessful");

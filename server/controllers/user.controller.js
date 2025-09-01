@@ -89,6 +89,8 @@ const login = async (req, res) => {
     const userId = user._id;
     const accessToken = await createAccessToken(userId);
 
+    sendLoginNotificationEmail(user.email);
+
     return res
       .status(200)
       .json({
@@ -146,6 +148,35 @@ const forgotPassword = async (req, res) => {
     return res.status(200).json({ message: "Otp sent successfully" });
   } catch (error) {
     return res.status(500).json({ message: "An error occurred" });
+  }
+};
+
+const sendLoginNotificationEmail = async (email) => {
+  try {
+    const emailBody = `
+      <h1>New login detected</h1>
+      <p>We noticed a login to your account.</p>
+      <p>If this was you, no action is required. If not, please change your password immediately.</p>
+    `;
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "New Login to Your Account",
+      html: emailBody,
+    };
+
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error("Login notification email error:", error.message || error);
   }
 };
 
@@ -289,6 +320,28 @@ const idVerification = async (req, res) => {
   }
 };
 
+const verifyUser = async (req, res) => {
+  try {
+    // only admins can verify
+    if (!req.user || !req.user.isAdmin) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const userId = req.params.id;
+
+    const userToVerify = await User.findById(userId);
+    if (!userToVerify) return res.status(404).json({ message: "User not found" });
+
+    userToVerify.isVerified = true;
+    userToVerify.verificationBadge = req.body.badge || "✔️ Verified";
+    await userToVerify.save();
+
+    return res.status(200).json({ message: "User verified successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "An error occurred" });
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -298,4 +351,5 @@ module.exports = {
   updateUser,
   getUser,
   idVerification,
+  verifyUser,
 };

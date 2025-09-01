@@ -21,10 +21,11 @@ import Button from "../../components/common/Button";
 const Subscription = () => {
   const { getUser, user } = useAuth();
   const [convertedPrice, setConvertedPrice] = useState("");
+  const [convertedAmount, setConvertedAmount] = useState(null);
   const [currencyInfo, setCurrencyInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const basePriceNGN = 2000;
+  const basePriceNGN = 20000;
 
   useEffect(() => {
     const getUserDetails = async () => {
@@ -66,12 +67,13 @@ const Subscription = () => {
           throw new Error("Currency conversion failed");
         }
 
+        setCurrencyInfo(countryData);
+        setConvertedAmount(converted);
         const formatted = formatCurrency(
           converted,
           countryData.symbol,
           countryData.code,
         );
-
         setConvertedPrice(formatted);
       } catch (err) {
         setError(
@@ -138,7 +140,9 @@ const Subscription = () => {
                 bg={true}
                 onPress={() =>
                   router.push(
-                    `/agent/pay?amount=${convertedPrice || basePriceNGN}`,
+                    `/agent/pay?amount=${encodeURIComponent(
+                      (convertedAmount ?? basePriceNGN).toString(),
+                    )}&currency=${encodeURIComponent(currencyInfo?.code ?? "NGN")}`,
                   )
                 }
               />

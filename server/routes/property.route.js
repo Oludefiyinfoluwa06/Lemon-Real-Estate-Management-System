@@ -5,6 +5,8 @@ const {
   updateProperty,
   searchProperty,
   deleteProperty,
+  getAgentMetrics,
+  getRecommendations,
 } = require("../controllers/property.controller");
 const { authenticate } = require("../middlewares/authenticate");
 const {
@@ -23,8 +25,10 @@ router.post(
 );
 router.get("/all", authenticate, getProperties);
 router.get("/:id", authenticate, getProperty);
+router.get("/metrics/:agentId", authenticate, getAgentMetrics);
 router.put("/:id", authenticate, updateProperty);
 router.get("/", authenticate, searchProperty);
+router.get("/recommendations", authenticate, getRecommendations);
 router.delete("/:id", authenticate, deleteProperty);
 
 module.exports = router;

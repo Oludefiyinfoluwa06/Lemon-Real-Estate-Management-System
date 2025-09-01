@@ -59,8 +59,7 @@ const PropertyDetails = () => {
       if (params?.id) {
         try {
           await getProperty(params.id);
-        } catch (error) {
-        }
+        } catch (error) {}
       }
     };
     getPropertyDetails();
@@ -101,8 +100,7 @@ const PropertyDetails = () => {
     if (property?._id) {
       try {
         await updateProperty(property._id);
-      } catch (error) {
-      }
+      } catch (error) {}
     }
   };
 

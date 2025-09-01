@@ -46,12 +46,15 @@ const uploadProperty = async (req, res) => {
       agentProfilePicture: agent.profilePicture,
       document,
       documentType,
-      coordinates,
+      coordinates: {
+        latitude: coordinates.lat,
+        longitude: coordinates.lng,
+      },
     });
 
     return res.status(201).json({ message: "Property upload successful", property });
   } catch (error) {
-    return res.status(500).json({ message: "An error occurred" });
+    return res.status(500).json({ message: error.message || "An error occurred while adding property" });
   }
 };
 
@@ -157,7 +160,18 @@ const getProperty = async (req, res) => {
       return res.status(400).json({ message: "Invalid ID" });
     }
 
-    const property = await Property.findById(propertyId);
+    let property = await Property.findById(propertyId);
+
+    // hide documents for client (buyer) role unless property.isDocumentPublic is true
+    if (req.user && req.user.role === "buyer") {
+      if (property && !property.isDocumentPublic) {
+        // remove documents and documentTypes from response
+        const propObj = property.toObject();
+        delete propObj.documents;
+        delete propObj.documentTypes;
+        property = propObj;
+      }
+    }
 
     if (!property) {
       return res.status(404).json({ message: "Property not found" });
@@ -243,57 +257,109 @@ const updateProperty = async (req, res) => {
 
 const searchProperty = async (req, res) => {
   try {
-    const { title, country, category, status, minPrice, maxPrice } = req.query;
+    // support queries: q (general query), location, category, status, minPrice, maxPrice
+    const { q, location, category, status, minPrice, maxPrice } = req.query;
 
-    if (!country || !category || !status || !minPrice || !maxPrice) {
-      const properties = await Property.find({
-        title: { $regex: title, $options: "i" },
-      });
-      return res.status(200).json({
-        count: properties.length,
-        properties,
-      });
+    const query = {};
+
+    if (q) {
+      // search across title and description
+      query.$or = [
+        { title: { $regex: q, $options: "i" } },
+        { description: { $regex: q, $options: "i" } },
+      ];
     }
 
-    let query = {};
-
-    if (title) {
-      query.title = { $regex: title, $options: "i" };
-    }
-
-    if (country) {
-      query.country = { $regex: country, $options: "i" };
+    if (location) {
+      // location may match country or coordinates-related text fields
+      query.$or = query.$or || [];
+      query.$or.push({ country: { $regex: location, $options: "i" } });
+      query.$or.push({ "coordinates.latitude": { $regex: location, $options: "i" } });
     }
 
     if (category) {
-      query.category = category;
-    }
-
-    const minPriceNumber = parseFloat(minPrice);
-    const maxPriceNumber = parseFloat(maxPrice);
-
-    if (!isNaN(minPriceNumber) || !isNaN(maxPriceNumber)) {
-      query.price = {};
-      if (!isNaN(minPriceNumber)) {
-        query.price.$gte = minPriceNumber;
-      }
-      if (!isNaN(maxPriceNumber)) {
-        query.price.$lte = maxPriceNumber;
-      }
+      query.category = { $regex: category, $options: "i" };
     }
 
     if (status) {
       query.status = status;
     }
 
+    const minPriceNumber = parseFloat(minPrice);
+    const maxPriceNumber = parseFloat(maxPrice);
+    if (!isNaN(minPriceNumber) || !isNaN(maxPriceNumber)) {
+      query.price = {};
+      if (!isNaN(minPriceNumber)) query.price.$gte = minPriceNumber;
+      if (!isNaN(maxPriceNumber)) query.price.$lte = maxPriceNumber;
+    }
+
     const properties = await Property.find(query);
 
-    return res.status(200).json({
-      count: properties.length,
-      properties,
+    // strip documents for buyers
+    const sanitized = properties.map((p) => {
+      const po = p.toObject();
+      if (req.user && req.user.role === "buyer" && !po.isDocumentPublic) {
+        delete po.documents;
+        delete po.documentTypes;
+      }
+      return po;
     });
+
+    return res.status(200).json({ count: sanitized.length, properties: sanitized });
   } catch (error) {
     res.status(500).json({ message: "An error occurred" });
+  }
+};
+
+const getAgentMetrics = async (req, res) => {
+  try {
+    const agentId = req.params.agentId;
+    const isValidId = isValidObjectId(agentId);
+    if (!isValidId) return res.status(400).json({ message: "Invalid agent ID" });
+
+    const properties = await Property.find({ agentId }).select(
+      "title likes videoViews",
+    );
+
+    return res.status(200).json({ properties });
+  } catch (error) {
+    return res.status(500).json({ message: "An error occurred" });
+  }
+};
+
+const getRecommendations = async (req, res) => {
+  try {
+    const user = req.user;
+    let properties = [];
+
+    if (user && user.preferences && user.preferences.length > 0) {
+      // match category, title or description
+      const prefRegexes = user.preferences.map((p) => ({ $regex: p, $options: "i" }));
+      properties = await Property.find({
+        $or: [
+          { category: { $in: user.preferences } },
+          { title: { $in: user.preferences } },
+          { description: { $in: user.preferences } },
+        ],
+      }).limit(50);
+    } else {
+      // fallback to trending properties sorted by likes + views
+      properties = await Property.find().sort({ likes: -1, videoViews: -1 }).limit(50);
+    }
+
+    // sanitize documents for buyers
+    const sanitized = properties.map((p) => {
+      const po = p.toObject();
+      if (req.user && req.user.role === "buyer" && !po.isDocumentPublic) {
+        delete po.documents;
+        delete po.documentTypes;
+      }
+      return po;
+    });
+
+    return res.status(200).json({ properties: sanitized });
+  } catch (error) {
+    return res.status(500).json({ message: "An error occurred" });
   }
 };
 
@@ -324,4 +390,6 @@ module.exports = {
   updateProperty,
   searchProperty,
   deleteProperty,
+  getAgentMetrics,
+  getRecommendations,
 };

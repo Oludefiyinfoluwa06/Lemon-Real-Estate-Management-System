@@ -76,7 +76,10 @@ const AddProperty = () => {
           }
         });
         setCurrencies(
-          Array.from(currencyMap.entries()).map(([name, symbol]) => ({ name, symbol })),
+          Array.from(currencyMap.entries()).map(([name, symbol]) => ({
+            name,
+            symbol,
+          })),
         );
       } catch (error) {
         throw error;
@@ -104,19 +107,15 @@ const AddProperty = () => {
   };
 
   const handleAddProperty = async () => {
-    if (
-      propertyImages.filter(Boolean).length === 0 ||
-      !video ||
-      !document
-    ) {
+    if (propertyImages.filter(Boolean).length === 0 || !video || !document) {
       return setPropertyError("Select the necessary files");
     }
     const documentType =
       category === "Hotels"
         ? "CAC/Tax"
         : status === "Rent"
-        ? "Proof of Ownership"
-        : "Property Document";
+          ? "Proof of Ownership"
+          : "Property Document";
 
     await uploadProperty(
       title,
@@ -130,7 +129,7 @@ const AddProperty = () => {
       video,
       document,
       coordinates,
-      documentType
+      documentType,
     );
   };
 
@@ -212,12 +211,12 @@ const AddProperty = () => {
       const { uri, base64, fileSize, width, height } = result.assets[0];
 
       const getImageHash = (base64Data) => {
-        if (!base64Data) return '';
+        if (!base64Data) return "";
         const sampleSize = 1000;
         const sample = base64Data.slice(0, sampleSize);
         let hash = 0;
         for (let i = 0; i < sample.length; i++) {
-          hash = ((hash << 5) - hash) + sample.charCodeAt(i);
+          hash = (hash << 5) - hash + sample.charCodeAt(i);
           hash = hash & hash;
         }
         return hash.toString();
@@ -314,8 +313,8 @@ const AddProperty = () => {
     category === "Hotels"
       ? "Upload CAC/Tax Document"
       : status === "Rent"
-      ? "Upload Proof of Ownership"
-      : "Upload Property Document";
+        ? "Upload Proof of Ownership"
+        : "Upload Property Document";
 
   return (
     <SafeAreaView className="bg-darkUmber-dark h-full">
@@ -370,12 +369,14 @@ const AddProperty = () => {
               options={categories}
               onSelect={(value) => setCategory(value.name)}
             />
-            {category !== 'Hotels' && <CustomSelect
-              placeholder="Choose a status"
-              selectedValue={status}
-              options={statusItems}
-              onSelect={(value) => setStatus(value.name)}
-            />}
+            {category !== "Hotels" && (
+              <CustomSelect
+                placeholder="Choose a status"
+                selectedValue={status}
+                options={statusItems}
+                onSelect={(value) => setStatus(value.name)}
+              />
+            )}
 
             <Button text="Next" bg={true} onPress={handleNextStep} />
           </View>

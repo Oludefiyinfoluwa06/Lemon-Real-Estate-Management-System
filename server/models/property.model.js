@@ -24,9 +24,13 @@ const propertySchema = new mongoose.Schema(
     agentContact: { type: String, required: true },
     companyName: { type: String, required: true },
     agentProfilePicture: { type: String },
-    document: { type: String, required: true },
-    documentType: { type: String, required: true },
+    // property documents are confidential; store as array but control visibility in controllers
+    documents: [{ type: String }],
+    documentTypes: [{ type: String }],
     isDocumentPublic: { type: Boolean, default: false },
+    // engagement metrics
+    likes: { type: Number, default: 0 },
+    videoViews: { type: Number, default: 0 },
     savedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
     coordinates: {
       latitude: {

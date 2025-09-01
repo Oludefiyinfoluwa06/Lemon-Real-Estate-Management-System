@@ -6,6 +6,11 @@ const userSchema = new mongoose.Schema({
     required: () => this.role === "buyer",
     default: null,
   },
+  // preferences / target demography to help recommend properties
+  preferences: {
+    type: [String],
+    default: [],
+  },
   profilePicture: {
     type: String,
     default: null,
@@ -33,6 +38,30 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["buyer", "individual-agent", "company-agent"],
     required: true,
+  },
+  // whether the proprietor (agent) is verified/trusted
+  isVerified: {
+    type: Boolean,
+    default: false,
+  },
+  // optional badge text or emoji to show near verified users
+  verificationBadge: {
+    type: String,
+    default: null,
+  },
+  // simple admin flag to gate privileged operations
+  isAdmin: {
+    type: Boolean,
+    default: false,
+  },
+  // aggregate rating fields for proprietors
+  avgRating: {
+    type: Number,
+    default: 0,
+  },
+  ratingsCount: {
+    type: Number,
+    default: 0,
   },
   isIdVerified: {
     type: Boolean,

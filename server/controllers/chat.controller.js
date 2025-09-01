@@ -1,5 +1,7 @@
 const Chat = require("../models/chat.model");
 const User = require("../models/user.model");
+const Notification = require("../models/notification.model");
+const nodemailer = require("nodemailer");
 
 const sendMessage = async (req, res) => {
   const { senderId, receiverId, message } = req.body;
@@ -14,6 +16,50 @@ const sendMessage = async (req, res) => {
   try {
     const newMessage = new Chat({ senderId, receiverId, message });
     await newMessage.save();
+
+    // create an in-app notification for the receiver
+    try {
+      const sender = await User.findById(senderId).select("firstName lastName");
+      const title = `New message from ${sender ? `${sender.firstName} ${sender.lastName}` : "Someone"}`;
+      const body = message.slice(0, 200);
+
+      await Notification.create({
+        userId: receiverId,
+        type: "chat_message",
+        title,
+        body,
+        data: { chatId: newMessage._id, senderId },
+      });
+
+      // send email to notify of new message (non-blocking)
+      (async () => {
+        try {
+          const recipient = await User.findById(receiverId).select("email");
+          if (recipient && recipient.email) {
+            const transporter = nodemailer.createTransport({
+              service: "gmail",
+              auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASSWORD,
+              },
+            });
+
+            const mailOptions = {
+              from: process.env.EMAIL_USER,
+              to: recipient.email,
+              subject: title,
+              html: `<p>${body}</p><p>Open the app to reply.</p>`,
+            };
+
+            await transporter.sendMail(mailOptions);
+          }
+        } catch (err) {
+          console.error("Error sending chat notification email:", err.message || err);
+        }
+      })();
+    } catch (err) {
+      console.error("Error creating notification:", err.message || err);
+    }
 
     return res.status(201).json({
       success: true,

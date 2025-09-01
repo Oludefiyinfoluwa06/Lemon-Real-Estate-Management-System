@@ -1,6 +1,7 @@
 const { isValidObjectId } = require("mongoose");
 const User = require("../models/user.model");
 const Review = require("../models/review.model");
+const Property = require("../models/property.model");
 
 const createReview = async (req, res) => {
   try {
@@ -32,6 +33,23 @@ const createReview = async (req, res) => {
 
     if (!review) {
       return res.status(400).json({ message: "Could not post review" });
+    }
+
+    // update proprietor aggregates (avgRating, ratingsCount)
+    try {
+      const property = await Property.findById(propertyId).select("agentId");
+      if (property && property.agentId) {
+        const agentId = property.agentId;
+        // compute new aggregates
+        const reviewsForAgent = await Review.find({ propertyId });
+        const ratings = reviewsForAgent.map((r) => r.rating || 0);
+        const ratingsCount = ratings.length;
+        const avgRating = ratingsCount > 0 ? ratings.reduce((a, b) => a + b, 0) / ratingsCount : 0;
+
+        await User.findByIdAndUpdate(agentId, { avgRating, ratingsCount });
+      }
+    } catch (err) {
+      console.error("Error updating agent aggregates:", err.message || err);
     }
 
     return res.status(201).json({ message: "Review posted successfully" });

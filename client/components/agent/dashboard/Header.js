@@ -3,6 +3,7 @@ import { Image, Text, TouchableOpacity, View } from "react-native";
 import { router } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useAuth } from "../../../contexts/AuthContext";
+import RatingsSummary from "../../common/RatingsSummary";
 
 const Header = () => {
   const { getUser, user } = useAuth();
@@ -33,11 +34,22 @@ const Header = () => {
           )}
         </TouchableOpacity>
 
-        <Text className="text-white font-rbold text-xl">
-          {user.firstName
-            ? `Welcome, ${user.firstName}`
-            : `${user.companyName}`}
-        </Text>
+        <View>
+          <Text className="text-white font-rbold text-xl">
+            {user.firstName
+              ? `Welcome, ${user.firstName}`
+              : `${user.companyName}`}
+          </Text>
+          {user.rating > 0 && (
+            <View className="mt-1">
+              <RatingsSummary
+                avgRating={user.rating}
+                ratingsCount={user.ratingsCount || 0}
+                size="sm"
+              />
+            </View>
+          )}
+        </View>
       </View>
 
       <TouchableOpacity

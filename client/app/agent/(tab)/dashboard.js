@@ -4,7 +4,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../../../components/agent/dashboard/Header";
 import PropertiesOverview from "../../../components/agent/dashboard/PropertiesOverview";
 import PropertiesAnalytics from "../../../components/agent/dashboard/PropertiesAnalytics";
+import MetricsPanel from "../../../components/agent/dashboard/MetricsPanel";
 import { useProperty } from "../../../contexts/PropertyContext";
+import { useAuth } from "../../../contexts/AuthContext";
 
 const Dashboard = () => {
   const {
@@ -14,6 +16,7 @@ const Dashboard = () => {
     agentLeaseProperties,
     agentSaleProperties,
   } = useProperty();
+  const { user } = useAuth();
 
   useEffect(() => {
     const getPropertiesDetails = async () => {
@@ -49,6 +52,8 @@ const Dashboard = () => {
               propertiesForLease={agentLeaseProperties.length}
               propertiesForSale={agentSaleProperties.length}
             />
+
+            <MetricsPanel agentId={user?._id} />
 
             <View className="h-20" />
           </View>

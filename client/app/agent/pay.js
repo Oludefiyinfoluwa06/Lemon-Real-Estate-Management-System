@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
@@ -15,6 +14,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { getCountryCurrencyData } from "../../services/currencyConverter";
 import { getToken } from "../../services/getToken";
 import { config } from "../../config";
+import { PAYSTACK_PUBLIC_KEY } from "@env";
+import PaystackWebview from "../../components/agent/payments/PaystackWebview";
 
 const Payment = () => {
   const { user } = useAuth();
@@ -25,14 +26,19 @@ const Payment = () => {
   const [remainingTime, setRemainingTime] = useState("");
   const [paymentCountdown, setPaymentCountdown] = useState("");
 
+  // New: payment webview state
+  const [showPaymentWebview, setShowPaymentWebview] = useState(false);
+  const [paymentData, setPaymentData] = useState(null);
+
   const params = useLocalSearchParams();
   const PAYMENT_INITIALIZE_ENDPOINT = `${config.API_BASE_URL}/api/payment/initialize`;
   const PAYMENT_VERIFY_ENDPOINT = `${config.API_BASE_URL}/api/payment/verify`;
 
-  const convertPriceToNumber = (formattedPrice) => Number(formattedPrice.replace(/[^0-9.]/g, ""));
+  const convertPriceToNumber = (formattedPrice) =>
+    Number(formattedPrice.replace(/[^0-9.]/g, ""));
 
   useEffect(() => {
-    if (user.isOnTrial) {
+    if (user?.isOnTrial) {
       const interval = setInterval(() => {
         const now = new Date();
         const end = new Date(user.trialEndDate);
@@ -49,10 +55,10 @@ const Payment = () => {
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [user.isOnTrial, user.trialEndDate]);
+  }, [user?.isOnTrial, user?.trialEndDate]);
 
   useEffect(() => {
-    if (user.hasPaid) {
+    if (user?.hasPaid) {
       const interval = setInterval(() => {
         const now = new Date();
         const end = new Date(user.paymentEndDate);
@@ -69,7 +75,7 @@ const Payment = () => {
       }, 1000);
       return () => clearInterval(interval);
     }
-  }, [user.hasPaid, user.paymentEndDate]);
+  }, [user?.hasPaid, user?.paymentEndDate]);
 
   useEffect(() => {
     const setup = async () => {
@@ -86,7 +92,7 @@ const Payment = () => {
         const reference = `PSK_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
         setPaymentDetails({
           reference,
-          amount: convertPriceToNumber(params.amount) * 100,
+          amount: convertPriceToNumber(params.amount) * 100, // convert to kobo
           email: user.email,
           currency: countryData.code,
         });
@@ -97,63 +103,45 @@ const Payment = () => {
       }
     };
     setup();
-  }, [user]);
+  }, [user, params.amount]);
 
+  // Initialize payment and show webview (same pattern as advertise payment)
   const initiatePayment = async () => {
     if (!paymentDetails) {
       return;
     }
 
     setIsLoading(true);
+    setError("");
     try {
       const token = await getToken();
       const resp = await fetch(PAYMENT_INITIALIZE_ENDPOINT, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(paymentDetails),
       });
-      const { data, status } = await resp.json();
-      if (status === 'success' && data.authorization_url) {
-        await Linking.openURL(data.authorization_url);
-        await pollVerification(paymentDetails.reference);
+
+      const json = await resp.json();
+      const { status, data } = json;
+
+      if (status === "success" && data) {
+        // data should include at least reference and possibly authorization_url
+        setPaymentData(data);
+        setShowPaymentWebview(true);
       } else {
-        throw new Error('Initialization failed');
+        throw new Error(json.message || "Initialization failed");
       }
-    } catch {
-      Alert.alert('Payment Error','Unable to start payment. Please try again.');
+    } catch (err) {
+      Alert.alert("Payment Error", err.message || "Unable to start payment.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const pollVerification = async (reference) => {
-    let attempts = 0;
-    const max = 10;
-    const interval = setInterval(async () => {
-      attempts++;
-      try {
-        const token = await getToken();
-        const resp = await fetch(`${PAYMENT_VERIFY_ENDPOINT}?reference=${reference}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const { status, data } = await resp.json();
-        if (status === 'success' && data.status === 'success') {
-          clearInterval(interval);
-          Alert.alert('Payment Successful','Your subscription is active!',[{ onPress: () => router.push('/agent/dashboard'), text: 'OK' }]);
-        } else if (attempts >= max) {
-          clearInterval(interval);
-          Alert.alert('Verification Timeout','Please contact support if payment was made.');
-        }
-      } catch {
-        clearInterval(interval);
-        Alert.alert('Verification Error','An error occurred.');
-      }
-    }, 5000);
-  };
-
+  // Called by PaystackWebview after successful verification
   const startPayment = async () => {
     try {
       const token = await getToken();
@@ -183,7 +171,7 @@ const Payment = () => {
           ],
         );
       } else {
-        throw new Error(data.message || "Failed to start trial");
+        throw new Error(data.message || "Failed to start subscription");
       }
     } catch (err) {
       Alert.alert(
@@ -294,6 +282,21 @@ const Payment = () => {
     }
   };
 
+  if (showPaymentWebview && paymentData && paymentDetails) {
+    return (
+      <PaystackWebview
+        reference={paymentData.reference || paymentDetails.reference}
+        amount={paymentDetails.amount}
+        email={paymentDetails.email}
+        publicKey={PAYSTACK_PUBLIC_KEY}
+        onVerified={() => {
+          setShowPaymentWebview(false);
+          startPayment();
+        }}
+      />
+    );
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-darkUmber-dark p-4">
       <ScrollView>
@@ -323,24 +326,23 @@ const Payment = () => {
               <View className="border-b border-gray-600 pb-2">
                 <Text className="text-white text-lg">Amount:</Text>
                 <Text className="text-white font-rbold text-xl">
-                  {paymentDetails.currency} {paymentDetails.amount}
+                  {paymentDetails.currency} {paymentDetails.amount / 100}
                 </Text>
               </View>
 
               <TouchableOpacity
                 className={`bg-[#BBCC13] p-4 rounded-lg items-center ${
-                  isLoading || user.isOnTrial || user.hasPaid
+                  isLoading || user?.isOnTrial || user?.hasPaid
                     ? "bg-gray-400"
                     : "bg-[#BBCC13]"
-                }
-                                `}
+                }`}
                 onPress={initiatePayment}
-                disabled={isLoading || user.isOnTrial || user.hasPaid}
+                disabled={isLoading || user?.isOnTrial || user?.hasPaid}
               >
                 <Text className="text-white font-rbold text-lg">
                   {isLoading
                     ? "Processing..."
-                    : user.hasPaid
+                    : user?.hasPaid
                       ? paymentCountdown || "Calculating..."
                       : "Pay Now"}
                 </Text>
@@ -348,17 +350,17 @@ const Payment = () => {
 
               <TouchableOpacity
                 className={`p-4 rounded-lg items-center ${
-                  isProcessingTrial || user.isOnTrial || user.hasPaid
+                  isProcessingTrial || user?.isOnTrial || user?.hasPaid
                     ? "bg-gray-400"
                     : "bg-[#BBCC13]"
                 }`}
                 onPress={handleTrialRequest}
-                disabled={isProcessingTrial || user.isOnTrial}
+                disabled={isProcessingTrial || user?.isOnTrial}
               >
                 <Text className="text-white font-rbold text-lg">
                   {isProcessingTrial
                     ? "Processing..."
-                    : user.isOnTrial
+                    : user?.isOnTrial
                       ? remainingTime || "Calculating..."
                       : "Start 6 months trial"}
                 </Text>

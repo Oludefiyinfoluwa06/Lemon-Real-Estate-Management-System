@@ -33,7 +33,8 @@ const Chats = () => {
         return a._id.localeCompare(b._id);
       });
 
-      const shouldUpdate = JSON.stringify(sortedChats) !== JSON.stringify(localChatList);
+      const shouldUpdate =
+        JSON.stringify(sortedChats) !== JSON.stringify(localChatList);
       if (shouldUpdate) {
         setLocalChatList(sortedChats);
       }
@@ -70,45 +71,55 @@ const Chats = () => {
     };
   }, [user, fetchChats, lastUpdate]);
 
-  const renderChatItem = useCallback(({ item }) => {
-    const navigateToChat = () => {
-      const chatPartnerId = user._id === item.receiverId ? item.senderId : item.receiverId;
-      router.push(
-        `/user/chat/${chatPartnerId}?name=${encodeURIComponent(item.name)}&profilePicture=${encodeURIComponent(item.profilePicture || '')}`
-      );
-    };
+  const renderChatItem = useCallback(
+    ({ item }) => {
+      const navigateToChat = () => {
+        const chatPartnerId =
+          user._id === item.receiverId ? item.senderId : item.receiverId;
+        router.push(
+          `/user/chat/${chatPartnerId}?name=${encodeURIComponent(item.name)}&profilePicture=${encodeURIComponent(item.profilePicture || "")}`,
+        );
+      };
 
-    return (
-      <TouchableOpacity
-        onPress={navigateToChat}
-        className="flex-row items-center justify-between bg-darkUmber-light p-4 mb-2 rounded-lg"
-      >
-        <View className="flex-row items-center justify-start">
-          {item.profilePicture ? (
-            <Image
-              source={{ uri: item.profilePicture }}
-              className="w-10 h-10 rounded-full"
-            />
-          ) : (
-            <Ionicons name="person-circle-outline" size={40} color="#FFFFFF" />
-          )}
-          <View className="flex-1 ml-4">
-            <Text className="text-white font-medium text-lg">{item.name}</Text>
-            <Text
-              className="text-frenchGray-light"
-              numberOfLines={1}
-              ellipsizeMode="tail"
-            >
-              {item.lastMessage}
-            </Text>
+      return (
+        <TouchableOpacity
+          onPress={navigateToChat}
+          className="flex-row items-center justify-between bg-darkUmber-light p-4 mb-2 rounded-lg"
+        >
+          <View className="flex-row items-center justify-start">
+            {item.profilePicture ? (
+              <Image
+                source={{ uri: item.profilePicture }}
+                className="w-10 h-10 rounded-full"
+              />
+            ) : (
+              <Ionicons
+                name="person-circle-outline"
+                size={40}
+                color="#FFFFFF"
+              />
+            )}
+            <View className="flex-1 ml-4">
+              <Text className="text-white font-medium text-lg">
+                {item.name}
+              </Text>
+              <Text
+                className="text-frenchGray-light"
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {item.lastMessage}
+              </Text>
+            </View>
           </View>
-        </View>
-        {!item.isRead && item.receiverId === user._id && (
-          <View className="bg-chartreuse w-3 h-3 rounded-full" />
-        )}
-      </TouchableOpacity>
-    );
-  }, [user?._id]);
+          {!item.isRead && item.receiverId === user._id && (
+            <View className="bg-chartreuse w-3 h-3 rounded-full" />
+          )}
+        </TouchableOpacity>
+      );
+    },
+    [user?._id],
+  );
 
   const keyExtractor = useCallback((item) => item._id, []);
 
