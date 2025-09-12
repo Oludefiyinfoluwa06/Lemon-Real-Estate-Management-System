@@ -55,7 +55,7 @@ export const PropertyProvider = ({ children }) => {
     try {
       const token = await getToken();
 
-      const response = await axios.post(
+      await axios.post(
         `${config.API_BASE_URL}/api/property/upload`,
         {
           title,

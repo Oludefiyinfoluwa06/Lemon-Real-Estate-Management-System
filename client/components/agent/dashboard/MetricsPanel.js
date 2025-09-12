@@ -54,18 +54,25 @@ const MetricsPanel = ({ agentId }) => {
           >
             <Text className="text-white font-rbold mb-2">{property.title}</Text>
 
-            <View className="flex-row justify-between">
+            <View className="flex-row justify-start gap-3 items-center">
               <View className="flex-row items-center">
                 <Ionicons name="heart" size={20} color="#BBCC13" />
                 <Text className="text-white font-rregular ml-2">
-                  {property.likes || 0} likes
+                  {property.savedBy.length || 0} likes
                 </Text>
               </View>
 
               <View className="flex-row items-center">
                 <Ionicons name="eye" size={20} color="#BBCC13" />
                 <Text className="text-white font-rregular ml-2">
-                  {property.videoViews || 0} views
+                  {property.views || 0} views
+                </Text>
+              </View>
+
+              <View className="flex-row items-center">
+                <Ionicons name="videocam" size={20} color="#BBCC13" />
+                <Text className="text-white font-rregular ml-2">
+                  {property.videoViews || 0} video views
                 </Text>
               </View>
             </View>

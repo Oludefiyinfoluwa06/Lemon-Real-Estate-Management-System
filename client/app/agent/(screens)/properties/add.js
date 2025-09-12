@@ -68,23 +68,36 @@ const AddProperty = () => {
       try {
         const countries = await fetchCountries();
         const currencyMap = new Map();
+
         countries.forEach((c) => {
           if (c.currencies) {
-            Object.values(c.currencies).forEach((cur) => {
-              currencyMap.set(cur.name, cur.symbol);
+            // iterate entries so we keep the currency code (key)
+            Object.entries(c.currencies).forEach(([code, cur]) => {
+              // avoid duplicates: key by code
+              if (!currencyMap.has(code)) {
+                currencyMap.set(code, {
+                  code,
+                  name: cur.name,
+                  symbol: cur.symbol || "",
+                });
+              }
             });
           }
         });
-        setCurrencies(
-          Array.from(currencyMap.entries()).map(([name, symbol]) => ({
-            name,
-            symbol,
-          })),
+
+        // convert to array and sort by currency name (optional)
+        const currencyArray = Array.from(currencyMap.values()).sort((a, b) =>
+          a.name.localeCompare(b.name),
         );
+
+        setCurrencies(currencyArray);
       } catch (error) {
+        // handle error more gracefully in production
+        console.error("Failed to load currencies", error);
         throw error;
       }
     };
+
     getCurrency();
   }, []);
 
@@ -409,7 +422,7 @@ const AddProperty = () => {
               selectedValue={currency}
               options={currencies}
               onSelect={(value) =>
-                setCurrency(`${value.name} - ${value.symbol}`)
+                setCurrency(value.code)
               }
             />
 

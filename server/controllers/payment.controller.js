@@ -29,34 +29,52 @@ const generateUniqueReferenceId = async (maxAttempts = 10) => {
 
 const initializePayment = async (req, res) => {
   try {
-    const { amount, email, currency } = req.body;
-    const response = await fetch('https://api.paystack.co/transaction/initialize', {
-      method: 'POST',
+    const { amount, email, currency, metadata = {} } = req.body;
+
+    // Paystack expects amount in kobo if NGN already passed by client — ensure consistency
+    // If your frontend already sent amount *in kobo*, don't re-multiply here.
+    const payload = {
+      amount, // client sends kobo (as in your Payment screen)
+      email,
+      channels: ["card", "bank", "ussd", "bank_transfer"],
+      currency: currency || "NGN",
+      // IMPORTANT: include metadata so webhook includes transactionId/propertyId
+      metadata,
+      // optionally include a callback_url if you want Paystack to redirect after payment
+      // callback_url: process.env.FRONTEND_CALLBACK_SUCCESS_URL || undefined,
+    };
+
+    const response = await fetch("https://api.paystack.co/transaction/initialize", {
+      method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        amount,
-        email,
-        channels: ['card', 'bank', 'ussd', 'bank_transfer'],
-        currency,
-      }),
+      body: JSON.stringify(payload),
     });
+
     const data = await response.json();
 
-    const customReference = await generateUniqueReferenceId();
+    console.log(data);
 
+    if (!data || !data.status) {
+      return res.status(500).json({ status: "error", message: "Paystack initialize failed", raw: data });
+    }
+
+    // create a Payment document (existing behavior)
+    const customReference = await generateUniqueReferenceId();
     await Payment.create({
-      userId: req.user._id,
+      userId: req.user ? req.user._id : null,
       paystackReference: data.data.reference,
       customReference,
       amount,
+      metadata,
     });
 
-    return res.json({ status: 'success', data: data.data });
+    return res.json({ status: "success", data: data.data });
   } catch (err) {
-    return res.status(500).json({ status: 'error', message: err.message });
+    console.error("initializePayment error:", err);
+    return res.status(500).json({ status: "error", message: err.message });
   }
 };
 

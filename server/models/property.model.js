@@ -1,3 +1,4 @@
+// models/property.model.js
 const mongoose = require("mongoose");
 
 const propertySchema = new mongoose.Schema(
@@ -31,7 +32,9 @@ const propertySchema = new mongoose.Schema(
     // engagement metrics
     likes: { type: Number, default: 0 },
     videoViews: { type: Number, default: 0 },
+    views: { type: Number, default: 0 }, // NEW: general views counter
     savedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    savedCount: { type: Number, default: 0 }, // NEW: denormalized saved count (keeps queries cheap)
     coordinates: {
       latitude: {
         type: Number,
@@ -46,9 +49,9 @@ const propertySchema = new mongoose.Schema(
     isOnAdvertisement: { type: Boolean, default: false },
     advertisementStartDate: { type: Date, default: null },
     advertisementEndDate: { type: Date, default: null },
+    isTaken: { type: Boolean, default: false },
   },
   { timestamps: true },
 );
 
-const Property = mongoose.model("properties", propertySchema);
-module.exports = Property;
+module.exports = mongoose.model("Property", propertySchema);

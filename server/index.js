@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
 const methodOverride = require("method-override");
+const bodyParser = require("body-parser");
 
 const usersRoute = require("./routes/user.route");
 const propertiesRoute = require("./routes/property.route");
@@ -12,6 +13,7 @@ const paymentRoute = require("./routes/payment.route");
 const emailRoute = require("./routes/email.route");
 const subscriptionRoute = require("./routes/subscription.route");
 const advertisementRoute = require("./routes/advertisement.route");
+const transactionRoute = require("./routes/transaction.route");
 
 const port = process.env.PORT || 5000;
 const app = express();
@@ -20,6 +22,19 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(methodOverride("_method"));
+
+app.use((req, res, next) => {
+  if (req.path === "/transactions/webhook/paystack") {
+    bodyParser.json({
+      verify: (req, res, buf) => {
+        req.rawBody = buf.toString();
+      },
+    })(req, res, next);
+  } else {
+    bodyParser.json()(req, res, next);
+  }
+});
+app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose
   .connect(process.env.DB_URI)
@@ -41,5 +56,6 @@ app.use("/api/payment", paymentRoute);
 app.use("/api/email", emailRoute);
 app.use("/api/subscription", subscriptionRoute);
 app.use("/api/advertise", advertisementRoute);
+app.use("/api/transaction", transactionRoute);
 
 module.exports = app;

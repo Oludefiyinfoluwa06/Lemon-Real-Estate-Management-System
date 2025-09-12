@@ -1,10 +1,10 @@
-import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { View, Text, TouchableOpacity, FlatList, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { useChat } from "../../../contexts/ChatContext";
-import EmptyChatList from "../../../components/common/EmptyChatList";
-import { useAuth } from "../../../contexts/AuthContext";
+import { useChat } from "../../contexts/ChatContext";
+import EmptyChatList from "../../components/common/EmptyChatList";
+import { useAuth } from "../../contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 
 const Chats = () => {

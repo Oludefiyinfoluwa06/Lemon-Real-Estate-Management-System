@@ -5,7 +5,7 @@ import * as NavigationBar from "expo-navigation-bar";
 
 const TabIcon = ({ icon, focused }) => (
   <View
-    className={`${focused ? "bg-[#212A2B]" : ""} items-center justify-center w-[50px] h-[50px] rounded-full`}
+    className={`${focused ? "bg-[#212A2B]" : ""} mt-7 items-center justify-center w-[50px] h-[50px] rounded-full`}
   >
     <Ionicons
       name={icon}
@@ -27,9 +27,9 @@ const TabLayout = () => {
         tabBarHideOnKeyboard: true,
         tabBarStyle: {
           position: "absolute",
-          bottom: -0.3,
+          bottom: 0,
           left: 0,
-          height: 60,
+          height: 80,
           paddingVertical: 5,
           borderTopLeftRadius: 15,
           borderTopRightRadius: 15,

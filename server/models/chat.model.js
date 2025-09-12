@@ -18,8 +18,13 @@ const chatSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    metadata: {
+      // optional free-form object to store references (e.g., transactionId, propertyId)
+      type: Object,
+      default: {},
+    },
   },
-  { timestamps: true },
+  { timestamps: true }
 );
 
 module.exports = mongoose.model("Chat", chatSchema);

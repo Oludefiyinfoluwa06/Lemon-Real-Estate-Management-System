@@ -164,7 +164,13 @@ const getProperty = async (req, res) => {
 
     // hide documents for client (buyer) role unless property.isDocumentPublic is true
     if (req.user && req.user.role === "buyer") {
-      if (property && !property.isDocumentPublic) {
+      await Property.findByIdAndUpdate(
+        propertyId,
+        { $inc: { views: 1 } },
+        { new: true }
+      ).lean();
+
+      if (property) {
         // remove documents and documentTypes from response
         const propObj = property.toObject();
         delete propObj.documents;
@@ -179,6 +185,7 @@ const getProperty = async (req, res) => {
 
     return res.status(200).json({ property });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "An error occurred" });
   }
 };
@@ -255,6 +262,65 @@ const updateProperty = async (req, res) => {
   }
 };
 
+const toggleSaveProperty = async (req, res) => {
+  try {
+    const propertyId = req.params.id;
+    const userId = req.user && req.user._id;
+    if (!isValidObjectId(propertyId)) return res.status(400).json({ success: false, message: "Invalid ID" });
+    if (!userId) return res.status(401).json({ success: false, message: "Authentication required" });
+
+    // Check if user already saved
+    const prop = await Property.findById(propertyId).select("savedBy").lean();
+    if (!prop) return res.status(404).json({ success: false, message: "Property not found" });
+
+    const alreadySaved = (prop.savedBy || []).some((id) => id.toString() === userId.toString());
+
+    let updated;
+    if (!alreadySaved) {
+      // add user to savedBy and increment savedCount
+      updated = await Property.findByIdAndUpdate(
+        propertyId,
+        { $addToSet: { savedBy: userId }, $inc: { savedCount: 1 } },
+        { new: true }
+      );
+      return res.status(200).json({ success: true, message: "Property saved", property: updated, saved: true });
+    } else {
+      // remove user and decrement savedCount (min 0)
+      updated = await Property.findByIdAndUpdate(
+        propertyId,
+        { $pull: { savedBy: userId }, $inc: { savedCount: -1 } },
+        { new: true }
+      );
+
+      // If savedCount became negative (rare), correct it
+      if (updated.savedCount < 0) {
+        updated.savedCount = 0;
+        await updated.save();
+      }
+
+      return res.status(200).json({ success: true, message: "Property unsaved", property: updated, saved: false });
+    }
+  } catch (err) {
+    console.error("toggleSaveProperty error:", err);
+    return res.status(500).json({ success: false, message: "Error toggling saved state", error: err.message });
+  }
+};
+
+const incrementVideoView = async (req, res) => {
+  try {
+    const propertyId = req.params.id;
+    if (!isValidObjectId(propertyId)) return res.status(400).json({ success: false, message: "Invalid ID" });
+
+    const updated = await Property.findByIdAndUpdate(propertyId, { $inc: { videoViews: 1 } }, { new: true }).lean();
+    if (!updated) return res.status(404).json({ success: false, message: "Property not found" });
+
+    return res.status(200).json({ success: true, message: "Video view recorded", property: updated });
+  } catch (err) {
+    console.error("incrementVideoView error:", err);
+    return res.status(500).json({ success: false, message: "Error recording video view", error: err.message });
+  }
+};
+
 const searchProperty = async (req, res) => {
   try {
     // support queries: q (general query), location, category, status, minPrice, maxPrice
@@ -313,12 +379,10 @@ const searchProperty = async (req, res) => {
 
 const getAgentMetrics = async (req, res) => {
   try {
-    const agentId = req.params.agentId;
-    const isValidId = isValidObjectId(agentId);
-    if (!isValidId) return res.status(400).json({ message: "Invalid agent ID" });
+    const agentId = req.user._id;
 
     const properties = await Property.find({ agentId }).select(
-      "title likes videoViews",
+      "title savedBy views videoViews",
     );
 
     return res.status(200).json({ properties });
@@ -388,6 +452,8 @@ module.exports = {
   getProperties,
   getProperty,
   updateProperty,
+  toggleSaveProperty,
+  incrementVideoView,
   searchProperty,
   deleteProperty,
   getAgentMetrics,
