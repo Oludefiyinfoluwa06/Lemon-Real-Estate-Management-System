@@ -7,6 +7,7 @@ const {
   verifyOtp,
   resetPassword,
   idVerification,
+  verifyUser,
 } = require("../controllers/user.controller");
 const { authenticate } = require("../middlewares/authenticate");
 const { upload } = require("../middlewares/image-upload");
@@ -15,6 +16,7 @@ const router = require("express").Router();
 
 router.post("/register", register);
 router.post("/login", login);
+router.post("/verify/:id", authenticate, verifyUser);
 router.post("/forgot-password", forgotPassword);
 router.post("/verify-otp", verifyOtp);
 router.post("/reset-password", resetPassword);

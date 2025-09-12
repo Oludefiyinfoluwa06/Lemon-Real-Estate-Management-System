@@ -84,15 +84,46 @@ const FilterBottomSheet = ({
 
           <View className="mb-4">
             <Text className="text-frenchGray-light mb-2 font-rregular">
-              Category
+              Description or Keywords
             </Text>
             <TextInput
-              placeholder="Lands, Houses, Shop Spaces, Offices, Industrial buildings"
-              value={category}
-              onChangeText={setCategory}
+              placeholder="e.g., duplex, bungalow, 3 bedroom..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
               className="bg-frenchGray-dark text-white p-2 rounded-lg font-rregular"
               placeholderTextColor="#AFAFAF"
             />
+          </View>
+
+          <View className="mb-4">
+            <Text className="text-frenchGray-light mb-2 font-rregular">
+              Category
+            </Text>
+            <View className="flex-row flex-wrap gap-2">
+              {[
+                "Lands",
+                "Houses",
+                "Shop Spaces",
+                "Office Buildings",
+                "Industrial Buildings",
+              ].map((cat) => (
+                <TouchableOpacity
+                  key={cat}
+                  onPress={() => setCategory(cat)}
+                  className={`px-3 py-1 rounded-full ${
+                    category === cat ? "bg-chartreuse" : "bg-frenchGray-dark"
+                  }`}
+                >
+                  <Text
+                    className={`font-rregular ${
+                      category === cat ? "text-darkUmber-dark" : "text-white"
+                    }`}
+                  >
+                    {cat}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
 
           <View className="mb-4">

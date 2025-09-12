@@ -24,7 +24,7 @@ const SponsoredProperties = () => {
   return (
     <>
       {sponsoredProperties.length > 0 && (
-        <View className="mt-[20px]">
+        <View className="my-[20px]">
           <Text className="text-xl font-rbold text-white ml-[20px]">
             Sponsored Posts
           </Text>

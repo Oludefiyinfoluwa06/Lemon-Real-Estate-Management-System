@@ -39,6 +39,8 @@ const startPayment = async (req, res) => {
 
     await property.save();
 
+    console.log("Advertisement sponsorship started successfully");
+
     return res.status(200).json({
       status: "success",
       message: "Advertisement sponsorship period started successfully",
@@ -48,6 +50,7 @@ const startPayment = async (req, res) => {
       },
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       status: "error",
       message: error.message || "Failed to start advertisement sponsorship",

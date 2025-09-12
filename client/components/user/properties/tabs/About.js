@@ -2,7 +2,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { WebView } from "react-native-webview";
-import { View, Text, TouchableOpacity, Linking, Image } from "react-native";
+import {
+  Alert,
+  View,
+  Text,
+  TouchableOpacity,
+  Linking,
+  Image,
+} from "react-native";
 
 const About = ({
   description,
@@ -14,7 +21,58 @@ const About = ({
   isDocumentPublic,
   proprietorId,
   coordinates,
+  propertyId,
+  propertyTitle,
+  ownerContact,
 }) => {
+  const openChat = () => {
+    try {
+      if (!proprietorId) {
+        Alert.alert(
+          "Can't open chat",
+          "Property has no agent set. Please try again later.",
+        );
+        return;
+      }
+
+      // Preferred: object form (pathname + params) which works reliably with expo-router
+      const pathname = `/user/(screens)/chat/${proprietorId}`; // adjust if your route differs
+      const navParams = {
+        id: proprietorId,
+        name: proprietorName,
+        profilePicture: proprietorProfilePic,
+        propertyId,
+        propertyTitle,
+        ownerContact,
+      };
+
+      // Try object navigation first (safer). If this route doesn't exist in your project, fallback to string.
+      try {
+        router.push({ pathname, params: navParams });
+        return;
+      } catch (e) {
+        console.warn(
+          "Object router.push failed, trying string route fallback:",
+          e?.message || e,
+        );
+      }
+
+      // Fallback: string route with encoded query params
+      const qp = [
+        `name=${encodeURIComponent(property.agentName || "")}`,
+        `profilePicture=${encodeURIComponent(property.agentProfilePicture || "")}`,
+        `propertyId=${encodeURIComponent(property._id)}`,
+        `propertyTitle=${encodeURIComponent(property.title || "")}`,
+        `ownerContact=${encodeURIComponent(property.agentContact || "")}`,
+      ].join("&");
+
+      router.push(`/user/(screens)/chat/${property.agentId}?${qp}`);
+    } catch (err) {
+      console.error("openChat error:", err);
+      Alert.alert("Navigation error", err.message || String(err));
+    }
+  };
+
   return (
     <View className="p-4">
       <View className="mb-4">
@@ -65,11 +123,7 @@ const About = ({
           <View className="flex-row items-center justify-end gap-4">
             <TouchableOpacity
               className="rounded-full p-3 items-center justify-center bg-frenchGray-dark"
-              onPress={() =>
-                router.push(
-                  `/user/chat/${proprietorId}?name=${proprietorName}&profilePicture=${proprietorProfilePic}`,
-                )
-              }
+              onPress={openChat}
             >
               <Ionicons
                 name="chatbubble-ellipses-outline"

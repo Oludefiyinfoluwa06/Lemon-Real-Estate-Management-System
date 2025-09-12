@@ -18,6 +18,11 @@ const chatSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    metadata: {
+      // optional free-form object to store references (e.g., transactionId, propertyId)
+      type: Object,
+      default: {},
+    },
   },
   { timestamps: true },
 );

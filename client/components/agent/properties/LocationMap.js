@@ -106,7 +106,10 @@ const LocationMap = ({ onLocationSelect }) => {
           onLocationSelect({ lat: latitude, lng: longitude });
         }
       } else {
-        Alert.alert("Location Not Found", "Could not find the specified location.");
+        Alert.alert(
+          "Location Not Found",
+          "Could not find the specified location.",
+        );
       }
     } catch (error) {
       Alert.alert("Error", "Error searching for location.");

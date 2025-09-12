@@ -20,7 +20,9 @@ const Header = () => {
       <Text className="font-bold text-white text-2xl">All Properties</Text>
 
       <View className="flex-row items-center justify-end gap-3">
-        <TouchableOpacity onPress={() => router.push("/agent/properties/add")}>
+        <TouchableOpacity
+          onPress={() => router.push("/agent/(screens)/properties/add")}
+        >
           <Ionicons name="add-outline" size={30} color={"#FFFFFF"} />
         </TouchableOpacity>
 

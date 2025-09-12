@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
-  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router, useLocalSearchParams } from "expo-router";
@@ -15,7 +14,8 @@ import { useAuth } from "../../contexts/AuthContext";
 import { getCountryCurrencyData } from "../../services/currencyConverter";
 import { getToken } from "../../services/getToken";
 import { config } from "../../config";
-import { FLUTTERWAVE_SECRET_KEY } from "@env";
+import { PAYSTACK_PUBLIC_KEY } from "@env";
+import PaystackWebview from "../../components/agent/payments/PaystackWebview";
 
 const Payment = () => {
   const { user } = useAuth();
@@ -26,111 +26,96 @@ const Payment = () => {
   const [remainingTime, setRemainingTime] = useState("");
   const [paymentCountdown, setPaymentCountdown] = useState("");
 
+  // New: payment webview state
+  const [showPaymentWebview, setShowPaymentWebview] = useState(false);
+  const [paymentData, setPaymentData] = useState(null);
+
   const params = useLocalSearchParams();
+  const PAYMENT_INITIALIZE_ENDPOINT = `${config.API_BASE_URL}/api/payment/initialize`;
+  const PAYMENT_VERIFY_ENDPOINT = `${config.API_BASE_URL}/api/payment/verify`;
 
-  const convertPriceToNumber = (formattedPrice) => {
-    return Number(formattedPrice.replace(/[^0-9.]/g, ""));
-  };
-
-  const PAYMENT_ENDPOINT = `${config.API_BASE_URL}/api/payment/initialize`;
+  const convertPriceToNumber = (formattedPrice) =>
+    Number(formattedPrice.replace(/[^0-9.]/g, ""));
 
   useEffect(() => {
-    if (user.isOnTrial) {
+    if (user?.isOnTrial) {
       const interval = setInterval(() => {
         const now = new Date();
         const end = new Date(user.trialEndDate);
-        const timeDiff = end - now;
-
-        if (timeDiff <= 0) {
+        const diff = end - now;
+        if (diff <= 0) {
           clearInterval(interval);
           setRemainingTime("Trial ended");
         } else {
-          const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((timeDiff / (1000 * 60 * 60)) % 24);
-          const minutes = Math.floor((timeDiff / (1000 * 60)) % 60);
-          setRemainingTime(`${days}d ${hours}h ${minutes}m left`);
+          const d = Math.floor(diff / 86400000);
+          const h = Math.floor((diff % 86400000) / 3600000);
+          const m = Math.floor((diff % 3600000) / 60000);
+          setRemainingTime(`${d}d ${h}h ${m}m left`);
         }
       }, 1000);
-
       return () => clearInterval(interval);
     }
-  }, [user.isOnTrial, user.trialEndDate]);
+  }, [user?.isOnTrial, user?.trialEndDate]);
 
   useEffect(() => {
-    if (user.hasPaid) {
+    if (user?.hasPaid) {
       const interval = setInterval(() => {
         const now = new Date();
         const end = new Date(user.paymentEndDate);
-        const timeDiff = end - now;
-
-        if (timeDiff <= 0) {
+        const diff = end - now;
+        if (diff <= 0) {
           clearInterval(interval);
           setPaymentCountdown("Payment period ended");
         } else {
-          const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-          const hours = Math.floor((timeDiff / (1000 * 60 * 60)) % 24);
-          const minutes = Math.floor((timeDiff / (1000 * 60)) % 60);
-          setPaymentCountdown(`${days}d ${hours}h ${minutes}m left`);
+          const d = Math.floor(diff / 86400000);
+          const h = Math.floor((diff % 86400000) / 3600000);
+          const m = Math.floor((diff % 3600000) / 60000);
+          setPaymentCountdown(`${d}d ${h}h ${m}m left`);
         }
       }, 1000);
-
       return () => clearInterval(interval);
     }
-  }, [user.hasPaid, user.paymentEndDate]);
+  }, [user?.hasPaid, user?.paymentEndDate]);
 
   useEffect(() => {
-    const setupPayment = async () => {
+    const setup = async () => {
       if (!user?.country || !user?.email) {
         setError("User details not available");
         return;
       }
-
       setIsLoading(true);
       setError("");
-
       try {
         const countryData = await getCountryCurrencyData(user.country);
+        if (!countryData) throw new Error("Currency data not found");
 
-        if (!countryData) {
-          throw new Error("Unable to get currency data for your country");
-        }
-
-        const tx_ref = `PRE_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
-
-        const paymentData = {
-          tx_ref,
-          amount: convertPriceToNumber(params.amount),
+        const reference = `PSK_${Date.now()}_${Math.floor(Math.random() * 1e6)}`;
+        setPaymentDetails({
+          reference,
+          amount: convertPriceToNumber(params.amount) * 100, // convert to kobo
+          email: user.email,
           currency: countryData.code,
-          customer: {
-            email: user.email,
-            name: user.companyName || "Customer",
-            phonenumber: user.mobileNumber || "",
-          },
-          customizations: {
-            title: "Premium Subscription",
-            description: "6 Months Premium Access",
-          },
-        };
-
-        setPaymentDetails(paymentData);
-      } catch (err) {
+        });
+      } catch {
         setError("Failed to setup payment. Please try again.");
       } finally {
         setIsLoading(false);
       }
     };
+    setup();
+  }, [user, params.amount]);
 
-    setupPayment();
-  }, [user]);
-
+  // Initialize payment and show webview (same pattern as advertise payment)
   const initiatePayment = async () => {
-    if (!paymentDetails) return;
-    const token = await getToken();
+    if (!paymentDetails) {
+      return;
+    }
 
+    setIsLoading(true);
+    setError("");
     try {
-      setIsLoading(true);
-
-      const response = await fetch(PAYMENT_ENDPOINT, {
+      const token = await getToken();
+      const resp = await fetch(PAYMENT_INITIALIZE_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -139,82 +124,24 @@ const Payment = () => {
         body: JSON.stringify(paymentDetails),
       });
 
-      const data = await response.json();
+      const json = await resp.json();
+      const { status, data } = json;
 
-      if (data.status === "success" && data.data.link) {
-        await Linking.openURL(data.data.link);
-
-        await startVerificationPolling(paymentDetails.tx_ref);
+      if (status === "success" && data) {
+        // data should include at least reference and possibly authorization_url
+        setPaymentData(data);
+        setShowPaymentWebview(true);
       } else {
-        throw new Error("Failed to initialize payment");
+        throw new Error(json.message || "Initialization failed");
       }
     } catch (err) {
-      Alert.alert(
-        "Payment Error",
-        "Unable to start payment process. Please try again.",
-        [{ text: "OK" }],
-      );
+      Alert.alert("Payment Error", err.message || "Unable to start payment.");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const startVerificationPolling = async (txRef) => {
-    let attempts = 0;
-    const maxAttempts = 10;
-
-    const pollInterval = setInterval(async () => {
-      try {
-        const response = await fetch(
-          `https://api.flutterwave.com/v3/transactions/verify_by_reference?tx_ref=${txRef}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${FLUTTERWAVE_SECRET_KEY}`,
-              "Content-Type": "application/json",
-            },
-          },
-        );
-
-        const verificationData = await response.json();
-
-        if (
-          verificationData.status === "success" &&
-          verificationData.data.status === "successful"
-        ) {
-          await startPayment();
-          clearInterval(pollInterval);
-          Alert.alert(
-            "Payment Successful",
-            "Your premium subscription has been activated!",
-            [
-              {
-                text: "OK",
-                onPress: () => router.push("/agent/dashboard"),
-              },
-            ],
-          );
-        } else if (attempts >= maxAttempts) {
-          clearInterval(pollInterval);
-          Alert.alert(
-            "Verification Timeout",
-            "Please contact support if payment was made.",
-            [{ text: "OK" }],
-          );
-        }
-
-        attempts++;
-      } catch (err) {
-        clearInterval(pollInterval);
-        Alert.alert(
-          "Verification Error",
-          "An error occurred during verification. Please try again or contact support.",
-          [{ text: "OK" }],
-        );
-      }
-    }, 5000);
-  };
-
+  // Called by PaystackWebview after successful verification
   const startPayment = async () => {
     try {
       const token = await getToken();
@@ -244,7 +171,7 @@ const Payment = () => {
           ],
         );
       } else {
-        throw new Error(data.message || "Failed to start trial");
+        throw new Error(data.message || "Failed to start subscription");
       }
     } catch (err) {
       Alert.alert(
@@ -355,6 +282,21 @@ const Payment = () => {
     }
   };
 
+  if (showPaymentWebview && paymentData && paymentDetails) {
+    return (
+      <PaystackWebview
+        reference={paymentData.reference || paymentDetails.reference}
+        amount={paymentDetails.amount}
+        email={paymentDetails.email}
+        publicKey={PAYSTACK_PUBLIC_KEY}
+        onVerified={() => {
+          setShowPaymentWebview(false);
+          startPayment();
+        }}
+      />
+    );
+  }
+
   return (
     <SafeAreaView className="flex-1 bg-darkUmber-dark p-4">
       <ScrollView>
@@ -384,24 +326,23 @@ const Payment = () => {
               <View className="border-b border-gray-600 pb-2">
                 <Text className="text-white text-lg">Amount:</Text>
                 <Text className="text-white font-rbold text-xl">
-                  {paymentDetails.currency} {paymentDetails.amount}
+                  {paymentDetails.currency} {paymentDetails.amount / 100}
                 </Text>
               </View>
 
               <TouchableOpacity
                 className={`bg-[#BBCC13] p-4 rounded-lg items-center ${
-                  isLoading || user.isOnTrial || user.hasPaid
+                  isLoading || user?.isOnTrial || user?.hasPaid
                     ? "bg-gray-400"
                     : "bg-[#BBCC13]"
-                }
-                                `}
+                }`}
                 onPress={initiatePayment}
-                disabled={isLoading || user.isOnTrial || user.hasPaid}
+                disabled={isLoading || user?.isOnTrial || user?.hasPaid}
               >
                 <Text className="text-white font-rbold text-lg">
                   {isLoading
                     ? "Processing..."
-                    : user.hasPaid
+                    : user?.hasPaid
                       ? paymentCountdown || "Calculating..."
                       : "Pay Now"}
                 </Text>
@@ -409,17 +350,17 @@ const Payment = () => {
 
               <TouchableOpacity
                 className={`p-4 rounded-lg items-center ${
-                  isProcessingTrial || user.isOnTrial || user.hasPaid
+                  isProcessingTrial || user?.isOnTrial || user?.hasPaid
                     ? "bg-gray-400"
                     : "bg-[#BBCC13]"
                 }`}
                 onPress={handleTrialRequest}
-                disabled={isProcessingTrial || user.isOnTrial}
+                disabled={isProcessingTrial || user?.isOnTrial}
               >
                 <Text className="text-white font-rbold text-lg">
                   {isProcessingTrial
                     ? "Processing..."
-                    : user.isOnTrial
+                    : user?.isOnTrial
                       ? remainingTime || "Calculating..."
                       : "Start 6 months trial"}
                 </Text>

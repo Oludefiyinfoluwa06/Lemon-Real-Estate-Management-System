@@ -5,7 +5,9 @@ const authenticate = async (req, res, next) => {
   const token = req.header("Authorization");
 
   if (!token) {
-    return res.status(401).json({ message: "Provide token, you're unauthorized" });
+    return res
+      .status(401)
+      .json({ message: "Provide token, you're unauthorized" });
   }
 
   const tokenValue = token.split(" ")[1];

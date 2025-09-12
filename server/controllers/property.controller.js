@@ -16,18 +16,15 @@ const uploadProperty = async (req, res) => {
       video,
       document,
       coordinates,
+      documentType,
     } = req.body;
 
     const agentId = req.user._id;
-
-    const isValidId = isValidObjectId(agentId);
-
-    if (!isValidId) {
+    if (!isValidObjectId(agentId)) {
       return res.status(400).json({ message: "Invalid ID" });
     }
 
     const agent = await User.findById(agentId);
-
     if (!agent) {
       return res.status(404).json({ message: "Agent Details not found" });
     }
@@ -48,14 +45,22 @@ const uploadProperty = async (req, res) => {
       companyName: agent.companyName,
       agentProfilePicture: agent.profilePicture,
       document,
-      coordinates,
+      documentType,
+      coordinates: {
+        latitude: coordinates.lat,
+        longitude: coordinates.lng,
+      },
     });
 
     return res
       .status(201)
       .json({ message: "Property upload successful", property });
   } catch (error) {
-    return res.status(500).json({ message: "An error occurred" });
+    return res
+      .status(500)
+      .json({
+        message: error.message || "An error occurred while adding property",
+      });
   }
 };
 
@@ -161,7 +166,24 @@ const getProperty = async (req, res) => {
       return res.status(400).json({ message: "Invalid ID" });
     }
 
-    const property = await Property.findById(propertyId);
+    let property = await Property.findById(propertyId);
+
+    // hide documents for client (buyer) role unless property.isDocumentPublic is true
+    if (req.user && req.user.role === "buyer") {
+      await Property.findByIdAndUpdate(
+        propertyId,
+        { $inc: { views: 1 } },
+        { new: true },
+      ).lean();
+
+      if (property) {
+        // remove documents and documentTypes from response
+        const propObj = property.toObject();
+        delete propObj.documents;
+        delete propObj.documentTypes;
+        property = propObj;
+      }
+    }
 
     if (!property) {
       return res.status(404).json({ message: "Property not found" });
@@ -169,6 +191,7 @@ const getProperty = async (req, res) => {
 
     return res.status(200).json({ property });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "An error occurred" });
   }
 };
@@ -245,59 +268,226 @@ const updateProperty = async (req, res) => {
   }
 };
 
+const toggleSaveProperty = async (req, res) => {
+  try {
+    const propertyId = req.params.id;
+    const userId = req.user && req.user._id;
+    if (!isValidObjectId(propertyId))
+      return res.status(400).json({ success: false, message: "Invalid ID" });
+    if (!userId)
+      return res
+        .status(401)
+        .json({ success: false, message: "Authentication required" });
+
+    // Check if user already saved
+    const prop = await Property.findById(propertyId).select("savedBy").lean();
+    if (!prop)
+      return res
+        .status(404)
+        .json({ success: false, message: "Property not found" });
+
+    const alreadySaved = (prop.savedBy || []).some(
+      (id) => id.toString() === userId.toString(),
+    );
+
+    let updated;
+    if (!alreadySaved) {
+      // add user to savedBy and increment savedCount
+      updated = await Property.findByIdAndUpdate(
+        propertyId,
+        { $addToSet: { savedBy: userId }, $inc: { savedCount: 1 } },
+        { new: true },
+      );
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "Property saved",
+          property: updated,
+          saved: true,
+        });
+    } else {
+      // remove user and decrement savedCount (min 0)
+      updated = await Property.findByIdAndUpdate(
+        propertyId,
+        { $pull: { savedBy: userId }, $inc: { savedCount: -1 } },
+        { new: true },
+      );
+
+      // If savedCount became negative (rare), correct it
+      if (updated.savedCount < 0) {
+        updated.savedCount = 0;
+        await updated.save();
+      }
+
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "Property unsaved",
+          property: updated,
+          saved: false,
+        });
+    }
+  } catch (err) {
+    console.error("toggleSaveProperty error:", err);
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error toggling saved state",
+        error: err.message,
+      });
+  }
+};
+
+const incrementVideoView = async (req, res) => {
+  try {
+    const propertyId = req.params.id;
+    if (!isValidObjectId(propertyId))
+      return res.status(400).json({ success: false, message: "Invalid ID" });
+
+    const updated = await Property.findByIdAndUpdate(
+      propertyId,
+      { $inc: { videoViews: 1 } },
+      { new: true },
+    ).lean();
+    if (!updated)
+      return res
+        .status(404)
+        .json({ success: false, message: "Property not found" });
+
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Video view recorded",
+        property: updated,
+      });
+  } catch (err) {
+    console.error("incrementVideoView error:", err);
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error recording video view",
+        error: err.message,
+      });
+  }
+};
+
 const searchProperty = async (req, res) => {
   try {
-    const { title, country, category, status, minPrice, maxPrice } = req.query;
+    // support queries: q (general query), location, category, status, minPrice, maxPrice
+    const { q, location, category, status, minPrice, maxPrice } = req.query;
 
-    if (!country || !category || !status || !minPrice || !maxPrice) {
-      const properties = await Property.find({
-        title: { $regex: title, $options: "i" },
-      });
-      return res.status(200).json({
-        count: properties.length,
-        properties,
-      });
+    const query = {};
+
+    if (q) {
+      // search across title and description
+      query.$or = [
+        { title: { $regex: q, $options: "i" } },
+        { description: { $regex: q, $options: "i" } },
+      ];
     }
 
-    let query = {};
-
-    if (title) {
-      query.title = { $regex: title, $options: "i" };
-    }
-
-    if (country) {
-      query.country = { $regex: country, $options: "i" };
+    if (location) {
+      // location may match country or coordinates-related text fields
+      query.$or = query.$or || [];
+      query.$or.push({ country: { $regex: location, $options: "i" } });
+      query.$or.push({
+        "coordinates.latitude": { $regex: location, $options: "i" },
+      });
     }
 
     if (category) {
-      query.category = category;
-    }
-
-    const minPriceNumber = parseFloat(minPrice);
-    const maxPriceNumber = parseFloat(maxPrice);
-
-    if (!isNaN(minPriceNumber) || !isNaN(maxPriceNumber)) {
-      query.price = {};
-      if (!isNaN(minPriceNumber)) {
-        query.price.$gte = minPriceNumber;
-      }
-      if (!isNaN(maxPriceNumber)) {
-        query.price.$lte = maxPriceNumber;
-      }
+      query.category = { $regex: category, $options: "i" };
     }
 
     if (status) {
       query.status = status;
     }
 
+    const minPriceNumber = parseFloat(minPrice);
+    const maxPriceNumber = parseFloat(maxPrice);
+    if (!isNaN(minPriceNumber) || !isNaN(maxPriceNumber)) {
+      query.price = {};
+      if (!isNaN(minPriceNumber)) query.price.$gte = minPriceNumber;
+      if (!isNaN(maxPriceNumber)) query.price.$lte = maxPriceNumber;
+    }
+
     const properties = await Property.find(query);
 
-    return res.status(200).json({
-      count: properties.length,
-      properties,
+    // strip documents for buyers
+    const sanitized = properties.map((p) => {
+      const po = p.toObject();
+      if (req.user && req.user.role === "buyer" && !po.isDocumentPublic) {
+        delete po.documents;
+        delete po.documentTypes;
+      }
+      return po;
     });
+
+    return res
+      .status(200)
+      .json({ count: sanitized.length, properties: sanitized });
   } catch (error) {
     res.status(500).json({ message: "An error occurred" });
+  }
+};
+
+const getAgentMetrics = async (req, res) => {
+  try {
+    const agentId = req.user._id;
+
+    const properties = await Property.find({ agentId }).select(
+      "title savedBy views videoViews",
+    );
+
+    return res.status(200).json({ properties });
+  } catch (error) {
+    return res.status(500).json({ message: "An error occurred" });
+  }
+};
+
+const getRecommendations = async (req, res) => {
+  try {
+    const user = req.user;
+    let properties = [];
+
+    if (user && user.preferences && user.preferences.length > 0) {
+      // match category, title or description
+      const prefRegexes = user.preferences.map((p) => ({
+        $regex: p,
+        $options: "i",
+      }));
+      properties = await Property.find({
+        $or: [
+          { category: { $in: user.preferences } },
+          { title: { $in: user.preferences } },
+          { description: { $in: user.preferences } },
+        ],
+      }).limit(50);
+    } else {
+      // fallback to trending properties sorted by likes + views
+      properties = await Property.find()
+        .sort({ likes: -1, videoViews: -1 })
+        .limit(50);
+    }
+
+    // sanitize documents for buyers
+    const sanitized = properties.map((p) => {
+      const po = p.toObject();
+      if (req.user && req.user.role === "buyer" && !po.isDocumentPublic) {
+        delete po.documents;
+        delete po.documentTypes;
+      }
+      return po;
+    });
+
+    return res.status(200).json({ properties: sanitized });
+  } catch (error) {
+    return res.status(500).json({ message: "An error occurred" });
   }
 };
 
@@ -326,6 +516,10 @@ module.exports = {
   getProperties,
   getProperty,
   updateProperty,
+  toggleSaveProperty,
+  incrementVideoView,
   searchProperty,
   deleteProperty,
+  getAgentMetrics,
+  getRecommendations,
 };
