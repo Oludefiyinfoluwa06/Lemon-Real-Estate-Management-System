@@ -22,7 +22,7 @@
       ]
     ],
     "name": "Lemon",
-    "icon": "./assets/common/logo-2.jpg",
+    "icon": "./assets/common/logo.png",
     "extra": {
       "router": {
         "origin": false
