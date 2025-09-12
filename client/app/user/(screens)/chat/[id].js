@@ -92,7 +92,11 @@ const ChatScreen = () => {
   // Normalize a message's timestamp
   const getMessageTime = (msg) => {
     // Accept createdAt, updatedAt or timestamp fields; fall back to now
-    const t = msg.createdAt || msg.updatedAt || msg.timestamp || new Date().toISOString();
+    const t =
+      msg.createdAt ||
+      msg.updatedAt ||
+      msg.timestamp ||
+      new Date().toISOString();
     return new Date(t);
   };
 
@@ -104,13 +108,20 @@ const ChatScreen = () => {
     const yesterday = new Date();
     yesterday.setDate(today.getDate() - 1);
 
-    const sameDay = (a, b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+    const sameDay = (a, b) =>
+      a.getFullYear() === b.getFullYear() &&
+      a.getMonth() === b.getMonth() &&
+      a.getDate() === b.getDate();
 
     if (sameDay(d, today)) return "Today";
     if (sameDay(d, yesterday)) return "Yesterday";
 
     // e.g. Mar 01, 2025
-    return d.toLocaleDateString(undefined, { month: "short", day: "2-digit", year: "numeric" });
+    return d.toLocaleDateString(undefined, {
+      month: "short",
+      day: "2-digit",
+      year: "numeric",
+    });
   };
 
   // Turn flat messages into SectionList sections grouped by date
@@ -160,7 +171,10 @@ const ChatScreen = () => {
     try {
       setLoadingMessages(true);
       // NOTE: backend chat route is mounted at /api/chat/:sender/:receiver
-      const data = await apiFetch(`/api/chat/${user._id}/${receiverId}`, { method: "GET", token });
+      const data = await apiFetch(`/api/chat/${user._id}/${receiverId}`, {
+        method: "GET",
+        token,
+      });
       if (mountedFlag && !mountedFlag()) return;
       setMessages(Array.isArray(data) ? data : []);
     } catch (err) {
@@ -171,7 +185,12 @@ const ChatScreen = () => {
   };
 
   // Send a chat message (client)
-  const sendChatMessage = async ({ senderId, receiverId: rId, message, metadata = {} }) => {
+  const sendChatMessage = async ({
+    senderId,
+    receiverId: rId,
+    message,
+    metadata = {},
+  }) => {
     if (!senderId || !rId || !message) return;
     const token = await getToken();
     try {
@@ -198,7 +217,8 @@ const ChatScreen = () => {
 
   const requestTransactionCode = async () => {
     console.log({ user, propertyId: params.propertyId });
-    if (!user || !propertyId) return Alert.alert("Error", "Property or user not found");
+    if (!user || !propertyId)
+      return Alert.alert("Error", "Property or user not found");
     try {
       setBusy(true);
       const token = await getToken();
@@ -208,7 +228,8 @@ const ChatScreen = () => {
         token,
       });
       setBusy(false);
-      const txId = body.transactionId || body.transaction?._id || body._id || null;
+      const txId =
+        body.transactionId || body.transaction?._id || body._id || null;
       setTransactionId(txId);
       setBotStage("awaiting_code");
 
@@ -218,7 +239,8 @@ const ChatScreen = () => {
           _id: `local-bot-${Date.now()}`,
           senderId: receiverId,
           receiverId: user._id,
-          message: "A verification code has been emailed to your registered email. Enter it here to proceed with payment.",
+          message:
+            "A verification code has been emailed to your registered email. Enter it here to proceed with payment.",
           metadata: { propertyId },
           createdAt: new Date().toISOString(),
           local: true,
@@ -229,7 +251,8 @@ const ChatScreen = () => {
         await apiFetch("/api/chat/send-to-bot", {
           method: "POST",
           body: {
-            message: "A verification code has been emailed to your registered email. Enter it here to proceed with payment.",
+            message:
+              "A verification code has been emailed to your registered email. Enter it here to proceed with payment.",
             metadata: { propertyId, transactionId: txId },
           },
           token,
@@ -256,7 +279,10 @@ const ChatScreen = () => {
       console.log({ transactionData: data });
       setBusy(false);
       setTransaction(data.transaction);
-      if (data.transaction?.status === "verified" || data.transaction?.status === "ready_for_payment") {
+      if (
+        data.transaction?.status === "verified" ||
+        data.transaction?.status === "ready_for_payment"
+      ) {
         setBotStage("verified");
       } else if (data.transaction?.status === "awaiting_disbursement") {
         setBotStage("awaiting_disbursement");
@@ -269,7 +295,8 @@ const ChatScreen = () => {
           _id: `local-bot-${Date.now()}`,
           senderId: receiverId,
           receiverId: user._id,
-          message: "Code verified. Ready to show property summary and proceed to payment.",
+          message:
+            "Code verified. Ready to show property summary and proceed to payment.",
           metadata: { transactionId },
           createdAt: new Date().toISOString(),
           local: true,
@@ -282,8 +309,10 @@ const ChatScreen = () => {
   };
 
   const initiatePayment = async () => {
-    const amountBase = transaction?.amount ?? transaction?.draftSnapshot?.amount ?? 0;
-    if (!user?.email) return Alert.alert("Error", "Missing user email for payment");
+    const amountBase =
+      transaction?.amount ?? transaction?.draftSnapshot?.amount ?? 0;
+    if (!user?.email)
+      return Alert.alert("Error", "Missing user email for payment");
 
     try {
       setBusy(true);
@@ -296,7 +325,10 @@ const ChatScreen = () => {
           amount: amountKobo,
           email: user.email,
           currency: transaction?.currency || "NGN",
-          metadata: { transactionId: transactionId || transaction?._id || null, propertyId },
+          metadata: {
+            transactionId: transactionId || transaction?._id || null,
+            propertyId,
+          },
         },
         token,
       });
@@ -304,7 +336,10 @@ const ChatScreen = () => {
       setBusy(false);
 
       if (!init || init.status !== "success" || !init.data) {
-        throw new Error((init && (init.message || JSON.stringify(init))) || "Failed to initialize payment");
+        throw new Error(
+          (init && (init.message || JSON.stringify(init))) ||
+            "Failed to initialize payment",
+        );
       }
 
       setPaymentInitData(init.data);
@@ -360,12 +395,17 @@ const ChatScreen = () => {
   const onPaymentVerified = async (reference) => {
     try {
       const token = await getToken();
-      const verifyRes = await apiFetch(`/api/payment/verify?reference=${encodeURIComponent(reference)}`, {
-        method: "POST",
-        token,
-      });
+      const verifyRes = await apiFetch(
+        `/api/payment/verify?reference=${encodeURIComponent(reference)}`,
+        {
+          method: "POST",
+          token,
+        },
+      );
 
-      const verified = verifyRes && (verifyRes.data?.status === "success" || verifyRes.status === true);
+      const verified =
+        verifyRes &&
+        (verifyRes.data?.status === "success" || verifyRes.status === true);
 
       if (verified) {
         setShowPaymentWebview(false);
@@ -375,7 +415,10 @@ const ChatScreen = () => {
           try {
             await apiFetch("/api/transaction/link-payment", {
               method: "POST",
-              body: { transactionId: transactionId || transaction._id, paymentReference: reference },
+              body: {
+                transactionId: transactionId || transaction._id,
+                paymentReference: reference,
+              },
               token,
             });
             setTimeout(fetchLatestTransaction, 800);
@@ -392,7 +435,10 @@ const ChatScreen = () => {
     } catch (err) {
       console.error("onPaymentVerified error", err);
       setShowPaymentWebview(false);
-      Alert.alert("Payment Error", "Could not verify payment. Please try again.");
+      Alert.alert(
+        "Payment Error",
+        "Could not verify payment. Please try again.",
+      );
     }
   };
 
@@ -432,7 +478,11 @@ const ChatScreen = () => {
     const isLocalBot = item.local === true || item.senderId === receiverId;
     const containerStyle = {
       padding: 10,
-      backgroundColor: isLocalBot ? "#2C2F33" : isCurrentUser ? "#BBCC13" : "#3D454B",
+      backgroundColor: isLocalBot
+        ? "#2C2F33"
+        : isCurrentUser
+          ? "#BBCC13"
+          : "#3D454B",
       alignSelf: isCurrentUser ? "flex-end" : "flex-start",
       borderRadius: 10,
       marginVertical: 5,
@@ -441,14 +491,25 @@ const ChatScreen = () => {
     return (
       <View style={containerStyle}>
         <Text style={{ color: "#FFFFFF" }}>{item.message}</Text>
-        {isLocalBot ? <Text style={{ color: "#9DA1A3", fontSize: 11, marginTop: 6 }}>• Bot</Text> : null}
+        {isLocalBot ? (
+          <Text style={{ color: "#9DA1A3", fontSize: 11, marginTop: 6 }}>
+            • Bot
+          </Text>
+        ) : null}
       </View>
     );
   };
 
   const renderSectionHeader = ({ section }) => (
     <View style={{ paddingVertical: 8, alignItems: "center" }}>
-      <View style={{ backgroundColor: "#1E1E1E", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 16 }}>
+      <View
+        style={{
+          backgroundColor: "#1E1E1E",
+          paddingHorizontal: 12,
+          paddingVertical: 4,
+          borderRadius: 16,
+        }}
+      >
         <Text style={{ color: "#AFAFAF", fontSize: 12 }}>{section.title}</Text>
       </View>
     </View>
@@ -458,13 +519,37 @@ const ChatScreen = () => {
     if (botStage === "greeting") {
       return (
         <View style={{ padding: 12 }}>
-          <View style={{ backgroundColor: "#2B3B3C", padding: 12, borderRadius: 10 }}>
-            <Text style={{ color: "#fff", marginBottom: 8 }}>Hi! Would you like to commence payment for this property?</Text>
+          <View
+            style={{
+              backgroundColor: "#2B3B3C",
+              padding: 12,
+              borderRadius: 10,
+            }}
+          >
+            <Text style={{ color: "#fff", marginBottom: 8 }}>
+              Hi! Would you like to commence payment for this property?
+            </Text>
             <View style={{ flexDirection: "row" }}>
-              <TouchableOpacity onPress={requestTransactionCode} style={{ padding: 10, backgroundColor: "#BBCC13", borderRadius: 8, marginRight: 8 }}>
+              <TouchableOpacity
+                onPress={requestTransactionCode}
+                style={{
+                  padding: 10,
+                  backgroundColor: "#BBCC13",
+                  borderRadius: 8,
+                  marginRight: 8,
+                }}
+              >
                 <Text style={{ color: "#1A1A1A" }}>Yes</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setBotStage("idle")} style={{ padding: 10, borderRadius: 8, borderWidth: 1, borderColor: "#444" }}>
+              <TouchableOpacity
+                onPress={() => setBotStage("idle")}
+                style={{
+                  padding: 10,
+                  borderRadius: 8,
+                  borderWidth: 1,
+                  borderColor: "#444",
+                }}
+              >
                 <Text style={{ color: "#fff" }}>No</Text>
               </TouchableOpacity>
             </View>
@@ -476,17 +561,36 @@ const ChatScreen = () => {
     if (botStage === "awaiting_code") {
       return (
         <View style={{ padding: 12 }}>
-          <Text style={{ color: "#fff", marginBottom: 8 }}>A code has been sent to your registered email. Enter it below:</Text>
+          <Text style={{ color: "#fff", marginBottom: 8 }}>
+            A code has been sent to your registered email. Enter it below:
+          </Text>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <TextInput
               value={codeInput}
               onChangeText={setCodeInput}
               placeholder="Enter code"
               placeholderTextColor="#AFAFAF"
-              style={{ flex: 1, padding: 10, backgroundColor: "#1E1E1E", borderRadius: 8, color: "#fff" }}
+              style={{
+                flex: 1,
+                padding: 10,
+                backgroundColor: "#1E1E1E",
+                borderRadius: 8,
+                color: "#fff",
+              }}
             />
-            <TouchableOpacity onPress={verifyTransactionCode} style={{ padding: 10, marginLeft: 8 }}>
-              {busy ? <ActivityIndicator /> : <Ionicons name="checkmark-circle-outline" size={28} color="#BBCC13" />}
+            <TouchableOpacity
+              onPress={verifyTransactionCode}
+              style={{ padding: 10, marginLeft: 8 }}
+            >
+              {busy ? (
+                <ActivityIndicator />
+              ) : (
+                <Ionicons
+                  name="checkmark-circle-outline"
+                  size={28}
+                  color="#BBCC13"
+                />
+              )}
             </TouchableOpacity>
           </View>
         </View>
@@ -498,15 +602,45 @@ const ChatScreen = () => {
       return (
         <View style={{ padding: 12 }}>
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-            {p.photo ? <Image source={{ uri: p.photo }} style={{ width: 60, height: 60, borderRadius: 30 }} /> : <Ionicons name="home-outline" size={48} color="#fff" />}
+            {p.photo ? (
+              <Image
+                source={{ uri: p.photo }}
+                style={{ width: 60, height: 60, borderRadius: 30 }}
+              />
+            ) : (
+              <Ionicons name="home-outline" size={48} color="#fff" />
+            )}
             <View style={{ flex: 1 }}>
-              <Text style={{ color: "#fff", fontWeight: "700" }}>{p.title || transaction.draftSnapshot?.title || propertyTitle}</Text>
-              <Text style={{ color: "#fff" }}>{p.ownerName || ""} • {p.category || ""}</Text>
-              <Text style={{ color: "#BBCC13", marginTop: 6 }}>{p.currency || transaction.currency} {p.amount || transaction.amount}</Text>
+              <Text style={{ color: "#fff", fontWeight: "700" }}>
+                {p.title || transaction.draftSnapshot?.title || propertyTitle}
+              </Text>
+              <Text style={{ color: "#fff" }}>
+                {p.ownerName || ""} • {p.category || ""}
+              </Text>
+              <Text style={{ color: "#BBCC13", marginTop: 6 }}>
+                {p.currency || transaction.currency}{" "}
+                {p.amount || transaction.amount}
+              </Text>
             </View>
           </View>
+
+          <View style={{ marginTop: 10, marginBottom: 8 }}>
+            <Text style={{ color: "#E0E0E0", fontSize: 12 }}>
+              DISCLAIMER: Payments arranged or completed outside this app (bank
+              transfer, cash, external links) are at your own risk.
+            </Text>
+          </View>
+
           <View style={{ flexDirection: "row", marginTop: 10 }}>
-            <TouchableOpacity onPress={initiatePayment} style={{ padding: 10, backgroundColor: "#BBCC13", borderRadius: 8, marginRight: 8 }}>
+            <TouchableOpacity
+              onPress={initiatePayment}
+              style={{
+                padding: 10,
+                backgroundColor: "#BBCC13",
+                borderRadius: 8,
+                marginRight: 8,
+              }}
+            >
               <Text style={{ color: "#1A1A1A" }}>Proceed to Pay</Text>
             </TouchableOpacity>
           </View>
@@ -514,12 +648,24 @@ const ChatScreen = () => {
       );
     }
 
-    if (botStage === "paid_pending_confirmation" || (transaction && transaction.status === "pending_confirmation")) {
+    if (
+      botStage === "paid_pending_confirmation" ||
+      (transaction && transaction.status === "pending_confirmation")
+    ) {
       return (
         <View style={{ padding: 12 }}>
-          <Text style={{ color: "#fff", marginBottom: 6 }}>Please, confirm this payment</Text>
+          <Text style={{ color: "#fff", marginBottom: 6 }}>
+            Please, confirm this payment
+          </Text>
           <View style={{ flexDirection: "row", marginTop: 8 }}>
-            <TouchableOpacity onPress={confirmAsBuyer} style={{ padding: 10, backgroundColor: "#BBCC13", borderRadius: 8 }}>
+            <TouchableOpacity
+              onPress={confirmAsBuyer}
+              style={{
+                padding: 10,
+                backgroundColor: "#BBCC13",
+                borderRadius: 8,
+              }}
+            >
               <Text style={{ color: "#1A1A1A" }}>Confirm Transaction</Text>
             </TouchableOpacity>
           </View>
@@ -527,43 +673,76 @@ const ChatScreen = () => {
       );
     }
 
-    if (botStage === "awaiting_disbursement" || (transaction && transaction.status === "awaiting_disbursement")) {
-      const amt = transaction?.amount ?? transaction?.draftSnapshot?.amount ?? 0;
-      const currency = transaction?.currency ?? transaction?.draftSnapshot?.currency ?? "NGN";
+    if (
+      botStage === "awaiting_disbursement" ||
+      (transaction && transaction.status === "awaiting_disbursement")
+    ) {
+      const amt =
+        transaction?.amount ?? transaction?.draftSnapshot?.amount ?? 0;
+      const currency =
+        transaction?.currency ?? transaction?.draftSnapshot?.currency ?? "NGN";
       const commission = Math.round((amt * 0.04 + Number.EPSILON) * 100) / 100;
       const net = Math.round((amt - commission + Number.EPSILON) * 100) / 100;
 
       return (
         <View style={{ padding: 12 }}>
-          <Text style={{ color: "#fff", marginBottom: 8, fontWeight: "700" }}>Payment received — awaiting disbursement</Text>
+          <Text style={{ color: "#fff", marginBottom: 8, fontWeight: "700" }}>
+            Payment received — awaiting disbursement
+          </Text>
           <Text style={{ color: "#fff", marginBottom: 8 }}>
-            Your payment of {currency} {amt} has been received and is being held securely. An admin will disburse the seller shortly.
+            Your payment of {currency} {amt} has been received and is being held
+            securely. An admin will disburse the seller shortly.
           </Text>
 
-          <View style={{ backgroundColor: "#1E1E1E", padding: 12, borderRadius: 8, marginBottom: 10 }}>
+          <View
+            style={{
+              backgroundColor: "#1E1E1E",
+              padding: 12,
+              borderRadius: 8,
+              marginBottom: 10,
+            }}
+          >
             <Text style={{ color: "#AFAFAF" }}>Summary</Text>
-            <Text style={{ color: "#fff", marginTop: 6 }}>Amount: {currency} {amt}</Text>
-            <Text style={{ color: "#fff" }}>Platform commission (4%): {currency} {commission}</Text>
-            <Text style={{ color: "#fff" }}>Amount to seller: {currency} {net}</Text>
+            <Text style={{ color: "#fff", marginTop: 6 }}>
+              Amount: {currency} {amt}
+            </Text>
+            <Text style={{ color: "#fff" }}>
+              Platform commission (4%): {currency} {commission}
+            </Text>
+            <Text style={{ color: "#fff" }}>
+              Amount to seller: {currency} {net}
+            </Text>
           </View>
 
           <Text style={{ color: "#fff", marginBottom: 6 }}>
-            We will notify you when the seller has been paid. If you need assistance, contact support.
+            We will notify you when the seller has been paid. If you need
+            assistance, contact support.
           </Text>
 
           <View style={{ flexDirection: "row", marginTop: 8 }}>
             <TouchableOpacity
               onPress={() => {
                 if (SUPPORT_PHONE) {
-                  const tel = Platform.OS === "android" ? `tel:${SUPPORT_PHONE}` : `telprompt:${SUPPORT_PHONE}`;
+                  const tel =
+                    Platform.OS === "android"
+                      ? `tel:${SUPPORT_PHONE}`
+                      : `telprompt:${SUPPORT_PHONE}`;
                   Linking.openURL(tel).catch(() => {});
                 } else if (SUPPORT_EMAIL) {
                   Linking.openURL(`mailto:${SUPPORT_EMAIL}`).catch(() => {});
                 } else {
-                  Alert.alert("Support", "Contact support via the Help section in the app.");
+                  Alert.alert(
+                    "Support",
+                    "Contact support via the Help section in the app.",
+                  );
                 }
               }}
-              style={{ padding: 10, backgroundColor: "#3D454B", borderRadius: 8, marginRight: 8 }}
+              style={{
+                padding: 10,
+                backgroundColor: "#3D454B",
+                borderRadius: 8,
+                marginRight: 8,
+              }}
             >
               <Text style={{ color: "#fff" }}>Contact Support</Text>
             </TouchableOpacity>
@@ -571,12 +750,21 @@ const ChatScreen = () => {
             <TouchableOpacity
               onPress={() => {
                 if (transaction && transaction._id) {
-                  router.push(`/user/(screens)/transactions/${transaction._id}`);
+                  router.push(
+                    `/user/(screens)/transactions/${transaction._id}`,
+                  );
                 } else {
-                  Alert.alert("Transaction", "Transaction details not available yet.");
+                  Alert.alert(
+                    "Transaction",
+                    "Transaction details not available yet.",
+                  );
                 }
               }}
-              style={{ padding: 10, backgroundColor: "#BBCC13", borderRadius: 8 }}
+              style={{
+                padding: 10,
+                backgroundColor: "#BBCC13",
+                borderRadius: 8,
+              }}
             >
               <Text style={{ color: "#1A1A1A" }}>View Transaction</Text>
             </TouchableOpacity>
@@ -585,35 +773,59 @@ const ChatScreen = () => {
       );
     }
 
-    if (botStage === "completed" || (transaction && transaction.status === "completed")) {
+    if (
+      botStage === "completed" ||
+      (transaction && transaction.status === "completed")
+    ) {
       return (
         <View style={{ padding: 12 }}>
-          <Text style={{ color: "#fff", marginBottom: 8, fontWeight: "700" }}>Transaction complete</Text>
-          <Text style={{ color: "#fff", marginBottom: 8 }}>The transaction is complete and funds have been disbursed.</Text>
+          <Text style={{ color: "#fff", marginBottom: 8, fontWeight: "700" }}>
+            Transaction complete
+          </Text>
+          <Text style={{ color: "#fff", marginBottom: 8 }}>
+            The transaction is complete and funds have been disbursed.
+          </Text>
 
           <View style={{ flexDirection: "row", marginTop: 8 }}>
             <TouchableOpacity
               onPress={() => {
                 if (SUPPORT_PHONE) {
-                  const tel = Platform.OS === "android" ? `tel:${SUPPORT_PHONE}` : `telprompt:${SUPPORT_PHONE}`;
+                  const tel =
+                    Platform.OS === "android"
+                      ? `tel:${SUPPORT_PHONE}`
+                      : `telprompt:${SUPPORT_PHONE}`;
                   Linking.openURL(tel).catch(() => {});
                 } else if (SUPPORT_EMAIL) {
                   Linking.openURL(`mailto:${SUPPORT_EMAIL}`).catch(() => {});
                 } else {
-                  Alert.alert("Support", "Contact support via the Help section in the app.");
+                  Alert.alert(
+                    "Support",
+                    "Contact support via the Help section in the app.",
+                  );
                 }
               }}
-              style={{ padding: 10, backgroundColor: "#3D454B", borderRadius: 8, marginRight: 8 }}
+              style={{
+                padding: 10,
+                backgroundColor: "#3D454B",
+                borderRadius: 8,
+                marginRight: 8,
+              }}
             >
               <Text style={{ color: "#fff" }}>Contact Support</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
                 if (transaction && transaction._id) {
-                  router.push(`/user/(screens)/transactions/${transaction._id}`);
+                  router.push(
+                    `/user/(screens)/transactions/${transaction._id}`,
+                  );
                 }
               }}
-              style={{ padding: 10, backgroundColor: "#BBCC13", borderRadius: 8 }}
+              style={{
+                padding: 10,
+                backgroundColor: "#BBCC13",
+                borderRadius: 8,
+              }}
             >
               <Text style={{ color: "#1A1A1A" }}>View Receipt</Text>
             </TouchableOpacity>
@@ -633,11 +845,16 @@ const ChatScreen = () => {
         </TouchableOpacity>
         <View className="flex-row items-center ml-2">
           {profilePicture ? (
-            <Image source={{ uri: profilePicture }} style={{ width: 40, height: 40, borderRadius: 20 }} />
+            <Image
+              source={{ uri: profilePicture }}
+              style={{ width: 40, height: 40, borderRadius: 20 }}
+            />
           ) : (
             <Ionicons name="person-circle-outline" size={40} color="#FFFFFF" />
           )}
-          <Text style={{ color: "#fff", fontWeight: "700", marginLeft: 12 }}>{name}</Text>
+          <Text style={{ color: "#fff", fontWeight: "700", marginLeft: 12 }}>
+            {name}
+          </Text>
         </View>
       </View>
 
@@ -648,7 +865,9 @@ const ChatScreen = () => {
       ) : sections.length > 0 ? (
         <SectionList
           sections={sections}
-          keyExtractor={(item) => (item._id ? item._id.toString() : `${item.senderId}-${Math.random()}`)}
+          keyExtractor={(item) =>
+            item._id ? item._id.toString() : `${item.senderId}-${Math.random()}`
+          }
           renderItem={renderMessageItem}
           renderSectionHeader={renderSectionHeader}
           contentContainerStyle={{ padding: 10, paddingBottom: 160 }}
@@ -664,17 +883,33 @@ const ChatScreen = () => {
       {showPaymentWebview && paymentInitData ? (
         <PaystackWebview
           reference={paymentInitData.reference}
-          amount={paymentInitData.amount || Math.round((transaction?.amount ?? transaction?.draftSnapshot?.amount ?? 0) * 100)}
+          amount={
+            paymentInitData.amount ||
+            Math.round(
+              (transaction?.amount ?? transaction?.draftSnapshot?.amount ?? 0) *
+                100,
+            )
+          }
           email={user.email}
           publicKey={PAYSTACK_PUBLIC_KEY}
-          onVerified={(ref) => onPaymentVerified(ref || paymentInitData.reference)}
+          onVerified={(ref) =>
+            onPaymentVerified(ref || paymentInitData.reference)
+          }
         />
       ) : null}
 
       {/* Fallback checkoutUrl WebView */}
       {showWebView ? (
         <SafeAreaView style={{ flex: 1 }}>
-          <View style={{ height: 56, flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 12 }}>
+          <View
+            style={{
+              height: 56,
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              paddingHorizontal: 12,
+            }}
+          >
             <TouchableOpacity onPress={() => setShowWebView(false)}>
               <Ionicons name="close" size={28} color="#000" />
             </TouchableOpacity>
@@ -683,7 +918,12 @@ const ChatScreen = () => {
           </View>
 
           {checkoutUrl ? (
-            <WebView ref={webviewRef} source={{ uri: checkoutUrl }} onNavigationStateChange={onWebViewNavStateChange} startInLoadingState />
+            <WebView
+              ref={webviewRef}
+              source={{ uri: checkoutUrl }}
+              onNavigationStateChange={onWebViewNavStateChange}
+              startInLoadingState
+            />
           ) : (
             <ActivityIndicator />
           )}

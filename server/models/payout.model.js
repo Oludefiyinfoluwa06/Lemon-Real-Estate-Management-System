@@ -3,7 +3,11 @@ const { Schema } = mongoose;
 
 const payoutSchema = new Schema(
   {
-    transactionId: { type: Schema.Types.ObjectId, ref: "Transaction", required: true },
+    transactionId: {
+      type: Schema.Types.ObjectId,
+      ref: "Transaction",
+      required: true,
+    },
     ownerId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     buyerId: { type: Schema.Types.ObjectId, ref: "User" },
 
@@ -21,12 +25,24 @@ const payoutSchema = new Schema(
     // payout lifecycle status
     status: {
       type: String,
-      enum: ["pending", "awaiting_disbursement", "queued", "processing", "disbursed", "failed", "reversed"],
+      enum: [
+        "pending",
+        "awaiting_disbursement",
+        "queued",
+        "processing",
+        "disbursed",
+        "failed",
+        "reversed",
+      ],
       default: "awaiting_disbursement",
     },
 
     // preferred payout method / channel (bank transfer, wallet, manual, etc)
-    method: { type: String, enum: ["bank_transfer", "wallet", "manual", "other"], default: "bank_transfer" },
+    method: {
+      type: String,
+      enum: ["bank_transfer", "wallet", "manual", "other"],
+      default: "bank_transfer",
+    },
 
     // admin who processed/queued/disbursed this payout (optional)
     processedBy: { type: Schema.Types.ObjectId, ref: "User" },
@@ -48,10 +64,16 @@ const payoutSchema = new Schema(
 // compute minor units if missing (assume 2 decimal places)
 payoutSchema.pre("save", function (next) {
   // amountMinor = Math.round(amount * 100)
-  if (this.amount != null && (this.amountMinor == null || isNaN(this.amountMinor))) {
+  if (
+    this.amount != null &&
+    (this.amountMinor == null || isNaN(this.amountMinor))
+  ) {
     this.amountMinor = Math.round(Number(this.amount) * 100);
   }
-  if (this.netAmount != null && (this.netAmountMinor == null || isNaN(this.netAmountMinor))) {
+  if (
+    this.netAmount != null &&
+    (this.netAmountMinor == null || isNaN(this.netAmountMinor))
+  ) {
     this.netAmountMinor = Math.round(Number(this.netAmount) * 100);
   }
   // guard: ensure commission present
@@ -68,7 +90,10 @@ payoutSchema.index({ transactionId: 1 });
  * markDisbursed helper
  * usage: payout.markDisbursed({ providerReference, processedBy })
  */
-payoutSchema.methods.markDisbursed = async function ({ providerReference = null, processedBy = null } = {}) {
+payoutSchema.methods.markDisbursed = async function ({
+  providerReference = null,
+  processedBy = null,
+} = {}) {
   this.status = "disbursed";
   this.disbursedAt = new Date();
   if (providerReference) this.providerReference = providerReference;

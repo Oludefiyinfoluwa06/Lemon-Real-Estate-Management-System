@@ -1,5 +1,5 @@
 // metro.config.js (for Expo / React Native)
-const { getDefaultConfig } = require('@expo/metro-config');
+const { getDefaultConfig } = require("@expo/metro-config");
 
 module.exports = (() => {
   const config = getDefaultConfig(__dirname);
@@ -7,7 +7,7 @@ module.exports = (() => {
   // add common JS-ish extensions that sometimes help
   config.resolver = {
     ...config.resolver,
-    sourceExts: [...(config.resolver.sourceExts || []), 'cjs', 'native'],
+    sourceExts: [...(config.resolver.sourceExts || []), "cjs", "native"],
   };
 
   // If you need to explicitly include node_modules for transpilation,

@@ -35,7 +35,10 @@ const sendMessage = async (req, res) => {
         data: { chatId: newMessage._id, senderId },
       });
     } catch (err) {
-      console.error("Error creating notification for chat:", err?.message || err);
+      console.error(
+        "Error creating notification for chat:",
+        err?.message || err,
+      );
       // don't fail the request — notification/email are best-effort
     }
 
@@ -62,7 +65,12 @@ const getChatMessages = async (req, res) => {
   try {
     const { senderId, receiverId } = req.params;
     if (!senderId || !receiverId) {
-      return res.status(400).json({ success: false, message: "senderId and receiverId params required" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "senderId and receiverId params required",
+        });
     }
 
     const messages = await Chat.find({
@@ -91,7 +99,10 @@ const getChatMessages = async (req, res) => {
 const fetchChats = async (req, res) => {
   const { userId } = req.params;
 
-  if (!userId) return res.status(400).json({ success: false, message: "userId param required" });
+  if (!userId)
+    return res
+      .status(400)
+      .json({ success: false, message: "userId param required" });
 
   try {
     const allChats = await Chat.aggregate([
@@ -174,7 +185,8 @@ const fetchChats = async (req, res) => {
  *   await sendBotMessage({ receiverId: ownerId, message: 'Payment pending confirmation', metadata: { transactionId } });
  */
 const sendBotMessage = async ({ receiverId, message, metadata = {} }) => {
-  if (!receiverId || !message) throw new Error("receiverId and message are required for bot message");
+  if (!receiverId || !message)
+    throw new Error("receiverId and message are required for bot message");
 
   // create chat message with BOT_USER_ID as sender
   const botMsg = new Chat({
@@ -219,14 +231,23 @@ const sendBotMessage = async ({ receiverId, message, metadata = {} }) => {
 // Optional endpoint to let server-side code or admin send bot messages via HTTP
 const sendBotMessageEndpoint = async (req, res) => {
   const { receiverId, message, metadata = {} } = req.body;
-  if (!receiverId || !message) return res.status(400).json({ success: false, message: "receiverId and message required" });
+  if (!receiverId || !message)
+    return res
+      .status(400)
+      .json({ success: false, message: "receiverId and message required" });
 
   try {
     const botMsg = await sendBotMessage({ receiverId, message, metadata });
     return res.status(201).json({ success: true, data: botMsg });
   } catch (err) {
     console.error("sendBotMessageEndpoint error:", err);
-    return res.status(500).json({ success: false, message: "Error sending bot message", error: err.message });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error sending bot message",
+        error: err.message,
+      });
   }
 };
 

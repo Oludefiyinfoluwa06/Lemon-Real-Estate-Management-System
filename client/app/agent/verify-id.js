@@ -60,7 +60,8 @@ const VerifyId = () => {
   useEffect(() => {
     (async () => {
       try {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        const { status } =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
         setHasPermission(status === "granted");
         if (status !== "granted") {
           Alert.alert(

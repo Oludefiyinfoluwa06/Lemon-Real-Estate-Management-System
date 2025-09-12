@@ -12,9 +12,9 @@ export const PreferencesProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
 
   // Load preferences when context mounts
-  useEffect(() => {
-    loadPreferences();
-  }, []);
+  // useEffect(() => {
+  //   loadPreferences();
+  // }, []);
 
   const loadPreferences = async () => {
     try {

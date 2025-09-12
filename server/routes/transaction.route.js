@@ -10,7 +10,6 @@ router.post("/link-payment", transactionsController.linkPaymentToTransaction);
 router.get("/latest-for-user", transactionsController.getLatestForUser);
 router.get("/:id", transactionsController.getTransaction);
 
-
 // webhook endpoint - MUST be accessible publicly and use raw body for verification
 router.post("/webhook/paystack", transactionsController.handlePaystackWebhook);
 

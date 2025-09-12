@@ -421,9 +421,7 @@ const AddProperty = () => {
               placeholder="Choose a currency"
               selectedValue={currency}
               options={currencies}
-              onSelect={(value) =>
-                setCurrency(value.code)
-              }
+              onSelect={(value) => setCurrency(value.code)}
             />
 
             <TextInput

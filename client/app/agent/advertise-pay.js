@@ -125,39 +125,48 @@ const Payment = () => {
         Alert.alert(
           "Advertisement sponsorship activated",
           "Your advertisement sponsorship period has started!",
-          [{
-            text: "OK",
-            onPress: () => {
-              setShowPaymentWebview(false);
-              router.push("/agent/dashboard");
-            }
-          }],
+          [
+            {
+              text: "OK",
+              onPress: () => {
+                setShowPaymentWebview(false);
+                router.push("/agent/dashboard");
+              },
+            },
+          ],
         );
       } else {
-        throw new Error(data.message || "Failed to start advertisement sponsorship");
+        throw new Error(
+          data.message || "Failed to start advertisement sponsorship",
+        );
       }
     } catch (err) {
       Alert.alert(
         "Advertisement sponsorship activation Error",
-        err.message || "Unable to start advertisement sponsorship. Please try again.",
-        [{
-          text: "OK",
-          onPress: () => {
-            router.back();
-          }
-        }],
+        err.message ||
+          "Unable to start advertisement sponsorship. Please try again.",
+        [
+          {
+            text: "OK",
+            onPress: () => {
+              router.back();
+            },
+          },
+        ],
       );
     }
   };
 
   if (showPaymentWebview) {
-    return <PaystackWebview
-      reference={paymentData.reference}
-      amount={paymentDetails.amount}
-      email={paymentDetails.email}
-      publicKey={PAYSTACK_PUBLIC_KEY}
-      onVerified={startPayment}
-    />;
+    return (
+      <PaystackWebview
+        reference={paymentData.reference}
+        amount={paymentDetails.amount}
+        email={paymentDetails.email}
+        publicKey={PAYSTACK_PUBLIC_KEY}
+        onVerified={startPayment}
+      />
+    );
   }
 
   return (

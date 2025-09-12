@@ -2,7 +2,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import { WebView } from "react-native-webview";
-import { Alert, View, Text, TouchableOpacity, Linking, Image } from "react-native";
+import {
+  Alert,
+  View,
+  Text,
+  TouchableOpacity,
+  Linking,
+  Image,
+} from "react-native";
 
 const About = ({
   description,
@@ -21,7 +28,10 @@ const About = ({
   const openChat = () => {
     try {
       if (!proprietorId) {
-        Alert.alert("Can't open chat", "Property has no agent set. Please try again later.");
+        Alert.alert(
+          "Can't open chat",
+          "Property has no agent set. Please try again later.",
+        );
         return;
       }
 
@@ -41,7 +51,10 @@ const About = ({
         router.push({ pathname, params: navParams });
         return;
       } catch (e) {
-        console.warn("Object router.push failed, trying string route fallback:", e?.message || e);
+        console.warn(
+          "Object router.push failed, trying string route fallback:",
+          e?.message || e,
+        );
       }
 
       // Fallback: string route with encoded query params

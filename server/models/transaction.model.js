@@ -1,16 +1,39 @@
 const mongoose = require("mongoose");
 
 const transactionSchema = new mongoose.Schema({
-  propertyId: { type: mongoose.Schema.Types.ObjectId, ref: "Property", required: true },
-  buyerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  propertyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Property",
+    required: true,
+  },
+  buyerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  ownerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
   amount: { type: Number, required: true }, // stored in base currency units (e.g., Naira)
   currency: { type: String, default: "NGN" },
   paymentReference: { type: String }, // Paystack reference
   checkoutAuthorizationUrl: { type: String }, // returned to client to open WebView
   status: {
     type: String,
-    enum: ["initiated", "code_sent", "verified", "initiated_payment", "paid", "pending_confirmation", "completed", "reversed", "failed", "awaiting_disbursement"],
+    enum: [
+      "initiated",
+      "code_sent",
+      "verified",
+      "initiated_payment",
+      "paid",
+      "pending_confirmation",
+      "completed",
+      "reversed",
+      "failed",
+      "awaiting_disbursement",
+    ],
     default: "initiated",
   },
   draftSnapshot: { type: Object }, // small snapshot of property (title, ownerName, photo, category, contact)

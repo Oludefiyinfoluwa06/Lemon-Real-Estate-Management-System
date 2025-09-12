@@ -11,7 +11,9 @@ const nodemailer = require("nodemailer");
 
 const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY;
 const APP_BASE_URL = process.env.APP_BASE_URL || "http://localhost:3000";
-const FRONTEND_CALLBACK_SUCCESS_URL = process.env.FRONTEND_CALLBACK_SUCCESS_URL || `${APP_BASE_URL}/payment/success`;
+const FRONTEND_CALLBACK_SUCCESS_URL =
+  process.env.FRONTEND_CALLBACK_SUCCESS_URL ||
+  `${APP_BASE_URL}/payment/success`;
 
 // nodemailer transporter (Gmail example)
 const transporter = nodemailer.createTransport({
@@ -25,7 +27,8 @@ const transporter = nodemailer.createTransport({
 // helper: generate numeric OTP
 const generateNumericCode = (length = 6) => {
   let code = "";
-  for (let i = 0; i < length; i++) code += Math.floor(Math.random() * 10).toString();
+  for (let i = 0; i < length; i++)
+    code += Math.floor(Math.random() * 10).toString();
   return code;
 };
 
@@ -33,12 +36,20 @@ const generateNumericCode = (length = 6) => {
 // body: { propertyId, userId }
 const generateCode = async (req, res) => {
   const { propertyId, userId } = req.body;
-  if (!propertyId || !userId) return res.status(400).json({ success: false, message: "propertyId and userId required" });
+  if (!propertyId || !userId)
+    return res
+      .status(400)
+      .json({ success: false, message: "propertyId and userId required" });
 
   try {
     const property = await Property.findById(propertyId).lean();
-    const buyer = await User.findById(userId).select("email firstName lastName");
-    if (!property || !buyer) return res.status(404).json({ success: false, message: "Property or buyer not found" });
+    const buyer = await User.findById(userId).select(
+      "email firstName lastName",
+    );
+    if (!property || !buyer)
+      return res
+        .status(404)
+        .json({ success: false, message: "Property or buyer not found" });
 
     // create draft transaction
     const code = generateNumericCode(6);
@@ -54,7 +65,10 @@ const generateCode = async (req, res) => {
       location: property.country || property.location || "",
       amount: property.price || 0,
       currency: property.currency || "NGN",
-      photo: (property.images && property.images.length > 0) ? property.images[0] : null,
+      photo:
+        property.images && property.images.length > 0
+          ? property.images[0]
+          : null,
       ownerContact: property.agentContact || property.ownerContact || "",
       propertyStatus: property.status || "Sale",
     };
@@ -88,10 +102,22 @@ const generateCode = async (req, res) => {
       }
     })();
 
-    return res.status(200).json({ success: true, message: "Code sent to registered email", transactionId: tx._id });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Code sent to registered email",
+        transactionId: tx._id,
+      });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ success: false, message: "Error generating code", error: err.message });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error generating code",
+        error: err.message,
+      });
   }
 };
 
@@ -99,24 +125,40 @@ const generateCode = async (req, res) => {
 // body: { transactionId, code }
 const verifyCode = async (req, res) => {
   const { transactionId, code } = req.body;
-  if (!transactionId || !code) return res.status(400).json({ success: false, message: "transactionId and code required" });
+  if (!transactionId || !code)
+    return res
+      .status(400)
+      .json({ success: false, message: "transactionId and code required" });
 
   try {
     const tx = await Transaction.findById(transactionId);
-    if (!tx) return res.status(404).json({ success: false, message: "Transaction not found" });
-    if (tx.codeExpiry < new Date()) return res.status(400).json({ success: false, message: "Code expired" });
+    if (!tx)
+      return res
+        .status(404)
+        .json({ success: false, message: "Transaction not found" });
+    if (tx.codeExpiry < new Date())
+      return res.status(400).json({ success: false, message: "Code expired" });
 
     const valid = await bcrypt.compare(code, tx.codeHash);
-    if (!valid) return res.status(400).json({ success: false, message: "Invalid code" });
+    if (!valid)
+      return res.status(400).json({ success: false, message: "Invalid code" });
 
     tx.status = "verified";
     await tx.save();
 
     // return draftSnapshot so frontend can show property details
-    return res.status(200).json({ success: true, message: "Code verified", transaction: tx });
+    return res
+      .status(200)
+      .json({ success: true, message: "Code verified", transaction: tx });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ success: false, message: "Error verifying code", error: err.message });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error verifying code",
+        error: err.message,
+      });
   }
 };
 
@@ -125,13 +167,21 @@ const verifyCode = async (req, res) => {
 // Response: { checkoutUrl, transactionId }
 const initiatePayment = async (req, res) => {
   const { transactionId, buyerEmail } = req.body;
-  if (!transactionId) return res.status(400).json({ success: false, message: "transactionId required" });
+  if (!transactionId)
+    return res
+      .status(400)
+      .json({ success: false, message: "transactionId required" });
 
   try {
     const tx = await Transaction.findById(transactionId);
-    if (!tx) return res.status(404).json({ success: false, message: "Transaction not found" });
+    if (!tx)
+      return res
+        .status(404)
+        .json({ success: false, message: "Transaction not found" });
     if (tx.status !== "verified" && tx.status !== "initiated") {
-      return res.status(400).json({ success: false, message: "Transaction not ready for payment" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Transaction not ready for payment" });
     }
 
     // initialize Paystack transaction
@@ -160,7 +210,12 @@ const initiatePayment = async (req, res) => {
     );
 
     if (!paystackRes.data || !paystackRes.data.status) {
-      return res.status(500).json({ success: false, message: "Error initializing payment with Paystack" });
+      return res
+        .status(500)
+        .json({
+          success: false,
+          message: "Error initializing payment with Paystack",
+        });
     }
 
     const checkoutUrl = paystackRes.data.data.authorization_url;
@@ -168,20 +223,40 @@ const initiatePayment = async (req, res) => {
     tx.status = "initiated_payment";
     await tx.save();
 
-    return res.status(200).json({ success: true, checkoutUrl, transactionId: tx._id });
+    return res
+      .status(200)
+      .json({ success: true, checkoutUrl, transactionId: tx._id });
   } catch (err) {
-    console.error("initiatePayment error:", err?.response?.data || err.message || err);
-    return res.status(500).json({ success: false, message: "Error initiating payment", error: err.message });
+    console.error(
+      "initiatePayment error:",
+      err?.response?.data || err.message || err,
+    );
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error initiating payment",
+        error: err.message,
+      });
   }
 };
 
 const linkPaymentToTransaction = async (req, res) => {
   try {
     const { transactionId, paymentReference } = req.body;
-    if (!transactionId || !paymentReference) return res.status(400).json({ success: false, message: "transactionId and paymentReference required" });
+    if (!transactionId || !paymentReference)
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "transactionId and paymentReference required",
+        });
 
     const tx = await Transaction.findById(transactionId);
-    if (!tx) return res.status(404).json({ success: false, message: "Transaction not found" });
+    if (!tx)
+      return res
+        .status(404)
+        .json({ success: false, message: "Transaction not found" });
 
     tx.paymentReference = paymentReference;
     tx.status = "pending_confirmation";
@@ -207,7 +282,12 @@ const getLatestForUser = async (req, res) => {
     const { propertyId, userId } = req.query;
 
     if (!propertyId || !userId) {
-      return res.status(400).json({ success: false, message: "propertyId and userId query params required" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "propertyId and userId query params required",
+        });
     }
 
     // Find the most recent transaction for that property where user is buyer or owner
@@ -218,8 +298,14 @@ const getLatestForUser = async (req, res) => {
       .sort({ createdAt: -1 })
       .lean()
       .populate([
-        { path: "buyerId", select: "firstName lastName email phone profilePicture" },
-        { path: "ownerId", select: "firstName lastName email phone profilePicture" },
+        {
+          path: "buyerId",
+          select: "firstName lastName email phone profilePicture",
+        },
+        {
+          path: "ownerId",
+          select: "firstName lastName email phone profilePicture",
+        },
       ]);
 
     if (!tx) return res.status(200).json({ success: true, transaction: null });
@@ -239,21 +325,36 @@ const getLatestForUser = async (req, res) => {
           };
         }
       } catch (err) {
-        console.warn("getLatestForUser: payout lookup failed", err?.message || err);
+        console.warn(
+          "getLatestForUser: payout lookup failed",
+          err?.message || err,
+        );
       }
     }
 
     return res.status(200).json({ success: true, transaction: tx });
   } catch (err) {
     console.error("getLatestForUser error:", err);
-    return res.status(500).json({ success: false, message: "Error fetching latest transaction", error: err.message });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error fetching latest transaction",
+        error: err.message,
+      });
   }
 };
 
 /**
  * Helper: create in-app notification and optionally send email (best-effort)
  */
-async function notifyUser({ userId, title, body, data = {}, sendEmail = false }) {
+async function notifyUser({
+  userId,
+  title,
+  body,
+  data = {},
+  sendEmail = false,
+}) {
   try {
     await Notification.create({
       userId,
@@ -263,7 +364,10 @@ async function notifyUser({ userId, title, body, data = {}, sendEmail = false })
       data,
     });
   } catch (err) {
-    console.warn("notifyUser: notification creation failed", err?.message || err);
+    console.warn(
+      "notifyUser: notification creation failed",
+      err?.message || err,
+    );
   }
 
   if (sendEmail && process.env.EMAIL_USER && process.env.EMAIL_PASSWORD) {
@@ -293,11 +397,17 @@ async function notifyUser({ userId, title, body, data = {}, sendEmail = false })
  */
 const confirmTransaction = async (req, res) => {
   const { transactionId, role } = req.body;
-  if (!transactionId || !role) return res.status(400).json({ success: false, message: "transactionId and role required" });
+  if (!transactionId || !role)
+    return res
+      .status(400)
+      .json({ success: false, message: "transactionId and role required" });
 
   try {
     const tx = await Transaction.findById(transactionId);
-    if (!tx) return res.status(404).json({ success: false, message: "Transaction not found" });
+    if (!tx)
+      return res
+        .status(404)
+        .json({ success: false, message: "Transaction not found" });
 
     // set confirmations
     if (role === "buyer") {
@@ -345,7 +455,11 @@ const confirmTransaction = async (req, res) => {
         userId: tx.buyerId,
         title: "Payment recorded — awaiting disbursement",
         body: `Your payment of ${tx.currency || "NGN"} ${tx.amount} for "${tx.draftSnapshot?.title}" has been received and is awaiting admin disbursement.`,
-        data: { transactionId: tx._id, payoutId: payout._id, type: "transaction_awaiting_disbursement" },
+        data: {
+          transactionId: tx._id,
+          payoutId: payout._id,
+          type: "transaction_awaiting_disbursement",
+        },
         sendEmail: true,
       });
 
@@ -353,7 +467,11 @@ const confirmTransaction = async (req, res) => {
         userId: tx.ownerId,
         title: "Payout queued",
         body: `A payout for your property "${tx.draftSnapshot?.title}" has been queued. Net amount: ${tx.currency || "NGN"} ${toOwner}. Admin will disburse soon.`,
-        data: { transactionId: tx._id, payoutId: payout._id, type: "payout_queued" },
+        data: {
+          transactionId: tx._id,
+          payoutId: payout._id,
+          type: "payout_queued",
+        },
         sendEmail: true,
       });
 
@@ -374,7 +492,13 @@ const confirmTransaction = async (req, res) => {
     return res.status(200).json({ success: true, transaction: tx });
   } catch (err) {
     console.error("confirmTransaction error:", err);
-    return res.status(500).json({ success: false, message: "Error confirming transaction", error: err.message });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error confirming transaction",
+        error: err.message,
+      });
   }
 };
 
@@ -385,13 +509,19 @@ const confirmTransaction = async (req, res) => {
 const getTransaction = async (req, res) => {
   try {
     const id = req.params.id;
-    if (!id) return res.status(400).json({ success: false, message: "transaction id required" });
+    if (!id)
+      return res
+        .status(400)
+        .json({ success: false, message: "transaction id required" });
 
     const tx = await Transaction.findById(id)
       .lean()
       .populate("buyerId ownerId propertyId");
 
-    if (!tx) return res.status(404).json({ success: false, message: "Transaction not found" });
+    if (!tx)
+      return res
+        .status(404)
+        .json({ success: false, message: "Transaction not found" });
 
     // if there is a payoutId or payout stored, attach a snapshot (non-sensitive)
     if (tx.payoutId) {
@@ -410,7 +540,10 @@ const getTransaction = async (req, res) => {
         }
       } catch (err) {
         // don't fail the whole request for payout lookup errors
-        console.warn("getTransaction: payout lookup failed", err?.message || err);
+        console.warn(
+          "getTransaction: payout lookup failed",
+          err?.message || err,
+        );
       }
     }
 
@@ -418,7 +551,13 @@ const getTransaction = async (req, res) => {
     return res.status(200).json({ success: true, transaction: tx });
   } catch (err) {
     console.error("getTransaction error:", err);
-    return res.status(500).json({ success: false, message: "Error fetching transaction", error: err.message });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error fetching transaction",
+        error: err.message,
+      });
   }
 };
 
@@ -427,13 +566,18 @@ const getTransaction = async (req, res) => {
 const handlePaystackWebhook = async (req, res) => {
   try {
     // rawBody must be available on req.rawBody (see app-level setup)
-    const signature = req.headers["x-paystack-signature"] || req.headers["X-Paystack-Signature"];
+    const signature =
+      req.headers["x-paystack-signature"] ||
+      req.headers["X-Paystack-Signature"];
     if (!signature) {
       console.warn("No signature header on webhook");
       return res.status(400).send("No signature");
     }
 
-    const computed = crypto.createHmac("sha512", PAYSTACK_SECRET).update(req.rawBody).digest("hex");
+    const computed = crypto
+      .createHmac("sha512", PAYSTACK_SECRET)
+      .update(req.rawBody)
+      .digest("hex");
     if (signature !== computed) {
       console.warn("Invalid webhook signature");
       return res.status(400).send("Invalid signature");
@@ -462,7 +606,10 @@ const handlePaystackWebhook = async (req, res) => {
 
     // If event indicates success, mark paid and pending confirmation
     // Note: adapt depending on exact Paystack payload shape (charge.success / transaction)
-    if (eventType.includes("charge.success") || (data.status && data.status === "success")) {
+    if (
+      eventType.includes("charge.success") ||
+      (data.status && data.status === "success")
+    ) {
       tx.status = "pending_confirmation";
       tx.paymentReference = data.reference || data.id || data.transaction;
       await tx.save();
@@ -486,7 +633,9 @@ const handlePaystackWebhook = async (req, res) => {
       // email owner (non-blocking)
       (async () => {
         try {
-          const owner = await User.findById(tx.ownerId).select("email firstName");
+          const owner = await User.findById(tx.ownerId).select(
+            "email firstName",
+          );
           if (owner && owner.email) {
             await transporter.sendMail({
               from: process.env.EMAIL_USER,

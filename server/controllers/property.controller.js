@@ -52,9 +52,15 @@ const uploadProperty = async (req, res) => {
       },
     });
 
-    return res.status(201).json({ message: "Property upload successful", property });
+    return res
+      .status(201)
+      .json({ message: "Property upload successful", property });
   } catch (error) {
-    return res.status(500).json({ message: error.message || "An error occurred while adding property" });
+    return res
+      .status(500)
+      .json({
+        message: error.message || "An error occurred while adding property",
+      });
   }
 };
 
@@ -167,7 +173,7 @@ const getProperty = async (req, res) => {
       await Property.findByIdAndUpdate(
         propertyId,
         { $inc: { views: 1 } },
-        { new: true }
+        { new: true },
       ).lean();
 
       if (property) {
@@ -266,14 +272,23 @@ const toggleSaveProperty = async (req, res) => {
   try {
     const propertyId = req.params.id;
     const userId = req.user && req.user._id;
-    if (!isValidObjectId(propertyId)) return res.status(400).json({ success: false, message: "Invalid ID" });
-    if (!userId) return res.status(401).json({ success: false, message: "Authentication required" });
+    if (!isValidObjectId(propertyId))
+      return res.status(400).json({ success: false, message: "Invalid ID" });
+    if (!userId)
+      return res
+        .status(401)
+        .json({ success: false, message: "Authentication required" });
 
     // Check if user already saved
     const prop = await Property.findById(propertyId).select("savedBy").lean();
-    if (!prop) return res.status(404).json({ success: false, message: "Property not found" });
+    if (!prop)
+      return res
+        .status(404)
+        .json({ success: false, message: "Property not found" });
 
-    const alreadySaved = (prop.savedBy || []).some((id) => id.toString() === userId.toString());
+    const alreadySaved = (prop.savedBy || []).some(
+      (id) => id.toString() === userId.toString(),
+    );
 
     let updated;
     if (!alreadySaved) {
@@ -281,15 +296,22 @@ const toggleSaveProperty = async (req, res) => {
       updated = await Property.findByIdAndUpdate(
         propertyId,
         { $addToSet: { savedBy: userId }, $inc: { savedCount: 1 } },
-        { new: true }
+        { new: true },
       );
-      return res.status(200).json({ success: true, message: "Property saved", property: updated, saved: true });
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "Property saved",
+          property: updated,
+          saved: true,
+        });
     } else {
       // remove user and decrement savedCount (min 0)
       updated = await Property.findByIdAndUpdate(
         propertyId,
         { $pull: { savedBy: userId }, $inc: { savedCount: -1 } },
-        { new: true }
+        { new: true },
       );
 
       // If savedCount became negative (rare), correct it
@@ -298,26 +320,59 @@ const toggleSaveProperty = async (req, res) => {
         await updated.save();
       }
 
-      return res.status(200).json({ success: true, message: "Property unsaved", property: updated, saved: false });
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "Property unsaved",
+          property: updated,
+          saved: false,
+        });
     }
   } catch (err) {
     console.error("toggleSaveProperty error:", err);
-    return res.status(500).json({ success: false, message: "Error toggling saved state", error: err.message });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error toggling saved state",
+        error: err.message,
+      });
   }
 };
 
 const incrementVideoView = async (req, res) => {
   try {
     const propertyId = req.params.id;
-    if (!isValidObjectId(propertyId)) return res.status(400).json({ success: false, message: "Invalid ID" });
+    if (!isValidObjectId(propertyId))
+      return res.status(400).json({ success: false, message: "Invalid ID" });
 
-    const updated = await Property.findByIdAndUpdate(propertyId, { $inc: { videoViews: 1 } }, { new: true }).lean();
-    if (!updated) return res.status(404).json({ success: false, message: "Property not found" });
+    const updated = await Property.findByIdAndUpdate(
+      propertyId,
+      { $inc: { videoViews: 1 } },
+      { new: true },
+    ).lean();
+    if (!updated)
+      return res
+        .status(404)
+        .json({ success: false, message: "Property not found" });
 
-    return res.status(200).json({ success: true, message: "Video view recorded", property: updated });
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "Video view recorded",
+        property: updated,
+      });
   } catch (err) {
     console.error("incrementVideoView error:", err);
-    return res.status(500).json({ success: false, message: "Error recording video view", error: err.message });
+    return res
+      .status(500)
+      .json({
+        success: false,
+        message: "Error recording video view",
+        error: err.message,
+      });
   }
 };
 
@@ -340,7 +395,9 @@ const searchProperty = async (req, res) => {
       // location may match country or coordinates-related text fields
       query.$or = query.$or || [];
       query.$or.push({ country: { $regex: location, $options: "i" } });
-      query.$or.push({ "coordinates.latitude": { $regex: location, $options: "i" } });
+      query.$or.push({
+        "coordinates.latitude": { $regex: location, $options: "i" },
+      });
     }
 
     if (category) {
@@ -371,7 +428,9 @@ const searchProperty = async (req, res) => {
       return po;
     });
 
-    return res.status(200).json({ count: sanitized.length, properties: sanitized });
+    return res
+      .status(200)
+      .json({ count: sanitized.length, properties: sanitized });
   } catch (error) {
     res.status(500).json({ message: "An error occurred" });
   }
@@ -398,7 +457,10 @@ const getRecommendations = async (req, res) => {
 
     if (user && user.preferences && user.preferences.length > 0) {
       // match category, title or description
-      const prefRegexes = user.preferences.map((p) => ({ $regex: p, $options: "i" }));
+      const prefRegexes = user.preferences.map((p) => ({
+        $regex: p,
+        $options: "i",
+      }));
       properties = await Property.find({
         $or: [
           { category: { $in: user.preferences } },
@@ -408,7 +470,9 @@ const getRecommendations = async (req, res) => {
       }).limit(50);
     } else {
       // fallback to trending properties sorted by likes + views
-      properties = await Property.find().sort({ likes: -1, videoViews: -1 }).limit(50);
+      properties = await Property.find()
+        .sort({ likes: -1, videoViews: -1 })
+        .limit(50);
     }
 
     // sanitize documents for buyers

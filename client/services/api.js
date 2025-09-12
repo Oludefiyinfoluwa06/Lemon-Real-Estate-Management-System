@@ -29,7 +29,8 @@ export async function apiFetch(path, { method = "GET", body, token, qs } = {}) {
   }
 
   if (!res.ok) {
-    const message = data?.message || data?.error || res.statusText || "Request failed";
+    const message =
+      data?.message || data?.error || res.statusText || "Request failed";
     const err = new Error(message);
     err.status = res.status;
     err.body = data;

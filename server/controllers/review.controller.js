@@ -44,7 +44,10 @@ const createReview = async (req, res) => {
         const reviewsForAgent = await Review.find({ propertyId });
         const ratings = reviewsForAgent.map((r) => r.rating || 0);
         const ratingsCount = ratings.length;
-        const avgRating = ratingsCount > 0 ? ratings.reduce((a, b) => a + b, 0) / ratingsCount : 0;
+        const avgRating =
+          ratingsCount > 0
+            ? ratings.reduce((a, b) => a + b, 0) / ratingsCount
+            : 0;
 
         await User.findByIdAndUpdate(agentId, { avgRating, ratingsCount });
       }

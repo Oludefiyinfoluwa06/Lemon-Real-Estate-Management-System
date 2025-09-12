@@ -13,7 +13,10 @@ const Gallery = ({ photos, video, propertyId }) => {
     if (!propertyId) return;
     try {
       const token = await getToken();
-      await apiFetch(`/api/property/${propertyId}/video-view`, { method: "POST", token });
+      await apiFetch(`/api/property/${propertyId}/video-view`, {
+        method: "POST",
+        token,
+      });
       setVideoViewed(true);
     } catch (err) {
       // non-fatal: just log, don't spam user

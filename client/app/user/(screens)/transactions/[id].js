@@ -67,7 +67,11 @@ const TransactionDetails = () => {
       pollRef.current = setInterval(() => {
         fetchTransaction({ quiet: true });
       }, 5000);
-    } else if (transaction && transaction.status !== "awaiting_disbursement" && pollRef.current) {
+    } else if (
+      transaction &&
+      transaction.status !== "awaiting_disbursement" &&
+      pollRef.current
+    ) {
       clearInterval(pollRef.current);
       pollRef.current = null;
     }
@@ -81,7 +85,10 @@ const TransactionDetails = () => {
     try {
       const token = await getToken();
       // endpoint: GET /api/transaction/:id
-      const data = await apiFetch(`/api/transaction/${transactionId}`, { method: "GET", token });
+      const data = await apiFetch(`/api/transaction/${transactionId}`, {
+        method: "GET",
+        token,
+      });
       // expected shape: { transaction: { ... } } or transaction object directly
       const tx = data && data.transaction ? data.transaction : data;
       setTransaction(tx || null);
@@ -94,7 +101,8 @@ const TransactionDetails = () => {
   };
 
   const confirmTransactionAsBuyer = async () => {
-    if (!transaction || !transaction._id) return Alert.alert("Error", "Transaction not available");
+    if (!transaction || !transaction._id)
+      return Alert.alert("Error", "Transaction not available");
     if (!user || !user._id) return Alert.alert("Error", "User not available");
 
     Alert.alert(
@@ -116,7 +124,10 @@ const TransactionDetails = () => {
               setBusy(false);
               if (res && res.transaction) {
                 setTransaction(res.transaction);
-                Alert.alert("Confirmed", "Transaction confirmed. Admin will disburse shortly.");
+                Alert.alert(
+                  "Confirmed",
+                  "Transaction confirmed. Admin will disburse shortly.",
+                );
               } else {
                 Alert.alert("Done", "Confirmation sent.");
                 fetchTransaction();
@@ -124,7 +135,10 @@ const TransactionDetails = () => {
             } catch (err) {
               setBusy(false);
               console.error("confirm error", err);
-              Alert.alert("Error", err.message || "Could not confirm transaction.");
+              Alert.alert(
+                "Error",
+                err.message || "Could not confirm transaction.",
+              );
             }
           },
         },
@@ -134,8 +148,11 @@ const TransactionDetails = () => {
 
   const openPhone = (phone) => {
     if (!phone) return;
-    const tel = Platform.OS === "android" ? `tel:${phone}` : `telprompt:${phone}`;
-    Linking.openURL(tel).catch(() => Alert.alert("Error", "Could not open phone dialer"));
+    const tel =
+      Platform.OS === "android" ? `tel:${phone}` : `telprompt:${phone}`;
+    Linking.openURL(tel).catch(() =>
+      Alert.alert("Error", "Could not open phone dialer"),
+    );
   };
 
   if (!transactionId) {
@@ -158,32 +175,70 @@ const TransactionDetails = () => {
     const p = transaction?.draftSnapshot || {};
     return (
       <View className="p-4">
-        <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 12,
+          }}
+        >
           {p.photo ? (
-            <Image source={{ uri: p.photo }} style={{ width: 72, height: 72, borderRadius: 8, marginRight: 12 }} />
+            <Image
+              source={{ uri: p.photo }}
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: 8,
+                marginRight: 12,
+              }}
+            />
           ) : (
-            <View style={{ width: 72, height: 72, borderRadius: 8, backgroundColor: "#2B2B2B", marginRight: 12, alignItems: "center", justifyContent: "center" }}>
+            <View
+              style={{
+                width: 72,
+                height: 72,
+                borderRadius: 8,
+                backgroundColor: "#2B2B2B",
+                marginRight: 12,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
               <Ionicons name="home-outline" size={32} color="#FFFFFF" />
             </View>
           )}
 
           <View style={{ flex: 1 }}>
-            <Text style={{ color: "#fff", fontSize: 18, fontWeight: "700" }}>{p.title || transaction?.draftSnapshot?.title || "Property"}</Text>
-            <Text style={{ color: "#AFAFAF", marginTop: 4 }}>{p.location || transaction?.draftSnapshot?.location || ""}</Text>
+            <Text style={{ color: "#fff", fontSize: 18, fontWeight: "700" }}>
+              {p.title || transaction?.draftSnapshot?.title || "Property"}
+            </Text>
+            <Text style={{ color: "#AFAFAF", marginTop: 4 }}>
+              {p.location || transaction?.draftSnapshot?.location || ""}
+            </Text>
           </View>
         </View>
 
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
           <View>
             <Text style={{ color: "#AFAFAF", fontSize: 12 }}>Status</Text>
-            <Text style={{ color: "#fff", fontWeight: "700", marginTop: 4 }}>{transaction?.status || "Unknown"}</Text>
+            <Text style={{ color: "#fff", fontWeight: "700", marginTop: 4 }}>
+              {transaction?.status || "Unknown"}
+            </Text>
           </View>
 
           <View style={{ alignItems: "flex-end" }}>
             <Text style={{ color: "#AFAFAF", fontSize: 12 }}>Amount</Text>
             <Text style={{ color: "#BBCC13", fontWeight: "700", marginTop: 4 }}>
-              {transaction?.currency ? transaction.currency.split?.(" - ")[1] ?? transaction.currency : ""}
-              {" "}
+              {transaction?.currency
+                ? (transaction.currency.split?.(" - ")[1] ??
+                  transaction.currency)
+                : ""}{" "}
               {formatPrice(transaction?.amount ?? p.amount ?? 0)}
             </Text>
           </View>
@@ -193,17 +248,26 @@ const TransactionDetails = () => {
   };
 
   const renderParticipants = () => {
-    const owner = transaction?.owner || transaction?.ownerSnapshot || transaction?.ownerId;
-    const buyer = transaction?.buyer || transaction?.buyerSnapshot || transaction?.buyerId;
+    const owner =
+      transaction?.owner || transaction?.ownerSnapshot || transaction?.ownerId;
+    const buyer =
+      transaction?.buyer || transaction?.buyerSnapshot || transaction?.buyerId;
     return (
       <View className="p-4 border-t border-b border-gray-700">
         <Text style={{ color: "#AFAFAF", marginBottom: 8 }}>Participants</Text>
 
         <View style={{ marginBottom: 8 }}>
           <Text style={{ color: "#fff", fontWeight: "700" }}>Owner</Text>
-          <Text style={{ color: "#fff" }}>{owner?.name || owner?.firstName ? `${owner.firstName || ""} ${owner.lastName || ""}`.trim() : owner || "Owner"}</Text>
+          <Text style={{ color: "#fff" }}>
+            {owner?.name || owner?.firstName
+              ? `${owner.firstName || ""} ${owner.lastName || ""}`.trim()
+              : owner || "Owner"}
+          </Text>
           {owner?.phone ? (
-            <TouchableOpacity onPress={() => openPhone(owner.phone)} style={{ marginTop: 6 }}>
+            <TouchableOpacity
+              onPress={() => openPhone(owner.phone)}
+              style={{ marginTop: 6 }}
+            >
               <Text style={{ color: "#BBCC13" }}>Call owner</Text>
             </TouchableOpacity>
           ) : null}
@@ -211,7 +275,11 @@ const TransactionDetails = () => {
 
         <View>
           <Text style={{ color: "#fff", fontWeight: "700" }}>Buyer</Text>
-          <Text style={{ color: "#fff" }}>{buyer?.name || buyer?.firstName ? `${buyer.firstName || ""} ${buyer.lastName || ""}`.trim() : buyer || "Buyer"}</Text>
+          <Text style={{ color: "#fff" }}>
+            {buyer?.name || buyer?.firstName
+              ? `${buyer.firstName || ""} ${buyer.lastName || ""}`.trim()
+              : buyer || "Buyer"}
+          </Text>
         </View>
       </View>
     );
@@ -223,28 +291,53 @@ const TransactionDetails = () => {
     const net = Math.round((amt - commission) * 100) / 100;
     return (
       <View className="p-4 border-b border-gray-700">
-        <Text style={{ color: "#AFAFAF", marginBottom: 8 }}>Payment summary</Text>
+        <Text style={{ color: "#AFAFAF", marginBottom: 8 }}>
+          Payment summary
+        </Text>
 
-        <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 6 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginBottom: 6,
+          }}
+        >
           <Text style={{ color: "#fff" }}>Gross amount</Text>
-          <Text style={{ color: "#fff" }}>{transaction?.currency ?? "NGN"} {formatPrice(amt)}</Text>
+          <Text style={{ color: "#fff" }}>
+            {transaction?.currency ?? "NGN"} {formatPrice(amt)}
+          </Text>
         </View>
 
-        <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 6 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            marginBottom: 6,
+          }}
+        >
           <Text style={{ color: "#fff" }}>Platform commission (4%)</Text>
-          <Text style={{ color: "#fff" }}>{transaction?.currency ?? "NGN"} {formatPrice(commission)}</Text>
+          <Text style={{ color: "#fff" }}>
+            {transaction?.currency ?? "NGN"} {formatPrice(commission)}
+          </Text>
         </View>
 
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text style={{ color: "#AFAFAF", fontWeight: "700" }}>Amount to owner</Text>
-          <Text style={{ color: "#BBCC13", fontWeight: "700" }}>{transaction?.currency ?? "NGN"} {formatPrice(net)}</Text>
+          <Text style={{ color: "#AFAFAF", fontWeight: "700" }}>
+            Amount to owner
+          </Text>
+          <Text style={{ color: "#BBCC13", fontWeight: "700" }}>
+            {transaction?.currency ?? "NGN"} {formatPrice(net)}
+          </Text>
         </View>
       </View>
     );
   };
 
   const renderPayout = () => {
-    const payout = transaction?.payout || transaction?.payoutSnapshot || transaction?.payoutId;
+    const payout =
+      transaction?.payout ||
+      transaction?.payoutSnapshot ||
+      transaction?.payoutId;
     if (!payout && !transaction?.payoutId) {
       return null;
     }
@@ -257,20 +350,45 @@ const TransactionDetails = () => {
         {transaction?.payoutSnapshot ? (
           <>
             <View style={{ marginBottom: 6 }}>
-              <Text style={{ color: "#fff" }}>Status: {transaction.payoutSnapshot.status}</Text>
-              <Text style={{ color: "#fff" }}>Amount: {transaction.payoutSnapshot.currency || transaction.currency} {formatPrice(transaction.payoutSnapshot.netAmount)}</Text>
-              <Text style={{ color: "#fff" }}>Scheduled: {transaction.payoutSnapshot.scheduledAt ? new Date(transaction.payoutSnapshot.scheduledAt).toLocaleString() : "—"}</Text>
-              {transaction.payoutSnapshot.providerReference ? <Text style={{ color: "#fff" }}>Provider ref: {transaction.payoutSnapshot.providerReference}</Text> : null}
+              <Text style={{ color: "#fff" }}>
+                Status: {transaction.payoutSnapshot.status}
+              </Text>
+              <Text style={{ color: "#fff" }}>
+                Amount:{" "}
+                {transaction.payoutSnapshot.currency || transaction.currency}{" "}
+                {formatPrice(transaction.payoutSnapshot.netAmount)}
+              </Text>
+              <Text style={{ color: "#fff" }}>
+                Scheduled:{" "}
+                {transaction.payoutSnapshot.scheduledAt
+                  ? new Date(
+                      transaction.payoutSnapshot.scheduledAt,
+                    ).toLocaleString()
+                  : "—"}
+              </Text>
+              {transaction.payoutSnapshot.providerReference ? (
+                <Text style={{ color: "#fff" }}>
+                  Provider ref: {transaction.payoutSnapshot.providerReference}
+                </Text>
+              ) : null}
             </View>
           </>
         ) : (
           <View>
-            <Text style={{ color: "#fff", marginBottom: 8 }}>Payout queued (ID: {transaction?.payoutId || "—"})</Text>
+            <Text style={{ color: "#fff", marginBottom: 8 }}>
+              Payout queued (ID: {transaction?.payoutId || "—"})
+            </Text>
             <TouchableOpacity
-              style={{ padding: 10, backgroundColor: "#BBCC13", borderRadius: 8, alignSelf: "flex-start" }}
+              style={{
+                padding: 10,
+                backgroundColor: "#BBCC13",
+                borderRadius: 8,
+                alignSelf: "flex-start",
+              }}
               onPress={() => {
                 // open admin payout details if you have routing
-                if (transaction?.payoutId) router.push(`/admin/payouts/${transaction.payoutId}`);
+                if (transaction?.payoutId)
+                  router.push(`/admin/payouts/${transaction.payoutId}`);
                 else Alert.alert("Payout", "No detailed payout info available");
               }}
             >
@@ -283,7 +401,10 @@ const TransactionDetails = () => {
   };
 
   const renderFooterActions = () => {
-    const isBuyer = user && (transaction?.buyerId === user._id || (transaction?.buyer && transaction.buyer._id === user._id));
+    const isBuyer =
+      user &&
+      (transaction?.buyerId === user._id ||
+        (transaction?.buyer && transaction.buyer._id === user._id));
     return (
       <View className="p-4">
         <TouchableOpacity
@@ -297,28 +418,46 @@ const TransactionDetails = () => {
           onPress={() => fetchTransaction()}
           disabled={busy}
         >
-          <Text style={{ color: "#fff" }}>{busy ? "Working..." : "Refresh"}</Text>
+          <Text style={{ color: "#fff" }}>
+            {busy ? "Working..." : "Refresh"}
+          </Text>
         </TouchableOpacity>
 
         {transaction?.status === "pending_confirmation" && isBuyer ? (
           <TouchableOpacity
-            style={{ padding: 12, backgroundColor: "#BBCC13", borderRadius: 8, alignItems: "center", marginBottom: 10 }}
+            style={{
+              padding: 12,
+              backgroundColor: "#BBCC13",
+              borderRadius: 8,
+              alignItems: "center",
+              marginBottom: 10,
+            }}
             onPress={confirmTransactionAsBuyer}
             disabled={busy}
           >
-            <Text style={{ color: "#1A1A1A", fontWeight: "700" }}>{busy ? "Confirming..." : "Confirm Transaction (I paid)"}</Text>
+            <Text style={{ color: "#1A1A1A", fontWeight: "700" }}>
+              {busy ? "Confirming..." : "Confirm Transaction (I paid)"}
+            </Text>
           </TouchableOpacity>
         ) : null}
 
         {transaction?.status === "awaiting_disbursement" ? (
           <View>
-            <Text style={{ color: "#AFAFAF", marginBottom: 8 }}>An admin will disburse the funds to the owner soon.</Text>
+            <Text style={{ color: "#AFAFAF", marginBottom: 8 }}>
+              An admin will disburse the funds to the owner soon.
+            </Text>
             <TouchableOpacity
               onPress={() => {
-                if (transaction?.ownerId) openPhone(transaction.ownerId.mobileNumber);
+                if (transaction?.ownerId)
+                  openPhone(transaction.ownerId.mobileNumber);
                 else Alert.alert("Contact", "Owner contact not available");
               }}
-              style={{ padding: 12, backgroundColor: "#3D454B", borderRadius: 8, alignItems: "center" }}
+              style={{
+                padding: 12,
+                backgroundColor: "#3D454B",
+                borderRadius: 8,
+                alignItems: "center",
+              }}
             >
               <Text style={{ color: "#fff" }}>Contact Owner</Text>
             </TouchableOpacity>
@@ -335,9 +474,17 @@ const TransactionDetails = () => {
                 Alert.alert("Receipt", "Receipt not available");
               }
             }}
-            style={{ marginTop: 12, padding: 12, backgroundColor: "#BBCC13", borderRadius: 8, alignItems: "center" }}
+            style={{
+              marginTop: 12,
+              padding: 12,
+              backgroundColor: "#BBCC13",
+              borderRadius: 8,
+              alignItems: "center",
+            }}
           >
-            <Text style={{ color: "#1A1A1A", fontWeight: "700" }}>View Receipt</Text>
+            <Text style={{ color: "#1A1A1A", fontWeight: "700" }}>
+              View Receipt
+            </Text>
           </TouchableOpacity>
         ) : null}
       </View>
@@ -346,11 +493,27 @@ const TransactionDetails = () => {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#131516" }}>
-      <View style={{ flexDirection: "row", alignItems: "center", padding: 12, backgroundColor: "#212A2B" }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          padding: 12,
+          backgroundColor: "#212A2B",
+        }}
+      >
         <TouchableOpacity onPress={() => router.back()}>
           <Ionicons name="chevron-back-outline" size={24} color="#FFFFFF" />
         </TouchableOpacity>
-        <Text style={{ color: "#fff", fontSize: 18, fontWeight: "700", marginLeft: 12 }}>Transaction</Text>
+        <Text
+          style={{
+            color: "#fff",
+            fontSize: 18,
+            fontWeight: "700",
+            marginLeft: 12,
+          }}
+        >
+          Transaction
+        </Text>
       </View>
 
       <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
@@ -365,8 +528,18 @@ const TransactionDetails = () => {
         {/* timestamps */}
         <View className="p-4 border-t border-gray-700">
           <Text style={{ color: "#AFAFAF", marginBottom: 6 }}>Timestamps</Text>
-          <Text style={{ color: "#fff", marginBottom: 4 }}>Created: {transaction?.createdAt ? new Date(transaction.createdAt).toLocaleString() : "-"}</Text>
-          <Text style={{ color: "#fff", marginBottom: 4 }}>Updated: {transaction?.updatedAt ? new Date(transaction.updatedAt).toLocaleString() : "-"}</Text>
+          <Text style={{ color: "#fff", marginBottom: 4 }}>
+            Created:{" "}
+            {transaction?.createdAt
+              ? new Date(transaction.createdAt).toLocaleString()
+              : "-"}
+          </Text>
+          <Text style={{ color: "#fff", marginBottom: 4 }}>
+            Updated:{" "}
+            {transaction?.updatedAt
+              ? new Date(transaction.updatedAt).toLocaleString()
+              : "-"}
+          </Text>
         </View>
 
         {renderFooterActions()}

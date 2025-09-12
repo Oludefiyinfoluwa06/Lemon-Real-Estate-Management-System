@@ -21,9 +21,9 @@ const paymentSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['Verified', 'Unverified', 'Failed'],
+      enum: ["Verified", "Unverified", "Failed"],
       required: true,
-      default: 'Unverified',
+      default: "Unverified",
     },
   },
   { timestamps: true },

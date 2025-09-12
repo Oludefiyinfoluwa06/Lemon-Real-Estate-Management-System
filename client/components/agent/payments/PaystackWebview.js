@@ -6,7 +6,13 @@ import { router } from "expo-router";
 import { config } from "../../../config";
 import { getToken } from "../../../services/getToken";
 
-const PaystackWebview = ({ reference, amount, email, publicKey, onVerified }) => {
+const PaystackWebview = ({
+  reference,
+  amount,
+  email,
+  publicKey,
+  onVerified,
+}) => {
   const verifyUrl = `${config.API_BASE_URL}/api/payment/verify`;
 
   const injectedHtml = useMemo(() => {
@@ -97,51 +103,43 @@ const PaystackWebview = ({ reference, amount, email, publicKey, onVerified }) =>
           Alert.alert("Success", "Payment completed");
           onVerified();
         } else {
-          Alert.alert(
-            "Payment not confirmed",
-            "Please contact support",
-            [{
+          Alert.alert("Payment not confirmed", "Please contact support", [
+            {
               text: "OK",
               onPress: () => {
                 router.back();
-              }
-            }],
-          );
+              },
+            },
+          ]);
         }
       } catch (err) {
-        Alert.alert(
-          "Payment Error",
-          "Could not verify payment.",
-          [{
+        Alert.alert("Payment Error", "Could not verify payment.", [
+          {
             text: "OK",
             onPress: () => {
               router.back();
-            }
-          }],
-        );
+            },
+          },
+        ]);
       }
     } else if (data.type === "closed") {
-      Alert.alert(
-        "Payment cancelled",
-        "You closed the payment",
-        [{
+      Alert.alert("Payment cancelled", "You closed the payment", [
+        {
           text: "OK",
           onPress: () => {
             router.back();
-          }
-        }],
-      );
+          },
+        },
+      ]);
     } else if (data.type === "error") {
-      Alert.alert(
-        "Payment Error",
-        data.message || "Unknown web error",
-        [{
+      Alert.alert("Payment Error", data.message || "Unknown web error", [
+        {
           text: "OK",
           onPress: () => {
             router.back();
-          }
-        }],
-      );
+          },
+        },
+      ]);
     }
   };
 

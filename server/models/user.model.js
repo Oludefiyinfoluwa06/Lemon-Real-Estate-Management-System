@@ -1,5 +1,12 @@
 const mongoose = require("mongoose");
 
+const emergencyContactSchema = new mongoose.Schema({
+  name: { type: String, required: true },
+  relationship: { type: String, required: false },
+  phone: { type: String, required: true },
+  email: { type: String, required: true },
+});
+
 const userSchema = new mongoose.Schema({
   propertiesOfInterest: {
     type: [String],
@@ -34,6 +41,12 @@ const userSchema = new mongoose.Schema({
   mobileNumber: { type: String, required: true },
   email: { type: String, required: true },
   password: { type: String, required: true },
+  emergencyContact: {
+    type: emergencyContactSchema,
+    default: null,
+    required: () =>
+      this.role === "individual-agent" || this.role === "company-agent",
+  },
   role: {
     type: String,
     enum: ["buyer", "individual-agent", "company-agent"],
@@ -48,11 +61,6 @@ const userSchema = new mongoose.Schema({
   verificationBadge: {
     type: String,
     default: null,
-  },
-  // simple admin flag to gate privileged operations
-  isAdmin: {
-    type: Boolean,
-    default: false,
   },
   // aggregate rating fields for proprietors
   avgRating: {
