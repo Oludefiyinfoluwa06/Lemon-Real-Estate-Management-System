@@ -1,6 +1,12 @@
 {
   "expo": {
+    "name": "Lemonz",
+    "slug": "lemon",
+    "version": "1.0.0",
+    "platforms": ["ios", "android", "web"],
+    "orientation": "portrait",
     "scheme": "acme",
+    "icon": "./assets/common/logo_square.jpg",
     "web": {
       "bundler": "metro"
     },
@@ -11,18 +17,38 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Allow Lemon to use your location."
+          "locationAlwaysAndWhenInUsePermission": "Allow Lemonz to use your location."
         }
       ],
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Lemon to access your camera to scan ID documents."
+          "cameraPermission": "Allow Lemonz to access your camera to scan ID documents."
         }
       ]
     ],
-    "name": "Lemon",
-    "icon": "./assets/common/logo-2.jpg",
+    "android": {
+      "package": "com.oftotech.lemonz",
+      "permissions": [
+        "INTERNET",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/common/logo_square.png",
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "ios": {
+      "bundleIdentifier": "com.oftotech.lemonz",
+      "buildNumber": "1.0.0",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Allow Lemonz to access your camera to scan ID documents.",
+        "NSLocationWhenInUseUsageDescription": "Allow Lemonz to use your location.",
+        "NSLocationAlwaysAndWhenInUseUsageDescription": "Allow Lemonz to use your location."
+      }
+    },
     "extra": {
       "router": {
         "origin": false
@@ -30,15 +56,6 @@
       "eas": {
         "projectId": "c7e609ae-b1e2-4adf-b25e-776ac6dfd8a4"
       }
-    },
-    "android": {
-      "package": "com.oftotech.lemon",
-      "permissions": [
-        "INTERNET",
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
-      ],
-      "usesCleartextTraffic": true
     }
   }
 }

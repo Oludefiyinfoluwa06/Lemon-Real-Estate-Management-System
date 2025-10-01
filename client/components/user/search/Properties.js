@@ -1,10 +1,8 @@
-import { View, Text, Image, TouchableOpacity } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { formatPrice } from "../../../services/formatPrice";
-import { router } from "expo-router";
+import { View, Text } from "react-native";
 import ErrorOrMessageModal from "../../common/ErrorOrMessageModal";
 import Button from "../../common/Button";
 import NoProperties from "../NoProperties";
+import PropertyCard from "./PropertyCard";
 
 const Properties = ({
   properties,
@@ -22,53 +20,13 @@ const Properties = ({
 
   return (
     <View>
-      <View className="flex-row flex-wrap justify-between gap-y-[16px] mt-2">
+      <View className="flex-row flex-wrap justify-between mt-2">
         {properties.map((property) => (
-          <View
+          <PropertyCard
             key={property._id}
-            className="relative w-[48%] bg-frenchGray-light rounded-lg overflow-hidden"
-          >
-            <Image
-              source={{ uri: property.images[0] }}
-              resizeMode="cover"
-              className="h-[150px] w-full rounded-s-md"
-            />
-
-            <TouchableOpacity
-              className="absolute top-2 right-2 p-2 rounded-full bg-transparentBlack items-center justify-center"
-              onPress={async () => await updateProperty(property._id)}
-            >
-              <Ionicons
-                name={
-                  property.savedBy.includes(userId) ? "heart" : "heart-outline"
-                }
-                color={"#BBCC13"}
-                size={19}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="p-2"
-              onPress={() => router.push(`/user/properties/${property._id}`)}
-            >
-              <Text className="text-white font-rbold text-lg">
-                {property.title}
-              </Text>
-              <View className="flex-row items-center justify-start flex-1 mt-1">
-                <Ionicons name="location-outline" color={"#BBCC13"} size={18} />
-                <Text className="font-rregular text-[14px] text-white ml-1">
-                  {property.country}
-                </Text>
-              </View>
-              <View className="flex-row items-center justify-start flex-1 mt-1">
-                <Ionicons name="pricetag-outline" color={"#BBCC13"} size={18} />
-                <Text className="text-sm font-rbold text-white ml-1">
-                  {property.currency ? property.currency.split(" - ")[1] : ""}{" "}
-                  {formatPrice(property?.price)}{" "}
-                  {property.status === "Sale" ? "" : "/year"}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          </View>
+            property={property}
+            onLikePress={updateProperty}
+          />
         ))}
 
         <ErrorOrMessageModal

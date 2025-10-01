@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { View, Text, TouchableOpacity, TextInput } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import RatingsSummary from "../../common/RatingsSummary";
 
 const WriteReview = ({
   setShowReviewForm,
@@ -33,9 +34,17 @@ const WriteReview = ({
         <Text className="font-rbold text-2xl text-chartreuse">
           What do you think?
         </Text>
-        <Text className="font-rregular text-md text-white">
+        <Text className="font-rregular text-md text-white mb-2">
           Give your rating and comment below
         </Text>
+        {avgRating > 0 && (
+          <View className="flex-row items-center">
+            <RatingsSummary avgRating={avgRating} ratingsCount={ratingsCount} />
+            <Text className="text-frenchGray-light font-rregular text-sm ml-2">
+              Current Rating
+            </Text>
+          </View>
+        )}
       </View>
 
       <View className="flex-row items-center justify-center mb-4">

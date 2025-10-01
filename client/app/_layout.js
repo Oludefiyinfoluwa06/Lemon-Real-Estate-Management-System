@@ -6,6 +6,7 @@ import { AuthProvider } from "../contexts/AuthContext";
 import { PropertyProvider } from "../contexts/PropertyContext";
 import { ReviewProvider } from "../contexts/ReviewContext";
 import { ChatProvider } from "../contexts/ChatContext";
+import { PreferencesProvider } from "../contexts/PreferencesContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -37,16 +38,18 @@ const RootLayout = () => {
       <PropertyProvider>
         <ReviewProvider>
           <ChatProvider>
-            <Stack>
-              <Stack.Screen name="index" options={{ headerShown: false }} />
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-              <Stack.Screen name="user" options={{ headerShown: false }} />
-              <Stack.Screen name="agent" options={{ headerShown: false }} />
-              <Stack.Screen
-                name="profile-picture-upload"
-                options={{ headerShown: false }}
-              />
-            </Stack>
+            <PreferencesProvider>
+              <Stack>
+                <Stack.Screen name="index" options={{ headerShown: false }} />
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="user" options={{ headerShown: false }} />
+                <Stack.Screen name="agent" options={{ headerShown: false }} />
+                <Stack.Screen
+                  name="profile-picture-upload"
+                  options={{ headerShown: false }}
+                />
+              </Stack>
+            </PreferencesProvider>
           </ChatProvider>
         </ReviewProvider>
       </PropertyProvider>

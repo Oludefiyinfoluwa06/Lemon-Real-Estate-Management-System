@@ -1,6 +1,10 @@
-const axios = require('axios');
-const FormData = require('form-data');
-const { REGION_MAPPING, SECURITY_FEATURE_REQUIREMENTS, VALIDATION_RULES } = require('../utils');
+const axios = require("axios");
+const FormData = require("form-data");
+const {
+  REGION_MAPPING,
+  SECURITY_FEATURE_REQUIREMENTS,
+  VALIDATION_RULES,
+} = require("../utils");
 
 class IDVerificationService {
   constructor() {
@@ -13,7 +17,7 @@ class IDVerificationService {
         return region;
       }
     }
-    return 'US';
+    return "US";
   }
 
   async validateDocument(result, documentType, countryCode) {
@@ -34,26 +38,32 @@ class IDVerificationService {
       validationRules.documentNumberFormat &&
       !validationRules.documentNumberFormat.test(result.document_number)
     ) {
-      validationResults.errors.push('Invalid document number format');
+      validationResults.errors.push("Invalid document number format");
       validationResults.isValid = false;
     }
 
     if (validationRules.ageCheck) {
       const age = this.calculateAge(result.dob);
       if (age < validationRules.minAge || age > validationRules.maxAge) {
-        validationResults.errors.push(`Age ${age} is outside valid range (${validationRules.minAge}-${validationRules.maxAge})`);
+        validationResults.errors.push(
+          `Age ${age} is outside valid range (${validationRules.minAge}-${validationRules.maxAge})`,
+        );
         validationResults.isValid = false;
       }
     }
 
     if (validationRules.expiryRequired) {
       if (!result.expiry_date) {
-        validationResults.errors.push('Missing expiry date');
+        validationResults.errors.push("Missing expiry date");
         validationResults.isValid = false;
       } else {
-        const daysUntilExpiry = this.calculateDaysUntilExpiry(result.expiry_date);
+        const daysUntilExpiry = this.calculateDaysUntilExpiry(
+          result.expiry_date,
+        );
         if (daysUntilExpiry < validationRules.expiryMinDays) {
-          validationResults.errors.push(`Document expires in ${daysUntilExpiry} days (minimum ${validationRules.expiryMinDays} days required)`);
+          validationResults.errors.push(
+            `Document expires in ${daysUntilExpiry} days (minimum ${validationRules.expiryMinDays} days required)`,
+          );
           validationResults.isValid = false;
         }
       }
@@ -64,8 +74,13 @@ class IDVerificationService {
         const securityRequirements = SECURITY_FEATURE_REQUIREMENTS[feature];
         const featureResult = result.security_features?.[feature];
 
-        if (!featureResult || featureResult.confidence < securityRequirements.minConfidence) {
-          validationResults.errors.push(`Failed security feature check: ${feature}`);
+        if (
+          !featureResult ||
+          featureResult.confidence < securityRequirements.minConfidence
+        ) {
+          validationResults.errors.push(
+            `Failed security feature check: ${feature}`,
+          );
           validationResults.isValid = false;
         }
       }
@@ -78,7 +93,7 @@ class IDVerificationService {
     if (VALIDATION_RULES[countryCode]?.[documentType]) {
       return VALIDATION_RULES[countryCode][documentType];
     }
-    return VALIDATION_RULES[documentType] || VALIDATION_RULES['ID'];
+    return VALIDATION_RULES[documentType] || VALIDATION_RULES["ID"];
   }
 
   calculateAge(dateOfBirth) {
@@ -102,25 +117,31 @@ class IDVerificationService {
   async verifyDocument(imageBuffer, countryCode, documentType = null) {
     try {
       if (!imageBuffer || imageBuffer.length === 0) {
-        throw new Error('No image buffer provided or it is empty.');
+        throw new Error("No image buffer provided or it is empty.");
       }
 
-      const base64Image = imageBuffer.toString('base64');
+      const base64Image = imageBuffer.toString("base64");
 
-      const imageFileBuffer = Buffer.from(base64Image, 'base64');
+      const imageFileBuffer = Buffer.from(base64Image, "base64");
 
       const region = this.getRegionForCountry(countryCode);
-      const apiUrl = region === 'US' ? 'https://api.idanalyzer.com' : `https://api-${region}.idanalyzer.com`;
+      const apiUrl =
+        region === "US"
+          ? "https://api.idanalyzer.com"
+          : `https://api-${region}.idanalyzer.com`;
 
       const form = new FormData();
-      form.append('apikey', process.env.IDANALYZER_API_KEY);
-      form.append('file', imageFileBuffer, { filename: 'document.jpg', contentType: 'image/jpeg' });
-      form.append('documentType', documentType || '');
-      form.append('biometric', 'true');
-      form.append('verify_expiry', 'true');
-      form.append('verify_documentnumber', 'true');
-      form.append('verify_age', 'true');
-      form.append('validate_security_features', 'true');
+      form.append("apikey", process.env.IDANALYZER_API_KEY);
+      form.append("file", imageFileBuffer, {
+        filename: "document.jpg",
+        contentType: "image/jpeg",
+      });
+      form.append("documentType", documentType || "");
+      form.append("biometric", "true");
+      form.append("verify_expiry", "true");
+      form.append("verify_documentnumber", "true");
+      form.append("verify_age", "true");
+      form.append("validate_security_features", "true");
 
       const headers = {
         ...form.getHeaders(),
@@ -131,13 +152,13 @@ class IDVerificationService {
       const result = response.data;
 
       if (!result || result.error) {
-        throw new Error(result.error?.message || 'ID verification failed');
+        throw new Error(result.error?.message || "ID verification failed");
       }
 
       const validationResults = await this.validateDocument(
         result.result,
         result.result?.document_type || documentType,
-        countryCode
+        countryCode,
       );
 
       return {
@@ -165,7 +186,9 @@ class IDVerificationService {
         rawResult: result,
       };
     } catch (error) {
-      throw new Error(error.message || 'An error occurred during ID verification.');
+      throw new Error(
+        error.message || "An error occurred during ID verification.",
+      );
     }
   }
 }

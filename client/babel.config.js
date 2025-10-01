@@ -1,10 +1,11 @@
 module.exports = function (api) {
   api.cache(true);
   return {
-    presets: ["babel-preset-expo"],
+    presets: [
+      ["babel-preset-expo"]
+    ],
     plugins: [
       "nativewind/babel",
-      "react-native-reanimated/plugin",
       "@babel/plugin-transform-export-namespace-from",
       [
         "module:react-native-dotenv",
@@ -17,6 +18,7 @@ module.exports = function (api) {
           verbose: false,
         },
       ],
+      "react-native-reanimated/plugin",
     ],
   };
 };

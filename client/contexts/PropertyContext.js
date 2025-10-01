@@ -270,14 +270,11 @@ export const PropertyProvider = ({ children }) => {
     try {
       const token = await getToken();
 
-      await axios.delete(
-        `${config.API_BASE_URL}/api/property/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+      await axios.delete(`${config.API_BASE_URL}/api/property/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
     } catch (error) {
       if (error.response.data.message === "Please, authenticate") {
         await AsyncStorage.removeItem("token");

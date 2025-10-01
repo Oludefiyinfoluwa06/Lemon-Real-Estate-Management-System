@@ -11,6 +11,14 @@ const CompanyAgentSignupForm = ({ agentDetails, setAgentDetails }) => {
   const [selectedCountry, setSelectedCountry] = useState({});
   const [showPassword, setShowPassword] = useState(false);
 
+  // NEW: emergency contact
+  const [emergencyContact, setEmergencyContact] = useState({
+    name: "",
+    relationship: "",
+    phone: "",
+    email: "",
+  });
+
   const { authLoading, setAuthError, register } = useAuth();
 
   useEffect(() => {
@@ -89,11 +97,23 @@ const CompanyAgentSignupForm = ({ agentDetails, setAgentDetails }) => {
       );
     }
 
+    if (
+      !emergencyContact.name ||
+      !emergencyContact.relationship ||
+      !emergencyContact.phone ||
+      !emergencyContact.email
+    ) {
+      return setAuthError(
+        "Emergency contact must include name, relationship, phone and email",
+      );
+    }
+
     const fullMobileNumber = `${agentDetails.countryCode}${agentDetails.mobileNumber}`;
 
     const updatedAgentDetails = {
       ...agentDetails,
       mobileNumber: fullMobileNumber,
+      emergencyContact,
     };
 
     await register(updatedAgentDetails);
@@ -222,6 +242,68 @@ const CompanyAgentSignupForm = ({ agentDetails, setAgentDetails }) => {
               />
             </TouchableOpacity>
           </View>
+
+          <TouchableOpacity
+            onPress={prevStep}
+            className="bg-frenchGray-dark p-3 rounded-lg mt-4"
+          >
+            <Text className="text-center text-white font-rbold">Back</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={nextStep}
+            className="bg-chartreuse p-3 rounded-lg mt-4"
+          >
+            <Text className="text-center text-frenchGray-dark font-rbold">
+              Next
+            </Text>
+          </TouchableOpacity>
+        </>
+      )}
+
+      {/* NEW: Step 4 - Emergency contact + consent */}
+      {currentStep === 4 && (
+        <>
+          <TextInput
+            placeholder="Emergency contact name"
+            className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
+            placeholderTextColor="#AFAFAF"
+            value={emergencyContact.name}
+            onChangeText={(text) =>
+              setEmergencyContact({ ...emergencyContact, name: text })
+            }
+          />
+
+          <TextInput
+            placeholder="Relationship"
+            className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
+            placeholderTextColor="#AFAFAF"
+            value={emergencyContact.relationship}
+            onChangeText={(text) =>
+              setEmergencyContact({ ...emergencyContact, relationship: text })
+            }
+          />
+
+          <TextInput
+            placeholder="Emergency contact phone"
+            className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
+            placeholderTextColor="#AFAFAF"
+            keyboardType="phone-pad"
+            value={emergencyContact.phone}
+            onChangeText={(text) =>
+              setEmergencyContact({ ...emergencyContact, phone: text })
+            }
+          />
+
+          <TextInput
+            placeholder="Emergency contact email"
+            className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
+            placeholderTextColor="#AFAFAF"
+            value={emergencyContact.email}
+            onChangeText={(text) =>
+              setEmergencyContact({ ...emergencyContact, email: text })
+            }
+          />
 
           <TouchableOpacity
             onPress={prevStep}

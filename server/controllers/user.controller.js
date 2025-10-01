@@ -24,6 +24,7 @@ const register = async (req, res) => {
       email,
       password,
       role,
+      emergencyContact,
     } = req.body;
 
     const existingUser = await User.findOne({ email });
@@ -32,10 +33,31 @@ const register = async (req, res) => {
       return res.status(409).json({ message: "This email exists already" });
     }
 
+    if (role && role.includes("agent")) {
+      // If agent/proprietor, require at least one emergency contact and consent
+      if (!emergencyContact) {
+        return res
+          .status(400)
+          .json({ message: "Agents must provide an emergency contact" });
+      }
+      // optional: validate that each emergency contact at least has name and phone
+      const invalid =
+        !emergencyContact.name ||
+        !emergencyContact.phone ||
+        !emergencyContact.email;
+      if (invalid) {
+        return res
+          .status(400)
+          .json({
+            message: "Emergency contact must have name, phone and email",
+          });
+      }
+    }
+
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const user = await User.create({
+    const userPayload = {
       propertiesOfInterest,
       profilePicture: "",
       lastName,
@@ -48,7 +70,10 @@ const register = async (req, res) => {
       email,
       password: hashedPassword,
       role,
-    });
+      emergencyContact,
+    };
+
+    const user = await User.create(userPayload);
 
     if (!user) {
       return res.status(400).json({ message: "Could not save user's details" });
@@ -57,15 +82,14 @@ const register = async (req, res) => {
     const userId = user._id;
     const accessToken = await createAccessToken(userId);
 
-    return res
-      .status(201)
-      .json({
-        message: "Registration successful",
-        accessToken,
-        role: user.role,
-        id: userId,
-      });
+    return res.status(201).json({
+      message: "Registration successful",
+      accessToken,
+      role: user.role,
+      id: userId,
+    });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({ message: "An error occurred" });
   }
 };
@@ -89,14 +113,14 @@ const login = async (req, res) => {
     const userId = user._id;
     const accessToken = await createAccessToken(userId);
 
-    return res
-      .status(200)
-      .json({
-        message: "Login successful",
-        accessToken,
-        role: user.role,
-        id: userId,
-      });
+    sendLoginNotificationEmail(user.email);
+
+    return res.status(200).json({
+      message: "Login successful",
+      accessToken,
+      role: user.role,
+      id: userId,
+    });
   } catch (error) {
     return res.status(500).json({ message: "An error occurred" });
   }
@@ -146,6 +170,35 @@ const forgotPassword = async (req, res) => {
     return res.status(200).json({ message: "Otp sent successfully" });
   } catch (error) {
     return res.status(500).json({ message: "An error occurred" });
+  }
+};
+
+const sendLoginNotificationEmail = async (email) => {
+  try {
+    const emailBody = `
+      <h1>New login detected</h1>
+      <p>We noticed a login to your account.</p>
+      <p>If this was you, no action is required. If not, please change your password immediately.</p>
+    `;
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASSWORD,
+      },
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "New Login to Your Account",
+      html: emailBody,
+    };
+
+    await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error("Login notification email error:", error.message || error);
   }
 };
 
@@ -289,6 +342,29 @@ const idVerification = async (req, res) => {
   }
 };
 
+const verifyUser = async (req, res) => {
+  try {
+    // only admins can verify
+    if (!req.user || !req.user.isAdmin) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const userId = req.params.id;
+
+    const userToVerify = await User.findById(userId);
+    if (!userToVerify)
+      return res.status(404).json({ message: "User not found" });
+
+    userToVerify.isVerified = true;
+    userToVerify.verificationBadge = req.body.badge || "✔️ Verified";
+    await userToVerify.save();
+
+    return res.status(200).json({ message: "User verified successfully" });
+  } catch (error) {
+    return res.status(500).json({ message: "An error occurred" });
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -298,4 +374,5 @@ module.exports = {
   updateUser,
   getUser,
   idVerification,
+  verifyUser,
 };

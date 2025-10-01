@@ -1,11 +1,8 @@
 import React, { useEffect } from "react";
 import { StatusBar } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router } from "expo-router";
 import * as NavigationBar from "expo-navigation-bar";
 import { images } from "../assets/constants";
-import { getToken } from "../services/getToken";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -14,13 +11,16 @@ import Animated, {
   withTiming,
   Easing,
 } from "react-native-reanimated";
+import GetStartedCTA from "../components/common/GetStartedCTA";
 
 const SplashScreen = () => {
   const scale = useSharedValue(0.8);
 
   useEffect(() => {
+    // keep the nav bar style
     NavigationBar.setBackgroundColorAsync("#212A2B");
 
+    // logo breathing animation (unchanged)
     scale.value = withRepeat(
       withSequence(
         withTiming(1.2, {
@@ -36,29 +36,8 @@ const SplashScreen = () => {
       true,
     );
 
-    let timeoutId;
-
-    const checkIsLoggedIn = async () => {
-      try {
-        const token = await getToken();
-        const role = await AsyncStorage.getItem("role");
-
-        timeoutId = setTimeout(() => {
-          if (token && role) {
-            return role === "buyer"
-              ? router.replace("/user/home")
-              : router.replace("/agent/dashboard");
-          }
-          return router.replace("/login");
-        }, 2500);
-      } catch (error) {
-        router.replace("/login");
-      }
-    };
-
-    checkIsLoggedIn();
-
-    return () => clearTimeout(timeoutId);
+    // NOTE: intentionally do NOT auto-navigate here.
+    // The app will wait for the user to press the Get Started CTA.
   }, []);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -73,6 +52,10 @@ const SplashScreen = () => {
         className="w-32 h-32"
         style={animatedStyle}
       />
+
+      {/* Show CTA — user must tap to proceed */}
+      <GetStartedCTA forceShow={true} />
+
       <StatusBar backgroundColor="#212A2B" barStyle="light-content" />
     </SafeAreaView>
   );

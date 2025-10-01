@@ -43,6 +43,7 @@ const Advertise = () => {
   const [error, setError] = useState("");
   const [selectedDuration, setSelectedDuration] = useState("1_MONTH");
   const [propertyAdvertDuration, setPropertyAdvertDuration] = useState("");
+  const [convertedAmount, setConvertedAmount] = useState(null);
 
   const { propertyId } = useLocalSearchParams();
 
@@ -60,6 +61,7 @@ const Advertise = () => {
       const end = new Date(property.advertisementEndDate);
 
       const duration = end - start;
+      setPropertyAdvertDuration(duration);
     }
   }, [property.isOnAdvertisement, property.advertisementEndDate]);
 
@@ -102,6 +104,9 @@ const Advertise = () => {
         if (converted === null) {
           throw new Error("Currency conversion failed");
         }
+
+        setCurrencyInfo(countryData);
+        setConvertedAmount(converted);
 
         const formatted = formatCurrency(
           converted,
@@ -210,10 +215,11 @@ const Advertise = () => {
                 bg={true}
                 onPress={() =>
                   router.push(
-                    `/agent/advertise-pay?propertyId=${propertyId}&duration=${selectedDuration}&amount=${convertedPrice || DURATION_PRICES[selectedDuration].price}`,
+                    `/agent/advertise-pay?amount=${encodeURIComponent(
+                      (convertedAmount ?? basePriceNGN).toString(),
+                    )}&currency=${encodeURIComponent(currencyInfo?.code ?? "NGN")}&propertyId=${propertyId}&duration=${selectedDuration}`,
                   )
                 }
-                // disabled={property.}
               />
             </View>
           </View>

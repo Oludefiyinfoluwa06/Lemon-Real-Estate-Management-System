@@ -9,8 +9,8 @@ const AgentLayout = () => {
       <Stack.Screen name="verify-id" options={{ headerShown: false }} />
       <Stack.Screen name="subscription" options={{ headerShown: false }} />
       <Stack.Screen name="pay" options={{ headerShown: false }} />
-      <Stack.Screen name="advertise-pay" options={{ headerShown: false }} />
       <Stack.Screen name="advertise" options={{ headerShown: false }} />
+      <Stack.Screen name="advertise-pay" options={{ headerShown: false }} />
     </Stack>
   );
 };

@@ -23,6 +23,9 @@ const Login = () => {
     login,
   } = useAuth();
 
+  // Keep track of whether we should show email notification message
+  const [showEmailNotice, setShowEmailNotice] = useState(false);
+
   useEffect(() => {
     const timeout = setTimeout(() => {
       setAuthError("");
@@ -55,7 +58,11 @@ const Login = () => {
           visible={authMessage !== ""}
           modalType="success"
           onClose={() => setAuthMessage("")}
-          text={authMessage}
+          text={`${authMessage}${
+            showEmailNotice
+              ? "\n\nWe've sent you a login notification email."
+              : ""
+          }`}
         />
       )}
 
