@@ -103,7 +103,9 @@ const AddProperty = () => {
 
   const handleNextStep = () => {
     if (currentStep === 1) {
-      if (!title || !description || !category || !status) {
+      // For Hotels the status field is not shown/required, so only
+      // validate status when category is not Hotels.
+      if (!title || !description || !category || (category !== "Hotels" && !status)) {
         return setPropertyError("Input fields must not be empty");
       }
       setCurrentStep(2);

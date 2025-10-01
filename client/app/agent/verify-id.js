@@ -45,7 +45,7 @@ const CustomButton = ({
 );
 
 const VerifyId = () => {
-  const [hasPermission, setHasPermission] = useState(null);
+  // const [hasPermission, setHasPermission] = useState(null);
   const [selectedImage, setSelectedImage] = useState(null);
   const [countries, setCountries] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState({});
@@ -58,27 +58,27 @@ const VerifyId = () => {
   const router = useRouter();
 
   useEffect(() => {
-    (async () => {
-      try {
-        const { status } =
-          await ImagePicker.requestMediaLibraryPermissionsAsync();
-        setHasPermission(status === "granted");
-        if (status !== "granted") {
-          Alert.alert(
-            "Gallery Permission",
-            "Gallery permission is required to upload your ID document.",
-            [
-              {
-                text: "OK",
-                onPress: () => handleBackPress(),
-              },
-            ],
-          );
-        }
-      } catch (error) {
-        Alert.alert("Error", "Failed to access gallery. Please try again.");
-      }
-    })();
+    // (async () => {
+    //   try {
+    //     const { status } =
+    //       await ImagePicker.requestMediaLibraryPermissionsAsync();
+    //     setHasPermission(status === "granted");
+    //     if (status !== "granted") {
+    //       Alert.alert(
+    //         "Gallery Permission",
+    //         "Gallery permission is required to upload your ID document.",
+    //         [
+    //           {
+    //             text: "OK",
+    //             onPress: () => handleBackPress(),
+    //           },
+    //         ],
+    //       );
+    //     }
+    //   } catch (error) {
+    //     Alert.alert("Error", "Failed to access gallery. Please try again.");
+    //   }
+    // })();
 
     const getCountries = async () => {
       try {
@@ -134,10 +134,10 @@ const VerifyId = () => {
   };
 
   const pickImage = async () => {
-    if (hasPermission === false) {
-      Alert.alert("Error", "Gallery permission is required to upload images.");
-      return;
-    }
+    // if (hasPermission === false) {
+    //   Alert.alert("Error", "Gallery permission is required to upload images.");
+    //   return;
+    // }
 
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -216,17 +216,17 @@ const VerifyId = () => {
     }
   };
 
-  if (hasPermission === null) {
-    return <View />;
-  }
+  // if (hasPermission === null) {
+  //   return <View />;
+  // }
 
-  if (hasPermission === false) {
-    return (
-      <SafeAreaView className="flex-1 bg-darkUmber-dark p-6">
-        <Text className="text-white text-center">No access to gallery</Text>
-      </SafeAreaView>
-    );
-  }
+  // if (hasPermission === false) {
+  //   return (
+  //     <SafeAreaView className="flex-1 bg-darkUmber-dark p-6">
+  //       <Text className="text-white text-center">No access to gallery</Text>
+  //     </SafeAreaView>
+  //   );
+  // }
 
   return (
     <SafeAreaView className="flex-1 bg-darkUmber-dark p-6">

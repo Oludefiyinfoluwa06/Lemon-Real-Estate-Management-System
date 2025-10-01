@@ -25,7 +25,7 @@ const Subscription = () => {
   const [currencyInfo, setCurrencyInfo] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const basePriceNGN = 20000;
+  const basePriceNGN = 2000;
 
   useEffect(() => {
     const getUserDetails = async () => {
