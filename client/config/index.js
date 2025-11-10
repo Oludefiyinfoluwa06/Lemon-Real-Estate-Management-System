@@ -1,6 +1,5 @@
 export const config = {
-  API_BASE_URL: "http://10.202.176.68:5001",
-  // API_BASE_URL: "https://lemon-api.vercel.app",
+  API_BASE_URL: "https://lemon-api.vercel.app",
 };
 
 export const DOCUMENT_TYPE_DESCRIPTIONS = {
