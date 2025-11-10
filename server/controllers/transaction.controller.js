@@ -4,6 +4,7 @@ const Payout = require("../models/payout.model");
 const User = require("../models/user.model");
 const Notification = require("../models/notification.model");
 const Chat = require("../models/chat.model");
+const payoutService = require("../services/payout.service");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const axios = require("axios");
@@ -17,7 +18,9 @@ const FRONTEND_CALLBACK_SUCCESS_URL =
 
 // nodemailer transporter (Gmail example)
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
@@ -29,6 +32,7 @@ const generateNumericCode = (length = 6) => {
   let code = "";
   for (let i = 0; i < length; i++)
     code += Math.floor(Math.random() * 10).toString();
+  console.log({ code });
   return code;
 };
 
@@ -98,6 +102,7 @@ const generateCode = async (req, res) => {
           await transporter.sendMail(mailOptions);
         }
       } catch (err) {
+        console.log({ err });
         console.error("Error sending OTP email:", err?.message || err);
       }
     })();
@@ -428,27 +433,30 @@ const confirmTransaction = async (req, res) => {
       // mark property taken now (you can choose to wait until disbursement completes)
       await Property.findByIdAndUpdate(tx.propertyId, { isTaken: true });
 
-      // create a Payout record for admin queue
+      // create a Payout record for admin queue (avoid duplicates)
       const owner = await User.findById(tx.ownerId).lean();
       const buyer = await User.findById(tx.buyerId).lean();
 
-      const payout = await Payout.create({
-        transactionId: tx._id,
-        ownerId: tx.ownerId,
-        buyerId: tx.buyerId,
-        amount: tx.amount,
-        amountMinor: Math.round(Number(tx.amount) * 100),
-        commission,
-        netAmount: toOwner,
-        netAmountMinor: Math.round(Number(toOwner) * 100),
-        currency: tx.currency || "NGN",
-        status: "awaiting_disbursement",
-        method: "bank_transfer",
-        metadata: {
-          propertyId: tx.propertyId,
-          propertyTitle: tx.draftSnapshot?.title,
-        },
-      });
+      let payout = await Payout.findOne({ transactionId: tx._id });
+      if (!payout) {
+        payout = await Payout.create({
+          transactionId: tx._id,
+          ownerId: tx.ownerId,
+          buyerId: tx.buyerId,
+          amount: tx.amount,
+          amountMinor: Math.round(Number(tx.amount) * 100),
+          commission,
+          netAmount: toOwner,
+          netAmountMinor: Math.round(Number(toOwner) * 100),
+          currency: tx.currency || "NGN",
+          status: "awaiting_disbursement",
+          method: "bank_transfer",
+          metadata: {
+            propertyId: tx.propertyId,
+            propertyTitle: tx.draftSnapshot?.title,
+          },
+        });
+      }
 
       // create in-app notifications (buyer & owner)
       await notifyUser({
@@ -647,6 +655,47 @@ const handlePaystackWebhook = async (req, res) => {
           }
         } catch (err) {
           console.error("Error sending owner email on pending payment", err);
+        }
+      })();
+
+      // Create a payout and attempt immediate disbursement (idempotent)
+      (async () => {
+        try {
+          let payout = await Payout.findOne({ transactionId: tx._id });
+          if (!payout) {
+            const commissionRate = 0.04;
+            const commission = Math.round(tx.amount * commissionRate * 100) / 100; // 2dp
+            const toOwner = Math.round((tx.amount - commission) * 100) / 100;
+
+            payout = await Payout.create({
+              transactionId: tx._id,
+              ownerId: tx.ownerId,
+              buyerId: tx.buyerId,
+              amount: tx.amount,
+              amountMinor: Math.round(Number(tx.amount) * 100),
+              commission,
+              netAmount: toOwner,
+              netAmountMinor: Math.round(Number(toOwner) * 100),
+              currency: tx.currency || "NGN",
+              status: "queued",
+              method: "bank_transfer",
+              metadata: {
+                propertyId: tx.propertyId,
+                propertyTitle: tx.draftSnapshot?.title,
+              },
+            });
+            tx.payoutId = payout._id;
+            await tx.save();
+          }
+
+          // Attempt disbursement (this will create recipient if missing)
+          try {
+            await payoutService.disbursePayout(payout._id);
+          } catch (err) {
+            console.warn("Immediate disbursement failed (will remain queued):", err?.message || err);
+          }
+        } catch (err) {
+          console.error("Webhook payout creation error:", err?.message || err);
         }
       })();
     }

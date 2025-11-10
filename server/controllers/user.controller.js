@@ -25,6 +25,11 @@ const register = async (req, res) => {
       password,
       role,
       emergencyContact,
+      // bank details (optional for buyers, required for agents)
+      bankAccountNumber,
+      bankAccountName,
+      bankName,
+      bankCode,
     } = req.body;
 
     const existingUser = await User.findOne({ email });
@@ -52,6 +57,10 @@ const register = async (req, res) => {
             message: "Emergency contact must have name, phone and email",
           });
       }
+      // require bank details for agents so payouts can be performed
+      if (!bankAccountNumber || !bankAccountName || !bankName || !bankCode) {
+        return res.status(400).json({ message: "Agents must provide bank details (account number, account name, bank name and bank code)" });
+      }
     }
 
     const salt = await bcrypt.genSalt();
@@ -71,6 +80,10 @@ const register = async (req, res) => {
       password: hashedPassword,
       role,
       emergencyContact,
+      bankAccountNumber,
+      bankAccountName,
+      bankName,
+      bankCode,
     };
 
     const user = await User.create(userPayload);

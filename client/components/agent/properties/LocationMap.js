@@ -1,7 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Alert, View, StyleSheet, TextInput } from "react-native";
+import {
+  Alert,
+  View,
+  StyleSheet,
+  TextInput,
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import { WebView } from "react-native-webview";
-import * as Location from "expo-location";
+import { fetchSuggestions, geocodeAddress } from "../../../services/geocode";
 
 const LocationMap = ({ onLocationSelect }) => {
   // Initial region state (this may be updated once we get the user's location)
@@ -13,6 +21,10 @@ const LocationMap = ({ onLocationSelect }) => {
   });
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isGeocoding, setIsGeocoding] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const debounceTimer = useRef(null);
   const webviewRef = useRef(null);
 
   useEffect(() => {
@@ -41,6 +53,10 @@ const LocationMap = ({ onLocationSelect }) => {
           latitude: location.coords.latitude,
           longitude: location.coords.longitude,
         });
+        // notify parent of initial location
+        if (onLocationSelect) {
+          onLocationSelect({ lat: location.coords.latitude, lng: location.coords.longitude });
+        }
       } catch (error) {
         Alert.alert("Error", "Could not fetch location.");
       }
@@ -80,9 +96,10 @@ const LocationMap = ({ onLocationSelect }) => {
   // Called when the user submits a location in the input field
   const handleLocationSearch = async () => {
     if (!searchQuery) return;
+    setIsGeocoding(true);
     try {
-      const geocodeResults = await Location.geocodeAsync(searchQuery);
-      if (geocodeResults.length > 0) {
+      const geocodeResults = await geocodeAddress(searchQuery);
+      if (geocodeResults && geocodeResults.length > 0) {
         const { latitude, longitude } = geocodeResults[0];
         const newRegion = {
           latitude,
@@ -112,8 +129,63 @@ const LocationMap = ({ onLocationSelect }) => {
         );
       }
     } catch (error) {
+      console.warn("Geocoding error:", error);
       Alert.alert("Error", "Error searching for location.");
+    } finally {
+      setIsGeocoding(false);
     }
+  };
+
+  // Fetch suggestions (delegated to services/geocode)
+  const fetchSuggestionsLocal = async (query) => {
+    try {
+      const mapped = await fetchSuggestions(query);
+      setSuggestions(mapped || []);
+      setShowSuggestions((mapped || []).length > 0);
+    } catch (err) {
+      console.warn("Suggestion fetch error:", err);
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  // Debounce searchQuery to fetch suggestions while typing
+  useEffect(() => {
+    if (!searchQuery || searchQuery.length < 3) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      fetchSuggestionsLocal(searchQuery);
+    }, 600);
+
+    return () => {
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    };
+  }, [searchQuery]);
+
+  const handleSelectSuggestion = (item) => {
+    setSearchQuery(item.label);
+    setSuggestions([]);
+    setShowSuggestions(false);
+    const latitude = parseFloat(item.lat);
+    const longitude = parseFloat(item.lon);
+    const newRegion = {
+      latitude,
+      longitude,
+      latitudeDelta: region.latitudeDelta,
+      longitudeDelta: region.longitudeDelta,
+    };
+    setRegion(newRegion);
+    setSelectedLocation({ latitude, longitude });
+    if (webviewRef.current) {
+      const jsCode = `if (window.setMarkerPosition) { window.setMarkerPosition(${latitude}, ${longitude}); } true;`;
+      webviewRef.current.injectJavaScript(jsCode);
+    }
+    if (onLocationSelect) onLocationSelect({ lat: latitude, lng: longitude });
   };
 
   const mapHtml = `
@@ -198,14 +270,41 @@ const LocationMap = ({ onLocationSelect }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <TextInput
-        placeholder="Enter location"
-        value={searchQuery}
-        onChangeText={setSearchQuery}
-        onSubmitEditing={handleLocationSearch}
-        placeholderTextColor="#FFFFFF"
-        className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
-      />
+      <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}>
+        <TextInput
+          placeholder="Enter location"
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          onSubmitEditing={handleLocationSearch}
+          placeholderTextColor="#FFFFFF"
+          editable={!isGeocoding}
+          style={{ flex: 1 }}
+          className="bg-frenchGray-light text-white p-2 rounded-lg w-full font-rregular"
+        />
+        {isGeocoding && (
+          <ActivityIndicator
+            size="small"
+            color="#BBCC13"
+            style={{ marginLeft: 8 }}
+          />
+        )}
+      </View>
+      {showSuggestions && suggestions.length > 0 && (
+        <View style={styles.suggestionsContainer}>
+          {suggestions.map((item, idx) => (
+            <TouchableOpacity
+              key={idx}
+              style={styles.suggestionItem}
+              onPress={() => handleSelectSuggestion(item)}
+            >
+              <Text style={styles.suggestionText} numberOfLines={2}>
+                {item.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
       <View style={styles.container}>
         <WebView
           ref={webviewRef}
@@ -239,6 +338,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     margin: 10,
     borderRadius: 5,
+  },
+  suggestionsContainer: {
+    backgroundColor: "#2F2F2F",
+    borderRadius: 8,
+    marginBottom: 8,
+    maxHeight: 200,
+    overflow: "hidden",
+  },
+  suggestionItem: {
+    padding: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#444",
+  },
+  suggestionText: {
+    color: "#FFFFFF",
+    fontSize: 13,
   },
 });
 

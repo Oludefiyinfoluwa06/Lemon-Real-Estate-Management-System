@@ -8,6 +8,7 @@ import {
   StatusBar,
   Image,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
@@ -16,6 +17,7 @@ import { useAuth } from "../../../../contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import Button from "../../../../components/common/Button";
 import ErrorOrMessageModal from "../../../../components/common/ErrorOrMessageModal";
+import { config } from "../../../../config";
 
 const EditProfile = () => {
   const {
@@ -36,6 +38,18 @@ const EditProfile = () => {
     };
 
     getUserDetails();
+    // fetch banks for agent bank selector
+    (async () => {
+      try {
+        const res = await fetch(`${config.API_BASE_URL}/api/user/banks`);
+        const json = await res.json();
+        if (json.success && json.banks) {
+          setUser((u) => ({ ...u, __banks: json.banks }));
+        }
+      } catch (err) {
+        console.warn("Failed to fetch banks for agent profile edit", err);
+      }
+    })();
   }, []);
 
   const handleUploadProfileImage = async () => {
@@ -305,6 +319,45 @@ const EditProfile = () => {
             }),
           "mail-outline",
           "email-address",
+        )}
+
+        {/* Bank details for agents */}
+        {renderSectionHeader("Bank details", "card-outline")}
+
+        <View className="bg-frenchGray-light mb-4 rounded-lg w-full font-regular">
+          <Picker
+            selectedValue={user?.bankCode || ""}
+            onValueChange={(val) =>
+              setUser({
+                ...user,
+                bankCode: val,
+                bankName: (user.__banks || []).find((b) => b.code === val)?.name || "",
+              })
+            }
+            style={{ color: "#FFFFFF" }}
+            dropdownIconColor={"#AFAFAF"}
+            selectionColor={"#FFFFFF"}
+          >
+            <Picker.Item key="select" label="Select bank" value="" />
+            {(user.__banks || []).map((bank) => (
+              <Picker.Item key={bank.code} label={bank.name} value={bank.code} />
+            ))}
+          </Picker>
+        </View>
+
+        {renderInputField(
+          "Account name",
+          user?.bankAccountName || "",
+          (text) => setUser({ ...user, bankAccountName: text }),
+          "person-outline",
+        )}
+
+        {renderInputField(
+          "Account number",
+          user?.bankAccountNumber || "",
+          (text) => setUser({ ...user, bankAccountNumber: text }),
+          "card-outline",
+          "numeric",
         )}
 
         {/* Save Button */}

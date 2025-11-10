@@ -16,6 +16,7 @@ import { useAuth } from "../../../../contexts/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import Button from "../../../../components/common/Button";
 import ErrorOrMessageModal from "../../../../components/common/ErrorOrMessageModal";
+import { config } from "../../../../config";
 
 const EditProfile = () => {
   const {
@@ -236,6 +237,8 @@ const EditProfile = () => {
           (text) => setUser({ ...user, country: text }),
           "globe-outline",
         )}
+
+        
 
         {/* Save Button */}
         <View className="mt-8">

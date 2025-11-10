@@ -879,7 +879,6 @@ const ChatScreen = () => {
         <EmptyChatMessages />
       )}
 
-      {/* Inline Paystack flow */}
       {showPaymentWebview && paymentInitData ? (
         <PaystackWebview
           reference={paymentInitData.reference}
@@ -892,9 +891,7 @@ const ChatScreen = () => {
           }
           email={user.email}
           publicKey={PAYSTACK_PUBLIC_KEY}
-          onVerified={(ref) =>
-            onPaymentVerified(ref || paymentInitData.reference)
-          }
+          onVerified={(ref) => onPaymentVerified(ref || paymentInitData.reference)}
         />
       ) : null}
 

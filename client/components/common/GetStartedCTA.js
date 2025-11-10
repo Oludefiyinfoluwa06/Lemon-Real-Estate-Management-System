@@ -2,6 +2,7 @@
 import React, { useEffect, useCallback, useState } from "react";
 import { Text, Pressable, View, AccessibilityInfo } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuth } from "../../contexts/AuthContext";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -43,6 +44,7 @@ const GetStartedCTA = ({
   const [role, setRole] = useState(null);
   const [visible, setVisible] = useState(true);
   const [loading, setLoading] = useState(true);
+  const { user, getUser } = useAuth();
 
   useEffect(() => {
     AccessibilityInfo.isReduceMotionEnabled().then((res) =>
@@ -92,7 +94,8 @@ const GetStartedCTA = ({
 
         if (!mounted) return;
 
-        setRole(storedRole || null);
+        // prefer user.role if available, otherwise stored role
+        setRole((user && user.role) || storedRole || null);
 
         // If forceShow is true, ignore seen flag
         if (!forceShow && seen === "true") {
@@ -111,7 +114,7 @@ const GetStartedCTA = ({
     return () => {
       mounted = false;
     };
-  }, [forceShow]);
+  }, [forceShow, user]);
 
   // Animated styles
   const containerStyle = useAnimatedStyle(() => ({
@@ -170,11 +173,55 @@ const GetStartedCTA = ({
       await AsyncStorage.setItem(ONBOARDING_KEY, "true");
     } catch (e) {
       // ignore write errors
-    } finally {
-      // navigate to role-appropriate destination
-      router.push(destination);
     }
-  }, [destination]);
+
+    // If we already have a loaded user with a role, use it
+    try {
+      if (user && user.role) {
+        const r = user.role;
+        if (r === "individual-agent" || r === "company-agent") {
+          return router.replace("/agent/dashboard");
+        }
+
+        return router.replace("/user/home");
+      }
+
+      // No user in context — check for a token (logged in) and stored role as fallback
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        return router.replace("/login");
+      }
+
+      // If we have a token but no user loaded, try to refresh user
+      try {
+        await getUser();
+      } catch (err) {
+        // getUser may redirect to login if token invalid
+      }
+
+      // re-check user and stored role
+      const refreshedUser = (user && user.role) ? user : null;
+      if (refreshedUser && refreshedUser.role) {
+        const r2 = refreshedUser.role;
+        if (r2 === "individual-agent" || r2 === "company-agent") {
+          return router.replace("/agent/dashboard");
+        }
+        return router.replace("/user/home");
+      }
+
+      // fallback to stored role
+      const storedRole = await AsyncStorage.getItem("role");
+      if (storedRole === "individual-agent" || storedRole === "company-agent") {
+        return router.replace("/agent/dashboard");
+      }
+
+      // default to user home if token exists
+      return router.replace("/user/home");
+    } catch (err) {
+      // On any unexpected failure, send to login as safest fallback
+      return router.replace("/login");
+    }
+  }, [user, getUser]);
 
   if (loading || !visible) return null;
 

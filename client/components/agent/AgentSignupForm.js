@@ -4,6 +4,7 @@ import { Picker } from "@react-native-picker/picker";
 import { Ionicons } from "@expo/vector-icons";
 import { fetchCountries } from "../../services/countryApi";
 import { useAuth } from "../../contexts/AuthContext";
+import { config } from "../../config";
 
 const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
   const [currentStep, setCurrentStep] = useState(1);
@@ -17,6 +18,10 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
     phone: "",
     email: "",
   });
+  const [banks, setBanks] = useState([]);
+  const [selectedBankCode, setSelectedBankCode] = useState("");
+  const [bankAccountNumber, setBankAccountNumber] = useState("");
+  const [bankAccountName, setBankAccountName] = useState("");
 
   const { authLoading, setAuthError, register } = useAuth();
 
@@ -30,7 +35,18 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
       }
     };
 
+    const getBanks = async () => {
+      try {
+        const res = await fetch(`${config.API_BASE_URL}/api/user/banks`);
+        const json = await res.json();
+        if (json.success && json.banks) setBanks(json.banks);
+      } catch (err) {
+        console.warn("Failed to fetch banks:", err);
+      }
+    };
+
     getCountries();
+    getBanks();
   }, []);
 
   const validateEmail = (email) => {
@@ -115,6 +131,10 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
       ...agentDetails,
       mobileNumber: fullMobileNumber,
       emergencyContact,
+      bankAccountNumber,
+      bankAccountName,
+      bankName: banks.find((b) => b.code === selectedBankCode)?.name || "",
+      bankCode: selectedBankCode,
     };
 
     await register(updatedAgentDetails);
@@ -323,6 +343,39 @@ const AgentSignupForm = ({ agentDetails, setAgentDetails }) => {
             onChangeText={(text) =>
               setEmergencyContact({ ...emergencyContact, email: text })
             }
+          />
+
+          {/* Bank details */}
+          <View className="bg-frenchGray-light mb-4 rounded-lg w-full font-regular">
+            <Picker
+              selectedValue={selectedBankCode}
+              onValueChange={(itemValue) => setSelectedBankCode(itemValue)}
+              style={{ color: "#FFFFFF" }}
+              dropdownIconColor={"#AFAFAF"}
+              selectionColor={"#FFFFFF"}
+            >
+              <Picker.Item key="select" label="Select bank" value="" />
+              {banks.map((bank) => (
+                <Picker.Item key={bank.code} label={bank.name} value={bank.code} />
+              ))}
+            </Picker>
+          </View>
+
+          <TextInput
+            placeholder="Account name"
+            className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
+            placeholderTextColor="#AFAFAF"
+            value={bankAccountName}
+            onChangeText={(text) => setBankAccountName(text)}
+          />
+
+          <TextInput
+            placeholder="Account number"
+            className="bg-frenchGray-light text-white p-2 mb-4 rounded-lg w-full font-rregular"
+            placeholderTextColor="#AFAFAF"
+            keyboardType="numeric"
+            value={bankAccountNumber}
+            onChangeText={(text) => setBankAccountNumber(text)}
           />
 
           <TouchableOpacity

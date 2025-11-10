@@ -13,7 +13,6 @@ const userSchema = new mongoose.Schema({
     required: () => this.role === "buyer",
     default: null,
   },
-  // preferences / target demography to help recommend properties
   preferences: {
     type: [String],
     default: [],
@@ -41,6 +40,11 @@ const userSchema = new mongoose.Schema({
   mobileNumber: { type: String, required: true },
   email: { type: String, required: true },
   password: { type: String, required: true },
+  bankAccountNumber: { type: String, default: null },
+  bankAccountName: { type: String, default: null },
+  bankName: { type: String, default: null },
+  bankCode: { type: String, default: null },
+  paystackRecipientCode: { type: String, default: null },
   emergencyContact: {
     type: emergencyContactSchema,
     default: null,
